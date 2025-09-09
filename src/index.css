@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+/* Hide all scrollbars globally */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Firefox */
+html {
+  scrollbar-width: none;
+}
+
+/* IE and Edge */
+body {
+  -ms-overflow-style: none;
+}
+
+/* Utility class for hiding scrollbars */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Modal styling to ensure white background */
+.modal-white-bg {
+  background-color: white !important;
+  color: #1f2937 !important;
+}
+
+.modal-white-bg * {
+  background-color: inherit !important;
+}
+
+/* Override any dark theme styles for modals */
+.modal-container {
+  background-color: white !important;
+  color: #1f2937 !important;
+}
+
+.modal-container .bg-white {
+  background-color: white !important;
+}
+
+.modal-container .text-gray-900 {
+  color: #111827 !important;
+}
+
+.modal-container .text-gray-600 {
+  color: #4b5563 !important;
+}
+
+.modal-container .text-gray-700 {
+  color: #374151 !important;
+}
+
