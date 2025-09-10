@@ -130,14 +130,11 @@ const InvestmentForm = () => {
       investmentDate: new Date().toISOString().split('T')[0],
       timestamp: Date.now()
     };
-    
-    console.log('Payment verified, storing result:', result);
-    
+        
     // Store the result in localStorage
     localStorage.setItem('investmentResult', JSON.stringify(result));
     
     // Navigate to success page
-    console.log('Navigating to success page...');
     navigate('/investment-success');
   };
 

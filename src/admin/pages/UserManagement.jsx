@@ -136,7 +136,6 @@ const UserManagement = () => {
           autoClose: 3000,
         });
         
-        console.log('User deleted successfully:', response.data.deletedUser);
       } catch (error) {
         console.error('Failed to delete user:', error);
         

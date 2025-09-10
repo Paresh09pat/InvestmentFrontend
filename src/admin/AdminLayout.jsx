@@ -47,7 +47,6 @@ const AdminLayout = () => {
 
   // Force re-render when location changes
   useEffect(() => {
-    console.log('AdminLayout: Location changed to:', location.pathname);
   }, [location.pathname]);
 
   return (

@@ -86,7 +86,6 @@ const DocumentVerification = () => {
         autoClose: 3000,
       });
       
-      console.log('Document verification successful:', response.data);
     } catch (error) {
       console.error('Failed to verify document:', error);
       

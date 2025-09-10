@@ -36,14 +36,11 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
   };
 
   const handleNavClick = () => {
-    // Close mobile sidebar when navigation item is clicked
-    // Only close sidebar, don't interfere with navigation
-    console.log('AdminSidebar: Navigation item clicked, isMobile:', isMobile);
+
     if (isMobile) {
       // Use setTimeout to ensure navigation happens first
       setTimeout(() => {
-        console.log('AdminSidebar: Closing mobile sidebar');
-        window.dispatchEvent(new CustomEvent('closeMobileSidebar'));
+          window.dispatchEvent(new CustomEvent('closeMobileSidebar'));
       }, 100);
     }
   };

@@ -248,9 +248,9 @@ const Home = () => {
       
       <Navbar />
       
-      {/* Floating Navigation Dots */}
+      {/* Floating Navigation Dots - Desktop Only */}
       <motion.div
-        className="fixed right-8 top-1/2 transform -translate-y-1/2 z-40 flex flex-col space-y-4"
+        className="hidden lg:flex fixed right-8 top-1/2 transform -translate-y-1/2 z-40 flex-col space-y-4"
         initial={{ x: 100, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ delay: 1, duration: 0.8 }}
@@ -399,7 +399,7 @@ const Home = () => {
         >
           {/* Main Title */}
           <motion.h1 
-            className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-8 leading-tight"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black text-white mb-6 sm:mb-8 leading-tight"
             variants={itemVariants}
           >
             <motion.span 
@@ -419,7 +419,7 @@ const Home = () => {
               Smart
             </motion.span>
             <motion.span 
-              className="block text-4xl md:text-5xl lg:text-6xl mt-4"
+              className="block text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl mt-2 sm:mt-4"
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.6, type: "spring", stiffness: 100 }}
@@ -430,7 +430,7 @@ const Home = () => {
           
           {/* Subtitle */}
           <motion.p 
-            className="text-xl md:text-2xl lg:text-3xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl text-gray-300 mb-8 sm:mb-12 max-w-4xl mx-auto leading-relaxed px-4"
             variants={itemVariants}
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -442,7 +442,7 @@ const Home = () => {
           
           {/* CTA Buttons */}
           <motion.div 
-            className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16"
+            className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-12 sm:mb-16 px-4"
             variants={itemVariants}
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -496,7 +496,7 @@ const Home = () => {
 
           {/* Animated Stats */}
           <motion.div 
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto px-4"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -514,13 +514,13 @@ const Home = () => {
                 transition={{ type: "spring", stiffness: 300 }}
               >
                 <motion.div 
-                  className="text-4xl md:text-5xl font-black text-white mb-2"
+                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-2"
                   whileHover={{ scale: 1.1 }}
                   transition={{ type: "spring", stiffness: 400 }}
                 >
                   {stat.value}
                 </motion.div>
-                <div className="text-gray-300 text-lg font-medium">{stat.label}</div>
+                <div className="text-gray-300 text-sm sm:text-base md:text-lg font-medium">{stat.label}</div>
               </motion.div>
             ))}
           </motion.div>
@@ -528,7 +528,7 @@ const Home = () => {
         
         {/* Scroll Indicator */}
         <motion.div 
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer"
+          className="absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer"
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           whileHover={{ scale: 1.1 }}
@@ -536,12 +536,12 @@ const Home = () => {
           onClick={() => featuresRef.current?.scrollIntoView({ behavior: 'smooth' })}
         >
           <motion.div 
-            className="w-6 h-10 border-2 border-white rounded-full flex justify-center"
+            className="w-5 h-8 sm:w-6 sm:h-10 border-2 border-white rounded-full flex justify-center"
             whileHover={{ borderColor: 'rgba(59, 130, 246, 1)' }}
             transition={{ duration: 0.3 }}
           >
             <motion.div 
-              className="w-1 h-3 bg-white rounded-full mt-2"
+              className="w-1 h-2 sm:h-3 bg-white rounded-full mt-1 sm:mt-2"
               animate={{ opacity: [1, 0.3, 1] }}
               transition={{ duration: 1.5, repeat: Infinity }}
             />
@@ -572,14 +572,14 @@ const Home = () => {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
-            className="text-center mb-20"
+            className="text-center mb-12 sm:mb-16 lg:mb-20"
             initial={{ y: 50, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
             <motion.h2 
-              className="text-4xl md:text-6xl font-black text-gray-900 mb-6"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-gray-900 mb-4 sm:mb-6 px-4"
               initial={{ scale: 0.8, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
               viewport={{ once: true }}
@@ -588,7 +588,7 @@ const Home = () => {
               Why Choose <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">InvestPro?</span>
             </motion.h2>
             <motion.p 
-              className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed"
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed px-4"
               initial={{ y: 30, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true }}
@@ -601,7 +601,7 @@ const Home = () => {
           </motion.div>
 
           <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -627,9 +627,9 @@ const Home = () => {
                     whileHover={{ opacity: 0.1 }}
                   />
                   
-                  <div className="relative z-10 p-8">
+                  <div className="relative z-10 p-6 sm:p-8">
                     <motion.div 
-                      className={`bg-gradient-to-r ${feature.color} w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg`}
+                      className={`bg-gradient-to-r ${feature.color} w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg`}
                       whileHover={{ 
                         scale: 1.1, 
                         rotate: 6,
@@ -644,11 +644,11 @@ const Home = () => {
                         stiffness: 200 
                       }}
                     >
-                    <feature.icon size={40} className="text-white" />
+                    <feature.icon size={32} className="text-white sm:w-10 sm:h-10" />
                     </motion.div>
                     
                     <motion.h3 
-                      className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-gray-700 transition-colors duration-300"
+                      className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 group-hover:text-gray-700 transition-colors duration-300"
                       initial={{ y: 20, opacity: 0 }}
                       whileInView={{ y: 0, opacity: 1 }}
                       viewport={{ once: true }}
@@ -658,7 +658,7 @@ const Home = () => {
                     </motion.h3>
                     
                     <motion.p 
-                      className="text-gray-600 leading-relaxed text-lg"
+                      className="text-gray-600 leading-relaxed text-base sm:text-lg"
                       initial={{ y: 20, opacity: 0 }}
                       whileInView={{ y: 0, opacity: 1 }}
                       viewport={{ once: true }}
@@ -723,14 +723,14 @@ const Home = () => {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
-            className="text-center mb-20"
+            className="text-center mb-12 sm:mb-16 lg:mb-20"
             initial={{ y: 50, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
             <motion.h2 
-              className="text-4xl md:text-6xl font-black text-white mb-6"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-4 sm:mb-6 px-4"
               initial={{ scale: 0.8, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
               viewport={{ once: true }}
@@ -739,7 +739,7 @@ const Home = () => {
               What Our <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Investors</span> Say
             </motion.h2>
             <motion.p 
-              className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto"
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 max-w-3xl mx-auto px-4"
               initial={{ y: 30, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true }}
@@ -750,7 +750,7 @@ const Home = () => {
           </motion.div>
 
           <motion.div 
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -781,9 +781,9 @@ const Home = () => {
                     <div className="bg-white/10 backdrop-blur-lg rounded-xl h-full w-full" />
                   </motion.div>
                 
-                <div className="relative z-10 p-8">
+                <div className="relative z-10 p-6 sm:p-8">
                     <motion.div 
-                      className="flex items-center mb-6"
+                      className="flex items-center mb-4 sm:mb-6"
                       initial={{ x: -20, opacity: 0 }}
                       whileInView={{ x: 0, opacity: 1 }}
                       viewport={{ once: true }}
@@ -801,13 +801,13 @@ const Home = () => {
                             stiffness: 200
                           }}
                         >
-                          <FiStar className="text-yellow-400 fill-current" size={24} />
+                          <FiStar className="text-yellow-400 fill-current" size={20} />
                         </motion.div>
                       ))}
                     </motion.div>
                     
                     <motion.p 
-                      className="text-gray-200 mb-8 italic text-lg leading-relaxed"
+                      className="text-gray-200 mb-6 sm:mb-8 italic text-base sm:text-lg leading-relaxed"
                       initial={{ y: 20, opacity: 0 }}
                       whileInView={{ y: 0, opacity: 1 }}
                       viewport={{ once: true }}
@@ -824,20 +824,20 @@ const Home = () => {
                       transition={{ delay: index * 0.1 + 0.5 }}
                     >
                       <motion.div 
-                        className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mr-4 shadow-lg"
+                        className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mr-3 sm:mr-4 shadow-lg"
                         whileHover={{ 
                           scale: 1.1,
                           rotate: 5,
                           transition: { type: "spring", stiffness: 300 }
                         }}
                       >
-                      <span className="text-white font-bold text-xl">
+                      <span className="text-white font-bold text-lg sm:text-xl">
                       {testimonial.name.charAt(0)}
                     </span>
                       </motion.div>
                   <div>
-                      <div className="font-bold text-white text-xl">{testimonial.name}</div>
-                      <div className="text-gray-300">{testimonial.role}</div>
+                      <div className="font-bold text-white text-lg sm:text-xl">{testimonial.name}</div>
+                      <div className="text-gray-300 text-sm sm:text-base">{testimonial.role}</div>
                     </div>
                     </motion.div>
                 </div>
@@ -899,7 +899,7 @@ const Home = () => {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.h2 
-            className="text-4xl md:text-6xl font-black text-white mb-8"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-6 sm:mb-8 px-4"
             initial={{ y: 50, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             viewport={{ once: true }}
@@ -909,7 +909,7 @@ const Home = () => {
           </motion.h2>
           
           <motion.p 
-            className="text-xl md:text-2xl text-blue-100 mb-12 max-w-4xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg md:text-xl lg:text-2xl text-blue-100 mb-8 sm:mb-12 max-w-4xl mx-auto leading-relaxed px-4"
             initial={{ y: 30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             viewport={{ once: true }}
@@ -921,7 +921,7 @@ const Home = () => {
           
           {!user && (
             <motion.div 
-              className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+              className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center px-4"
               initial={{ y: 30, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true }}
@@ -959,7 +959,7 @@ const Home = () => {
           
           {/* Trust Indicators */}
           <motion.div 
-            className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto"
+            className="mt-12 sm:mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 max-w-4xl mx-auto px-4"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
@@ -981,7 +981,7 @@ const Home = () => {
                 }}
               >
                 <motion.div 
-                  className="text-3xl font-bold text-white mb-2"
+                  className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1 sm:mb-2"
                   initial={{ scale: 0 }}
                   whileInView={{ scale: 1 }}
                   viewport={{ once: true }}
@@ -993,7 +993,7 @@ const Home = () => {
                 >
                   {indicator.value}
                 </motion.div>
-                <div className="text-blue-200">{indicator.label}</div>
+                <div className="text-blue-200 text-xs sm:text-sm lg:text-base">{indicator.label}</div>
               </motion.div>
             ))}
           </motion.div>
@@ -1022,38 +1022,38 @@ const Home = () => {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
-            className="grid grid-cols-1 md:grid-cols-4 gap-12"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
           >
             <motion.div 
-              className="col-span-1 md:col-span-2"
+              className="col-span-1 sm:col-span-2 lg:col-span-2"
               variants={itemVariants}
             >
               <motion.div 
-                className="flex items-center space-x-3 mb-6"
+                className="flex items-center space-x-3 mb-4 sm:mb-6"
                 initial={{ x: -50, opacity: 0 }}
                 whileInView={{ x: 0, opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8 }}
               >
                 <motion.div 
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-xl shadow-lg"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 sm:p-3 rounded-xl shadow-lg"
                   whileHover={{ 
                     scale: 1.1,
                     rotate: 5,
                     transition: { type: "spring", stiffness: 300 }
                   }}
                 >
-                  <FiShield className="h-8 w-8 text-white" />
+                  <FiShield className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                 </motion.div>
-                <span className="text-2xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">InvestPro</span>
+                <span className="text-xl sm:text-2xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">InvestPro</span>
               </motion.div>
               
               <motion.p 
-                className="text-gray-400 mb-6 max-w-lg text-lg leading-relaxed"
+                className="text-gray-400 mb-4 sm:mb-6 max-w-lg text-sm sm:text-base lg:text-lg leading-relaxed"
                 initial={{ y: 20, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
                 viewport={{ once: true }}
@@ -1065,7 +1065,7 @@ const Home = () => {
               
               {/* Social Links */}
               <motion.div 
-                className="flex space-x-4"
+                className="flex space-x-3 sm:space-x-4"
                 initial={{ y: 20, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
                 viewport={{ once: true }}
@@ -1074,7 +1074,7 @@ const Home = () => {
                 {['f', 't', 'in'].map((social, index) => (
                   <motion.div 
                     key={social}
-                    className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center cursor-pointer"
+                    className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center cursor-pointer"
                     whileHover={{ 
                       scale: 1.2,
                       rotate: 360,
@@ -1090,7 +1090,7 @@ const Home = () => {
                       stiffness: 200
                     }}
                   >
-                    <span className="text-white font-bold">{social}</span>
+                    <span className="text-white font-bold text-sm sm:text-base">{social}</span>
                   </motion.div>
                 ))}
               </motion.div>
@@ -1098,7 +1098,7 @@ const Home = () => {
             
             <motion.div variants={itemVariants}>
               <motion.h3 
-                className="font-bold text-xl mb-6 text-white"
+                className="font-bold text-lg sm:text-xl mb-4 sm:mb-6 text-white"
                 initial={{ y: 20, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
                 viewport={{ once: true }}
@@ -1106,7 +1106,7 @@ const Home = () => {
               >
                 Quick Links
               </motion.h3>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {[
                   { to: "/about", text: "About Us" },
                   { to: "/features", text: "Features" },
@@ -1122,7 +1122,7 @@ const Home = () => {
                   >
                     <Link 
                       to={link.to} 
-                      className="text-gray-400 hover:text-white block transition-colors duration-300"
+                      className="text-gray-400 hover:text-white block transition-colors duration-300 text-sm sm:text-base"
                     >
                       <motion.span
                         whileHover={{ x: 8 }}
@@ -1138,7 +1138,7 @@ const Home = () => {
             
             <motion.div variants={itemVariants}>
               <motion.h3 
-                className="font-bold text-xl mb-6 text-white"
+                className="font-bold text-lg sm:text-xl mb-4 sm:mb-6 text-white"
                 initial={{ y: 20, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
                 viewport={{ once: true }}
@@ -1146,7 +1146,7 @@ const Home = () => {
               >
                 Support
               </motion.h3>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {[
                   { to: "/help", text: "Help Center" },
                   { to: "/terms", text: "Terms of Service" },
@@ -1162,7 +1162,7 @@ const Home = () => {
                   >
                     <Link 
                       to={link.to} 
-                      className="text-gray-400 hover:text-white block transition-colors duration-300"
+                      className="text-gray-400 hover:text-white block transition-colors duration-300 text-sm sm:text-base"
                     >
                       <motion.span
                         whileHover={{ x: 8 }}
@@ -1178,15 +1178,15 @@ const Home = () => {
           </motion.div>
           
           <motion.div 
-            className="border-t border-gray-800 mt-12 pt-8"
+            className="border-t border-gray-800 mt-8 sm:mt-12 pt-6 sm:pt-8"
             initial={{ y: 30, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.6, duration: 0.8 }}
           >
-            <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
               <motion.p 
-                className="text-gray-400 text-center md:text-left"
+                className="text-gray-400 text-center md:text-left text-sm sm:text-base"
                 initial={{ x: -20, opacity: 0 }}
                 whileInView={{ x: 0, opacity: 1 }}
                 viewport={{ once: true }}
@@ -1195,20 +1195,20 @@ const Home = () => {
               © 2024 InvestPro. All rights reserved. Built with ❤️ for smart investors.
               </motion.p>
               <motion.div 
-                className="flex items-center space-x-2 mt-4 md:mt-0"
+                className="flex items-center space-x-2"
                 initial={{ x: 20, opacity: 0 }}
                 whileInView={{ x: 0, opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: 1, duration: 0.8 }}
               >
-                <span className="text-gray-400">Secured by</span>
+                <span className="text-gray-400 text-sm sm:text-base">Secured by</span>
                 <motion.div 
                   className="flex items-center space-x-1"
                   whileHover={{ scale: 1.1 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  <FiShield className="text-green-500" size={16} />
-                  <span className="text-green-500 font-semibold">SSL</span>
+                  <FiShield className="text-green-500" size={14} />
+                  <span className="text-green-500 font-semibold text-sm sm:text-base">SSL</span>
                 </motion.div>
               </motion.div>
                 </div>

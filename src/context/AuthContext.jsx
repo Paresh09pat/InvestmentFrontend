@@ -152,7 +152,6 @@ export const AuthProvider = ({ children }) => {
       const currentPath = window.location.pathname;
       const isAdminRoute = currentPath.startsWith('/admin');
       
-      console.log('Current path:', currentPath, 'Is admin route:', isAdminRoute);
       
       if (isAdminRoute) {
         // For admin routes, check admin auth first
@@ -167,9 +166,7 @@ export const AuthProvider = ({ children }) => {
           expiryTime.setHours(expiryTime.getHours() + 24);
           setSessionExpiry(expiryTime);
           
-          console.log('Admin authentication successful:', adminData);
-        } catch (adminError) {
-          console.log('Admin authentication failed, checking user auth');
+          } catch (adminError) {
           // If admin auth fails, try user auth
           try {
             const userResponse = await axios.get(`${REACT_APP_API_URL}/api/auth/profile`);
@@ -182,11 +179,10 @@ export const AuthProvider = ({ children }) => {
             expiryTime.setHours(expiryTime.getHours() + 24);
             setSessionExpiry(expiryTime);
             
-            console.log('User authentication successful:', userData);
           } catch (userError) {
-            console.log('Both admin and user authentication failed');
             setUser(null);
             setIsAdmin(false);
+            setSessionExpiry(null);
           }
         }
       } else {
@@ -202,9 +198,7 @@ export const AuthProvider = ({ children }) => {
           expiryTime.setHours(expiryTime.getHours() + 24);
           setSessionExpiry(expiryTime);
           
-          console.log('User authentication successful:', userData);
         } catch (userError) {
-          console.log('User authentication failed, checking admin auth');
           // If user auth fails, try admin auth
           try {
             const adminResponse = await axios.get(`${REACT_APP_API_URL}/api/admin/profile`);
@@ -216,10 +210,8 @@ export const AuthProvider = ({ children }) => {
             const expiryTime = new Date();
             expiryTime.setHours(expiryTime.getHours() + 24);
             setSessionExpiry(expiryTime);
-            
-            console.log('Admin authentication successful:', adminData);
+
           } catch (adminError) {
-            console.log('Both user and admin authentication failed');
             setUser(null);
             setIsAdmin(false);
             setSessionExpiry(null);
@@ -237,15 +229,11 @@ export const AuthProvider = ({ children }) => {
 
   const adminLogin = async (email, password) => {
     try {
-      console.log('AdminLogin function called with:', { email, password: '***' });
-      console.log('API URL:', `${REACT_APP_API_URL}/api/admin/login`);
       
       const response = await axios.post(`${REACT_APP_API_URL}/api/admin/login`, {
         email,
         password
       });
-
-      console.log('Admin login response:', response.data);
 
       const { user: adminUser } = response.data;
       
@@ -255,12 +243,7 @@ export const AuthProvider = ({ children }) => {
       return adminUser;
     } catch (error) {
       console.error('Admin login error:', error);
-      console.error('Error type:', error.name);
-      console.error('Error message:', error.message);
-      console.error('Error response status:', error.response?.status);
-      console.error('Error response data:', error.response?.data);
-      console.error('Error response headers:', error.response?.headers);
-      console.error('Network error:', error.code);
+        console.error('Network error:', error.code);
       
       if (error.code === 'ERR_NETWORK') {
         throw new Error('Network error: Cannot connect to server. Please ensure backend is running.');

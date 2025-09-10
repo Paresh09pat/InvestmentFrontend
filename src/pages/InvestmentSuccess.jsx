@@ -13,12 +13,10 @@ const InvestmentSuccess = () => {
   useEffect(() => {
     // Simple check for investment data
     const storedResult = localStorage.getItem('investmentResult');
-    console.log('Checking localStorage:', storedResult);
     
     if (storedResult) {
       try {
         const data = JSON.parse(storedResult);
-        console.log('Parsed data:', data);
         setInvestmentData(data);
       } catch (error) {
         console.error('Error parsing data:', error);

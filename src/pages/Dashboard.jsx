@@ -13,10 +13,11 @@ import {
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { dummyInvestments } from '../utils/dummyData';
-import { INVESTMENT_STATUS } from '../utils/constants';
+import { INVESTMENT_STATUS, USER_VERIFICATION_STATUS } from '../utils/constants';
 import Navbar from '../components/common/Navbar';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
+import Wallet from '../components/Wallet';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -103,7 +104,7 @@ const Dashboard = () => {
           </div>
 
           {/* Verification Alert */}
-          {user?.verificationStatus !== 'verified' && (
+          {user?.verificationStatus !== USER_VERIFICATION_STATUS.VERIFIED && (
             <Card className="mb-8 border-l-4 border-l-yellow-500 bg-yellow-50">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -113,7 +114,7 @@ const Dashboard = () => {
                       Account Verification Required
                     </h3>
                     <p className="text-yellow-700">
-                      Please complete your profile verification to unlock all features.
+                      Please complete your profile verification to unlock all features including your wallet.
                     </p>
                   </div>
                 </div>
@@ -125,6 +126,17 @@ const Dashboard = () => {
                 </Button>
               </div>
             </Card>
+          )}
+
+          {/* Wallet Section - Only visible for verified users */}
+          {user?.verificationStatus === USER_VERIFICATION_STATUS.VERIFIED && (
+            <div className="mb-8">
+              <Wallet 
+                userInvestments={userInvestments}
+                totalInvested={stats.totalInvested}
+                currentValue={stats.currentValue}
+              />
+            </div>
           )}
 
           {/* Stats Cards */}

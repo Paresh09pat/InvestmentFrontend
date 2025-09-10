@@ -52,7 +52,6 @@ const AdminDashboard = () => {
       setStats(statsResponse.data.stats);
       setRecentUsers(usersResponse.data.users.slice(0, 5)); // Get only first 5 for display
       
-      console.log('Dashboard data loaded successfully');
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
       setError('Failed to load dashboard data');
@@ -67,8 +66,7 @@ const AdminDashboard = () => {
   };
 
   const handleViewAllUsers = () => {
-    console.log('handleViewAllUsers called, navigating to /admin/users');
-    toast.info('Navigating to User Management...', {
+      toast.info('Navigating to User Management...', {
       position: "top-right",
       autoClose: 2000,
     });
@@ -76,7 +74,6 @@ const AdminDashboard = () => {
   };
 
   const handleViewPendingVerifications = () => {
-    console.log('handleViewPendingVerifications called, navigating to /admin/documents');
     toast.info('Navigating to Document Verification...', {
       position: "top-right",
       autoClose: 2000,
@@ -85,7 +82,6 @@ const AdminDashboard = () => {
   };
 
   const handleViewAllStats = () => {
-    console.log('handleViewAllStats called, navigating to /admin/users');
     toast.info('Navigating to User Management...', {
       position: "top-right",
       autoClose: 2000,
