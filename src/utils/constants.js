@@ -1,5 +1,5 @@
 // API Configuration
-export const VITE_APP_API_URL = 'http://localhost:3000';
+export const VITE_APP_API_URL = import.meta.env.VITE_APP_API_URL;
 
 // User roles
 export const USER_ROLES = {
