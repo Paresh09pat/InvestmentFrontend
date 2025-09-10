@@ -11,7 +11,7 @@ import {
   FiEye
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { INVESTMENT_STATUS, REACT_APP_API_URL } from '../../utils/constants';
+import { INVESTMENT_STATUS, VITE_APP_API_URL } from '../../utils/constants';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import Table from '../../components/common/Table';
@@ -45,8 +45,8 @@ const AdminDashboard = () => {
     try {
       // Fetch stats and recent users in parallel
       const [statsResponse, usersResponse] = await Promise.all([
-        axios.get(`${REACT_APP_API_URL}/api/auth/admin/stats`, { withCredentials: true }),
-        axios.get(`${REACT_APP_API_URL}/api/auth/admin/recent-users`, { withCredentials: true })
+        axios.get(`${VITE_APP_API_URL}/api/auth/admin/stats`, { withCredentials: true }),
+        axios.get(`${VITE_APP_API_URL}/api/auth/admin/recent-users`, { withCredentials: true })
       ]);
 
       setStats(statsResponse.data.stats);

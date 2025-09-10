@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { REACT_APP_API_URL } from '../utils/constants';
+import { VITE_APP_API_URL } from '../utils/constants';
 
 const AuthContext = createContext();
 
@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post(`${REACT_APP_API_URL}/api/auth/login`, {
+      const response = await axios.post(`${VITE_APP_API_URL}/api/auth/login`, {
         email,
         password
       });
@@ -101,7 +101,7 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (userData) => {
     try {
-      const response = await axios.post(`${REACT_APP_API_URL}/api/auth/register`, userData);
+      const response = await axios.post(`${VITE_APP_API_URL}/api/auth/register`, userData);
       
       const { user: newUser } = response.data;
       
@@ -131,7 +131,7 @@ export const AuthProvider = ({ children }) => {
   const updateUserProfile = async (updatedData) => {
     try {
       // Update the user profile on the backend
-      const response = await axios.put(`${REACT_APP_API_URL}/api/auth/profile`, updatedData);
+      const response = await axios.put(`${VITE_APP_API_URL}/api/auth/profile`, updatedData);
 
       // Get the updated user data from the response
       const updatedUser = response.data.user || { ...user, ...updatedData };
@@ -156,7 +156,7 @@ export const AuthProvider = ({ children }) => {
       if (isAdminRoute) {
         // For admin routes, check admin auth first
         try {
-          const adminResponse = await axios.get(`${REACT_APP_API_URL}/api/admin/profile`);
+          const adminResponse = await axios.get(`${VITE_APP_API_URL}/api/admin/profile`);
           const adminData = adminResponse.data.user;
           setUser(adminData);
           setIsAdmin(true);
@@ -169,7 +169,7 @@ export const AuthProvider = ({ children }) => {
           } catch (adminError) {
           // If admin auth fails, try user auth
           try {
-            const userResponse = await axios.get(`${REACT_APP_API_URL}/api/auth/profile`);
+            const userResponse = await axios.get(`${VITE_APP_API_URL}/api/auth/profile`);
             const userData = userResponse.data.user;
             setUser(userData);
             setIsAdmin(false);
@@ -188,7 +188,7 @@ export const AuthProvider = ({ children }) => {
       } else {
         // For user routes, check user auth first
         try {
-          const userResponse = await axios.get(`${REACT_APP_API_URL}/api/auth/profile`);
+          const userResponse = await axios.get(`${VITE_APP_API_URL}/api/auth/profile`);
           const userData = userResponse.data.user;
           setUser(userData);
           setIsAdmin(false);
@@ -201,7 +201,7 @@ export const AuthProvider = ({ children }) => {
         } catch (userError) {
           // If user auth fails, try admin auth
           try {
-            const adminResponse = await axios.get(`${REACT_APP_API_URL}/api/admin/profile`);
+            const adminResponse = await axios.get(`${VITE_APP_API_URL}/api/admin/profile`);
             const adminData = adminResponse.data.user;
             setUser(adminData);
             setIsAdmin(true);
@@ -230,7 +230,7 @@ export const AuthProvider = ({ children }) => {
   const adminLogin = async (email, password) => {
     try {
       
-      const response = await axios.post(`${REACT_APP_API_URL}/api/admin/login`, {
+      const response = await axios.post(`${VITE_APP_API_URL}/api/admin/login`, {
         email,
         password
       });
@@ -265,8 +265,8 @@ export const AuthProvider = ({ children }) => {
     try {
       // Clear both user and admin cookies
       await Promise.allSettled([
-        axios.post(`${REACT_APP_API_URL}/api/auth/logout`),
-        axios.post(`${REACT_APP_API_URL}/api/admin/logout`)
+        axios.post(`${VITE_APP_API_URL}/api/auth/logout`),
+        axios.post(`${VITE_APP_API_URL}/api/admin/logout`)
       ]);
     } catch (error) {
       console.error('Clear sessions error:', error);

@@ -17,7 +17,7 @@ import {
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
-import { USER_VERIFICATION_STATUS, REACT_APP_API_URL } from '../utils/constants';
+import { USER_VERIFICATION_STATUS, VITE_APP_API_URL } from '../utils/constants';
 import Navbar from '../components/common/Navbar';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
@@ -106,7 +106,7 @@ const Profile = () => {
       formData.append('documentType', currentDocType);
 
       const response = await axios.post(
-        `${REACT_APP_API_URL}/api/documents/upload`,
+        `${VITE_APP_API_URL}/api/documents/upload`,
         formData,
         {
           headers: {
@@ -154,7 +154,7 @@ const Profile = () => {
     if (document && document.cloudinaryUrl) {
       window.open(document.cloudinaryUrl, '_blank');
     } else if (document && document.filePath) {
-      window.open(`${REACT_APP_API_URL}/uploads/documents/${document.fileName}`, '_blank');
+      window.open(`${VITE_APP_API_URL}/uploads/documents/${document.fileName}`, '_blank');
     }
   };
 

@@ -15,7 +15,7 @@ import {
   FiAlertCircle
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { USER_VERIFICATION_STATUS, REACT_APP_API_URL } from '../../utils/constants';
+import { USER_VERIFICATION_STATUS, VITE_APP_API_URL } from '../../utils/constants';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import Table from '../../components/common/Table';
@@ -44,7 +44,7 @@ const UserManagement = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${REACT_APP_API_URL}/api/documents/admin/users?status=${statusFilter}`,
+        `${VITE_APP_API_URL}/api/documents/admin/users?status=${statusFilter}`,
         { withCredentials: true }
       );
       setUsers(response.data.users);
@@ -71,7 +71,7 @@ const UserManagement = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${REACT_APP_API_URL}/api/documents/admin/verify`,
+        `${VITE_APP_API_URL}/api/documents/admin/verify`,
         {
           userId,
           documentType,
@@ -104,7 +104,7 @@ const UserManagement = () => {
   };
 
   const viewDocument = (userId, documentType) => {
-    window.open(`${REACT_APP_API_URL}/api/documents/admin/document/${userId}/${documentType}`, '_blank');
+    window.open(`${VITE_APP_API_URL}/api/documents/admin/document/${userId}/${documentType}`, '_blank');
   };
 
   const openDocumentModal = (user, documentType, action) => {
@@ -118,7 +118,7 @@ const UserManagement = () => {
       setLoading(true);
       try {
         const response = await axios.delete(
-          `${REACT_APP_API_URL}/api/auth/admin/delete-user/${userId}`,
+          `${VITE_APP_API_URL}/api/auth/admin/delete-user/${userId}`,
           { withCredentials: true }
         );
         

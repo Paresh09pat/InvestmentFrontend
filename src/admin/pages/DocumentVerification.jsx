@@ -13,7 +13,7 @@ import {
   FiShield
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { USER_VERIFICATION_STATUS, REACT_APP_API_URL } from '../../utils/constants';
+import { USER_VERIFICATION_STATUS, VITE_APP_API_URL } from '../../utils/constants';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import Table from '../../components/common/Table';
@@ -39,7 +39,7 @@ const DocumentVerification = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${REACT_APP_API_URL}/api/documents/admin/pending`,
+        `${VITE_APP_API_URL}/api/documents/admin/pending`,
         { withCredentials: true }
       );
       setPendingDocuments(response.data.users);
@@ -55,7 +55,7 @@ const DocumentVerification = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${REACT_APP_API_URL}/api/documents/admin/verify`,
+        `${VITE_APP_API_URL}/api/documents/admin/verify`,
         {
           userId,
           documentType,
@@ -106,7 +106,7 @@ const DocumentVerification = () => {
   };
 
   const viewDocument = (userId, documentType) => {
-    window.open(`${REACT_APP_API_URL}/api/documents/admin/document/${userId}/${documentType}`, '_blank');
+    window.open(`${VITE_APP_API_URL}/api/documents/admin/document/${userId}/${documentType}`, '_blank');
   };
 
   const openVerificationModal = (user, documentType, action) => {
