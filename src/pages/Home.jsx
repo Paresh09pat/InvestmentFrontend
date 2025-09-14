@@ -22,6 +22,8 @@ import Navbar from '../components/common/Navbar';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
 import { motion, useInView, useAnimation, useMotionValue, useSpring } from 'framer-motion';
+import Hero from '../components/Hero';
+import HowItWorks from '../components/HowItWorks';
 
 const Home = () => {
   const { user } = useAuth();
@@ -231,59 +233,11 @@ const Home = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Interactive Cursor Follower */}
-      <motion.div
-        className="fixed top-0 left-0 w-6 h-6 rounded-full pointer-events-none z-50"
-        style={{
-          x: springX,
-          y: springY,
-          transform: 'translate(-50%, -50%)',
-          border: '1px solid rgba(59, 130, 246, 0.6)',
-          background: 'transparent',
-          boxShadow: '0 0 10px rgba(59, 130, 246, 0.3)'
-        }}
-        whileHover={{ scale: 1.5 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      />
-      
+    
       <Navbar />
       
       {/* Floating Navigation Dots - Desktop Only */}
-      <motion.div
-        className="hidden lg:flex fixed right-8 top-1/2 transform -translate-y-1/2 z-40 flex-col space-y-4"
-        initial={{ x: 100, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ delay: 1, duration: 0.8 }}
-      >
-        {[
-          { ref: heroRef, label: 'Home' },
-          { ref: featuresRef, label: 'Features' },
-          { ref: testimonialsRef, label: 'Testimonials' },
-          { ref: ctaRef, label: 'CTA' }
-        ].map((section, index) => (
-          <motion.button
-            key={section.label}
-            className="w-4 h-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 shadow-lg hover:shadow-xl transition-all duration-300 relative group border-2 border-white/20 backdrop-blur-sm"
-            whileHover={{ 
-              scale: 1.5,
-              boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)"
-            }}
-            whileTap={{ scale: 0.8 }}
-            onClick={() => section.ref.current?.scrollIntoView({ behavior: 'smooth' })}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 1.2 + index * 0.1, type: "spring", stiffness: 200 }}
-          >
-            <motion.span
-              className="absolute right-6 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-2 rounded-lg text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap shadow-lg border border-gray-700"
-              initial={{ x: 10, opacity: 0 }}
-              whileHover={{ x: 0, opacity: 1 }}
-            >
-              {section.label}
-            </motion.span>
-          </motion.button>
-        ))}
-      </motion.div>
+   
       
       {/* Scroll to Top Button */}
       <motion.button
@@ -311,243 +265,10 @@ const Home = () => {
       </motion.button>
       
       {/* Hero Section */}
-      <motion.section 
-        ref={heroRef} 
-        className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900"
-      >
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0">
-          {/* Floating Particles */}
-          <div className="absolute inset-0">
-            {[...Array(50)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-1 h-1 bg-white rounded-full opacity-20"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-                animate={{
-                  y: [-20, 20, -20],
-                  opacity: [0.2, 0.8, 0.2],
-                  scale: [1, 1.5, 1]
-                }}
-                transition={{
-                  duration: 3 + Math.random() * 4,
-                  repeat: Infinity,
-                  delay: Math.random() * 5,
-                  ease: "easeInOut"
-                }}
-              />
-            ))}
-          </div>
-          
-          {/* Gradient Orbs */}
-          <motion.div 
-            className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-3xl opacity-20"
-            animate={{
-              scale: [1, 1.2, 1],
-              rotate: [0, 180, 360]
-            }}
-            transition={{
-              duration: 20,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-          />
-          <motion.div 
-            className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full blur-3xl opacity-20"
-            animate={{
-              scale: [1.2, 1, 1.2],
-              rotate: [360, 180, 0]
-            }}
-            transition={{
-              duration: 15,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-          />
-          <motion.div 
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full blur-3xl opacity-10"
-            animate={{
-              y: [-30, 30, -30],
-              x: [-20, 20, -20]
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
-          
-          {/* Grid Pattern */}
-          <motion.div 
-            className="absolute inset-0 opacity-30" 
-            style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-            }}
-            animate={{ opacity: [0.3, 0.1, 0.3] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          />
-        </div>
-        
-        <motion.div 
-          className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {/* Main Title */}
-          <motion.h1 
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black text-white mb-6 sm:mb-8 leading-tight"
-            variants={itemVariants}
-          >
-            <motion.span 
-              className="block"
-              initial={{ x: -100, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
-            >
-              Invest
-            </motion.span>
-            <motion.span 
-              className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
-            >
-              Smart
-            </motion.span>
-            <motion.span 
-              className="block text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl mt-2 sm:mt-4"
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.6, type: "spring", stiffness: 100 }}
-            >
-              Grow <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">Faster</span>
-            </motion.span>
-          </motion.h1>
-          
-          {/* Subtitle */}
-          <motion.p 
-            className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl text-gray-300 mb-8 sm:mb-12 max-w-4xl mx-auto leading-relaxed px-4"
-            variants={itemVariants}
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.8 }}
-          >
-            Join the future of investing with our AI-powered platform. 
-            <span className="text-white font-semibold"> Secure, smart, and profitable.</span>
-          </motion.p>
-          
-          {/* CTA Buttons */}
-          <motion.div 
-            className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center mb-12 sm:mb-16 px-4"
-            variants={itemVariants}
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 1, duration: 0.8 }}
-          >
-              {user ? (
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button 
-                  size="xl" 
-                  onClick={() => navigate('/dashboard')}
-                  icon={<FiTrendingUp />}
-                  className="transform transition-all duration-300"
-                >
-                  Go to Dashboard
-                </Button>
-              </motion.div>
-              ) : (
-                <>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button 
-                    size="xl" 
-                    onClick={() => navigate('/signup')}
-                    icon={<FiArrowRight />}
-                    className="transform transition-all duration-300 shadow-2xl"
-                  >
-                    Start Investing Now
-                  </Button>
-                </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button 
-                    size="xl" 
-                    variant="outline"
-                    className="text-white border-2 border-white hover:bg-white hover:text-purple-600 transform transition-all duration-300"
-                    icon={<FiPlay />}
-                  >
-                    Watch Demo
-                  </Button>
-                </motion.div>
-                </>
-              )}
-          </motion.div>
+     <Hero />
 
-          {/* Animated Stats */}
-          <motion.div 
-            className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto px-4"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {[
-              { value: animatedStats.users.toLocaleString() + '+', label: 'Happy Investors' },
-              { value: `₹${(animatedStats.investments / 10000000).toFixed(1)}Cr+`, label: 'Investments Managed' },
-              { value: `${animatedStats.returns}%`, label: 'Average Returns' }
-            ].map((stat, index) => (
-              <motion.div 
-                key={index}
-                className="text-center group"
-                variants={itemVariants}
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <motion.div 
-                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-2"
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
-                  {stat.value}
-                </motion.div>
-                <div className="text-gray-300 text-sm sm:text-base md:text-lg font-medium">{stat.label}</div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </motion.div>
-        
-        {/* Scroll Indicator */}
-        <motion.div 
-          className="absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 cursor-pointer"
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => featuresRef.current?.scrollIntoView({ behavior: 'smooth' })}
-        >
-          <motion.div 
-            className="w-5 h-8 sm:w-6 sm:h-10 border-2 border-white rounded-full flex justify-center"
-            whileHover={{ borderColor: 'rgba(59, 130, 246, 1)' }}
-            transition={{ duration: 0.3 }}
-          >
-            <motion.div 
-              className="w-1 h-2 sm:h-3 bg-white rounded-full mt-1 sm:mt-2"
-              animate={{ opacity: [1, 0.3, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            />
-          </motion.div>
-        </motion.div>
-      </motion.section>
+      {/* How It Works Section */}
+      <HowItWorks />
 
       {/* Features Section */}
       <motion.section 
