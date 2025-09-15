@@ -1,252 +1,392 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { FaArrowRight, FaCheckCircle, FaChartLine, FaWallet, FaShieldAlt, FaUsers } from 'react-icons/fa';
+
+
+import React, { useEffect, useState } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Area, AreaChart, Tooltip } from 'recharts';
+import { FaApple, FaMicrosoft, FaShopify, FaStar, FaArrowUp, FaArrowDown, FaPlus, FaEye, FaEyeSlash, FaDollarSign, FaEuroSign, FaPoundSign, FaYenSign, FaBitcoin, FaEthereum } from 'react-icons/fa';
 
 const HowItWorks = () => {
-  const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"]
-  });
-  const [activeStep, setActiveStep] = useState(0);
+  const { scrollY } = useScroll();
+  const [mounted, setMounted] = useState(false);
+  const [showBalance, setShowBalance] = useState(false);
+  const [activeTimeframe, setActiveTimeframe] = useState('1 Year');
+  
+  // Transform scroll to beam height
+  const beamHeight = useTransform(scrollY, [0, 1000], [200, 800]);
+  const beamOpacity = useTransform(scrollY, [0, 500], [0.8, 0.3]);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  // Steps data
-  const steps = [
-    {
-      id: 0,
-      title: "Sign Up & Verify",
-      description: "Create your account in minutes with our streamlined registration process. Complete identity verification for secure trading.",
-      details: [
-        "Quick registration with email",
-        "Identity verification process",
-        "Secure account setup",
-        "Access to trading dashboard"
-      ],
-      icon: <FaUsers className="text-4xl text-blue-400" />,
-      image: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&h=400&fit=crop&crop=center",
-      color: "from-blue-500 to-blue-600"
-    },
-    {
-      id: 1,
-      title: "Fund Your Account",
-      description: "Deposit funds securely using multiple payment methods. Choose from bank transfers, credit cards, or cryptocurrency deposits.",
-      details: [
-        "Multiple payment options",
-        "Instant deposit processing",
-        "Secure transaction handling",
-        "Real-time balance updates"
-      ],
-      icon: <FaWallet className="text-4xl text-green-400" />,
-      image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&h=400&fit=crop&crop=center",
-      color: "from-green-500 to-green-600"
-    },
-    {
-      id: 2,
-      title: "Choose Investment Strategy",
-      description: "Select from our expert-curated investment strategies. From conservative to aggressive, find the perfect fit for your goals.",
-      details: [
-        "Expert-curated strategies",
-        "Risk assessment tools",
-        "Customizable portfolios",
-        "Real-time performance tracking"
-      ],
-      icon: <FaChartLine className="text-4xl text-purple-400" />,
-      image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&h=400&fit=crop&crop=center",
-      color: "from-purple-500 to-purple-600"
-    },
-    {
-      id: 3,
-      title: "Start Trading",
-      description: "Begin your investment journey with automated trading or manual control. Our AI-powered system optimizes your returns.",
-      details: [
-        "Automated trading options",
-        "Manual trading control",
-        "AI-powered optimization",
-        "24/7 market monitoring"
-      ],
-      icon: <FaShieldAlt className="text-4xl text-orange-400" />,
-      image: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=600&h=400&fit=crop&crop=center",
-      color: "from-orange-500 to-orange-600"
-    }
+  // Enhanced portfolio data with more realistic values
+  const portfolioData = [
+    { month: 'Jan', value: 42000, stocks: 29400, crypto: 12600 },
+    { month: 'Feb', value: 43500, stocks: 30450, crypto: 13050 },
+    { month: 'Mar', value: 41000, stocks: 28700, crypto: 12300 },
+    { month: 'Apr', value: 44000, stocks: 30800, crypto: 13200 },
+    { month: 'May', value: 42500, stocks: 29750, crypto: 12750 },
+    { month: 'Jun', value: 44553, stocks: 31187, crypto: 13366 },
+    { month: 'Jul', value: 43800, stocks: 30660, crypto: 13140 },
+    { month: 'Aug', value: 42200, stocks: 29540, crypto: 12660 },
+    { month: 'Sep', value: 44100, stocks: 30870, crypto: 13230 },
+    { month: 'Oct', value: 45200, stocks: 31640, crypto: 13560 },
+    { month: 'Nov', value: 44800, stocks: 31360, crypto: 13440 },
+    { month: 'Dec', value: 44553, stocks: 31187, crypto: 13366 }
   ];
 
-  // Update active step based on scroll progress
-  useEffect(() => {
-    const unsubscribe = scrollYProgress.on("change", (latest) => {
-      const stepProgress = Math.floor(latest * steps.length);
-      const clampedStep = Math.min(Math.max(stepProgress, 0), steps.length - 1);
-      setActiveStep(clampedStep);
-    });
-    
-    return unsubscribe;
-  }, [scrollYProgress, steps.length]);
+  const pieData = [
+    { name: 'Stocks', value: 35, color: '#3B82F6', amount: 15594 }, // Blue from Hero
+    { name: 'Crypto', value: 25, color: '#8B5CF6', amount: 11138 }, // Purple from Hero
+    { name: 'Forex', value: 20, color: '#06B6D4', amount: 8911 }, // Cyan from Hero
+    { name: 'Bonds', value: 15, color: '#F59E0B', amount: 6683 }, // Amber
+    { name: 'Commodities', value: 5, color: '#EF4444', amount: 2228 } // Red
+  ];
 
-  // Transform scroll progress for animations
-  const imageOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [1, 1, 1, 0.8]);
+  // Currency icons data for floating animation - positioned only in hero section
+  const currencyIcons = [
+    { icon: FaDollarSign, color: '#10B981', size: 28, delay: 0, position: { left: '65%', top: '20%' } },
+    { icon: FaEuroSign, color: '#3B82F6', size: 26, delay: 0.5, position: { left: '75%', top: '35%' } },
+    { icon: FaPoundSign, color: '#8B5CF6', size: 24, delay: 1, position: { left: '85%', top: '25%' } },
+    { icon: FaYenSign, color: '#F59E0B', size: 30, delay: 1.5, position: { left: '70%', top: '50%' } },
+    { icon: FaBitcoin, color: '#F97316', size: 32, delay: 2, position: { left: '80%', top: '15%' } },
+    { icon: FaEthereum, color: '#06B6D4', size: 28, delay: 2.5, position: { left: '90%', top: '40%' } },
+    { icon: FaDollarSign, color: '#EF4444', size: 26, delay: 3, position: { left: '60%', top: '45%' } },
+    { icon: FaEuroSign, color: '#84CC16', size: 24, delay: 3.5, position: { left: '95%', top: '30%' } },
+  ];
+
+  const timeframes = ['1 Year', '3 Month', '6 Month', 'Weekly'];
+
+  if (!mounted) return null;
 
   return (
-    <div 
-      ref={containerRef}
-      className="min-h-[500vh] bg-gradient-to-b from-indigo-900 via-purple-900 to-blue-900 relative"
-    >
-      {/* Background elements */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-900/10 to-purple-900/10"></div>
-      
-      {/* Floating geometric shapes */}
-      <motion.div
-        className="absolute top-20 left-10 w-20 h-20 border-2 border-blue-400/20 rounded-full"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-      />
-      <motion.div
-        className="absolute top-40 right-20 w-16 h-16 border-2 border-purple-400/20 rounded-lg"
-        animate={{ rotate: -360 }}
-        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-      />
-      <motion.div
-        className="absolute bottom-40 left-20 w-12 h-12 border-2 border-cyan-400/20 rounded-full"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
+      {/* Subtle Grid Pattern - Fading from right to left */}
+      <div 
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px',
+          maskImage: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%)',
+          WebkitMaskImage: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 30%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%)',
+        }}
       />
 
-      {/* Sticky content container with proper spacing */}
-      <div className="sticky top-0 h-screen flex items-center justify-center">
-        <div className="container mx-auto px-6 py-20 w-full max-w-7xl">
-          {/* Section Header - Fixed */}
-          <div className="text-center mt-20 mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
-              How It <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Works</span>
-            </h2>
-            <p className="text-gray-300 text-lg max-w-2xl mx-auto">
-              Start your investment journey in just a few simple steps. Our platform makes trading accessible to everyone.
-            </p>
-          </div>
+      {/* Floating Currency Icons with Circular Bubbles - Hidden on mobile, visible on larger screens */}
+      {currencyIcons.map((currency, index) => {
+        const IconComponent = currency.icon;
+        return (
+          <motion.div
+            key={index}
+            className="absolute z-5 hidden sm:block"
+            style={{
+              left: currency.position.left,
+              top: currency.position.top,
+            }}
+            animate={{
+              y: [-15, 15, -15],
+              x: [-8, 8, -8],
+              rotate: [-8, 8, -8],
+            }}
+            transition={{
+              duration: 5 + index * 0.3,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: currency.delay,
+            }}
+          >
+            <div 
+              className="flex items-center justify-center rounded-full backdrop-blur-sm border border-white/20 hover:border-white/30 transition-all duration-300"
+              style={{
+                width: `${currency.size + 24}px`,
+                height: `${currency.size + 24}px`,
+                backgroundColor: `${currency.color}20`,
+                boxShadow: `0 0 30px ${currency.color}40, 0 0 60px ${currency.color}30, 0 0 90px ${currency.color}20`,
+              }}
+            >
+              <IconComponent 
+                size={currency.size} 
+                className="opacity-90 hover:opacity-100 transition-opacity duration-300"
+                style={{ color: currency.color }}
+              />
+            </div>
+          </motion.div>
+        );
+      })}
 
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Left Side - Image Display */}
-            <div className="relative h-[600px] rounded-2xl overflow-hidden">
-              {/* Step indicators */}
-              <div className="absolute top-6 left-6 z-10 flex space-x-2">
-                {steps.map((_, index) => (
-                  <motion.div
-                    key={index}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      index === activeStep 
-                        ? 'bg-white scale-125' 
-                        : 'bg-white/40'
-                    }`}
-                    animate={{
-                      scale: index === activeStep ? 1.25 : 1,
-                      opacity: index === activeStep ? 1 : 0.4
-                    }}
-                  />
-                ))}
-              </div>
-
-              {/* Main image */}
+      <div className="relative z-10 min-h-screen flex flex-col">
+        {/* Hero Section - Title and Content */}
+        <div className="flex-1 px-4 sm:px-6 py-6 sm:py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 h-full">
+            {/* Left Section - Hero Text and CTA */}
+            <div className="lg:col-span-6 space-y-6 sm:space-y-8">
+              {/* Hero Text */}
               <motion.div
-                key={activeStep}
-                initial={{ opacity: 0, scale: 1.1 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-                className="w-full h-full relative"
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="space-y-4"
               >
-                <img
-                  src={steps[activeStep].image}
-                  alt={steps[activeStep].title}
-                  className="w-full h-full object-cover"
-                />
-                <div className={`absolute inset-0 bg-gradient-to-t ${steps[activeStep].color} opacity-20`}></div>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-light text-white leading-tight">
+                  Invest With{' '}Confidence, Grow With Purpose.
+                 
+                </h1>
+               
               </motion.div>
 
-              {/* Floating step number */}
+              {/* CTA Buttons */}
               <motion.div
-                key={`step-${activeStep}`}
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className={`absolute bottom-6 right-6 w-16 h-16 bg-gradient-to-br ${steps[activeStep].color} rounded-full flex items-center justify-center shadow-2xl`}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4"
               >
-                <span className="text-white font-bold text-xl">{activeStep + 1}</span>
+                <button className="bg-white text-black px-6 py-3 sm:px-8 sm:py-4 rounded-full font-medium hover:bg-gray-100 transition-colors flex items-center justify-center space-x-3">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 sm:w-3 sm:h-3 bg-gray-600 rounded-full"></div>
+                  </div>
+                  <span className="text-base sm:text-lg">Invest Now</span>
+                </button>
+                <button className="text-white border border-gray-600 px-6 py-3 sm:px-8 sm:py-4 rounded-full hover:border-gray-400 transition-colors text-base sm:text-lg">
+                  Learn More
+                </button>
               </motion.div>
             </div>
 
-            {/* Right Side - Content */}
-            <div className="space-y-8">
-              {/* Current step content */}
-              <motion.div
-                key={`content-${activeStep}`}
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                {/* Step icon and title */}
-                <div className="flex items-center space-x-4 mb-6">
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    {steps[activeStep].icon}
-                  </motion.div>
-                  <h3 className="text-3xl font-bold text-white">
-                    {steps[activeStep].title}
-                  </h3>
-                </div>
+            {/* Right Section - Empty space */}
+            <div className="lg:col-span-6"></div>
+          </div>
+        </div>
 
-                {/* Description */}
-                <p className="text-gray-300 text-lg leading-relaxed mb-8">
-                  {steps[activeStep].description}
-                </p>
-
-                {/* Feature list */}
-                <div className="space-y-4">
-                  {steps[activeStep].details.map((detail, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.4, delay: index * 0.1 }}
-                      className="flex items-center space-x-3"
-                    >
-                      <FaCheckCircle className="text-green-400 text-lg flex-shrink-0" />
-                      <span className="text-gray-300">{detail}</span>
-                    </motion.div>
+        {/* Charts Section - Next Row */}
+        <div className="px-4 sm:px-6 pb-6 sm:pb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+            {/* Left Column - Assets Holding */}
+            <div className="lg:col-span-3">
+              <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700/50 h-full">
+                <h4 className="text-gray-400 text-sm mb-3 sm:mb-4">Assets Holding</h4>
+                <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
+                  {pieData.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div 
+                          className="w-2 h-2 sm:w-3 sm:h-3 rounded-full" 
+                          style={{ backgroundColor: item.color }}
+                        ></div>
+                        <span className="text-white text-xs sm:text-sm">{item.name} {item.value}%</span>
+                      </div>
+                      <span className="text-white font-semibold text-xs sm:text-sm">${item.amount.toLocaleString()}</span>
+                    </div>
                   ))}
                 </div>
 
-                {/* CTA Button */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                  className="mt-8"
-                >
-                  <button className={`bg-gradient-to-r ${steps[activeStep].color} hover:opacity-90 text-white px-8 py-4 rounded-lg font-semibold flex items-center space-x-2 transition-all duration-300 transform hover:scale-105 shadow-lg`}>
-                    <span>Get Started</span>
-                    <FaArrowRight className="text-sm" />
-                  </button>
-                </motion.div>
-              </motion.div>
-
-              {/* Progress bar */}
-              <div className="mt-12">
-                <div className="flex justify-between text-sm text-gray-400 mb-2">
-                  <span>Step {activeStep + 1} of {steps.length}</span>
-                  <span>{Math.round(((activeStep + 1) / steps.length) * 100)}% Complete</span>
+                {/* Enhanced Pie Chart with Rounded Edges - Responsive Size */}
+                <div className="flex justify-center">
+                  <div className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={pieData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={70}
+                          outerRadius={100}
+                          dataKey="value"
+                          startAngle={90}
+                          endAngle={450}
+                          paddingAngle={3}
+                          cornerRadius={12}
+                          strokeWidth={0}
+                        >
+                          {pieData.map((entry, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={entry.color}
+                              stroke={entry.color}
+                              strokeWidth={0}
+                            />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-gray-400 text-xs sm:text-sm">Portfolio Amount</div>
+                        <div className="text-white text-lg sm:text-xl md:text-2xl font-semibold">$44,553.00</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="w-full bg-gray-700 rounded-full h-2">
-                  <motion.div
-                    className={`h-2 rounded-full bg-gradient-to-r ${steps[activeStep].color}`}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${((activeStep + 1) / steps.length) * 100}%` }}
-                    transition={{ duration: 0.5 }}
-                  />
+              </div>
+            </div>
+
+            {/* Center Column - Portfolio Chart */}
+            <div className="lg:col-span-6">
+              <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700/50 h-full">
+                <div className="text-white mb-3 sm:mb-4">
+                  <div className="text-gray-400 text-xs sm:text-sm mb-1">Portfolio Amount</div>
+                  <div className="text-xl sm:text-2xl md:text-3xl font-light">$44,553.00</div>
+                </div>
+
+                {/* Timeframe Selectors */}
+                <div className="flex flex-wrap gap-1 sm:gap-2 mb-3 sm:mb-4">
+                  {timeframes.map((timeframe) => (
+                    <button
+                      key={timeframe}
+                      onClick={() => setActiveTimeframe(timeframe)}
+                      className={`px-2 py-1 sm:px-3 rounded text-xs transition-colors ${
+                        activeTimeframe === timeframe
+                          ? 'bg-gray-700 text-white'
+                          : 'text-gray-400 hover:text-white'
+                      }`}
+                    >
+                      {timeframe}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Chart Legend */}
+                <div className="flex flex-wrap gap-2 sm:gap-4 text-xs mb-3 sm:mb-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-white">Stocks Portfolio</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-gray-400">Crypto Portfolio</span>
+                  </div>
+                </div>
+
+                {/* Enhanced Area Chart - Matching Image Style */}
+                <div className="h-48 sm:h-56 md:h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={portfolioData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorStocks" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.4}/>
+                          <stop offset="50%" stopColor="#3B82F6" stopOpacity={0.2}/>
+                          <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="colorCrypto" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10B981" stopOpacity={0.4}/>
+                          <stop offset="50%" stopColor="#10B981" stopOpacity={0.2}/>
+                          <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <XAxis 
+                        dataKey="month" 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: '#9CA3AF', fontSize: 10 }}
+                        interval="preserveStartEnd"
+                      />
+                      <YAxis hide />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#1F2937', 
+                          border: '1px solid #374151',
+                          borderRadius: '8px',
+                          color: '#F9FAFB',
+                          fontSize: '12px'
+                        }}
+                        labelStyle={{ color: '#9CA3AF' }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="stocks"
+                        stackId="1"
+                        stroke="#3B82F6"
+                        fill="url(#colorStocks)"
+                        strokeWidth={2.5}
+                        dot={false}
+                        activeDot={{ r: 4, fill: '#3B82F6', stroke: '#fff', strokeWidth: 2 }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="crypto"
+                        stackId="1"
+                        stroke="#10B981"
+                        fill="url(#colorCrypto)"
+                        strokeWidth={2.5}
+                        dot={false}
+                        activeDot={{ r: 4, fill: '#10B981', stroke: '#fff', strokeWidth: 2 }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Price Points */}
+                <div className="space-y-1 sm:space-y-2 mt-3 sm:mt-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white font-medium text-sm sm:text-base">$54,342</span>
+                    <span className="text-green-400 flex items-center space-x-1">
+                      <FaArrowUp size={10} />
+                      <span className="text-xs sm:text-sm">+$4,293 5.34%</span>
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-white font-medium text-sm sm:text-base">$5,342</span>
+                    <span className="text-red-400 flex items-center space-x-1">
+                      <FaArrowDown size={10} />
+                      <span className="text-xs sm:text-sm">-$293 -2%</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - P&L */}
+            <div className="lg:col-span-3 space-y-3 sm:space-y-4">
+              {/* Unrealized P&L Card */}
+              <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700/50">
+                <div className="mb-3 sm:mb-4">
+                  <div className="text-gray-400 text-xs sm:text-sm">Unrealized P&L</div>
+                  <div className="text-green-400 text-lg sm:text-xl font-semibold">+$40,230.24</div>
+                </div>
+
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400 text-xs sm:text-sm">Asset Gain/Loss</span>
+                    <span className="text-green-400 font-medium text-xs sm:text-sm">+$5,352.00</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400 text-xs sm:text-sm">Forex Gain/Loss</span>
+                    <span className="text-green-400 font-medium text-xs sm:text-sm">+$2,334.31</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Realized P&L Card */}
+              <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700/50">
+                <div className="mb-3 sm:mb-4">
+                  <div className="text-gray-400 text-xs sm:text-sm">Realized P&L</div>
+                  <div className="text-green-400 text-lg sm:text-xl font-semibold">+$12,435.12</div>
+                </div>
+
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400 text-xs sm:text-sm">Asset Gain/Loss</span>
+                    <span className="text-green-400 font-medium text-xs sm:text-sm">+$5,352.00</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400 text-xs sm:text-sm">Forex Gain/Loss</span>
+                    <span className="text-red-400 font-medium text-xs sm:text-sm">-$2,334.31</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400 text-xs sm:text-sm">Dividends Received</span>
+                    <span className="text-green-400 font-medium text-xs sm:text-sm">+$2,334.31</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400 text-xs sm:text-sm">Rewards Received</span>
+                    <span className="text-green-400 font-medium text-xs sm:text-sm">+$1,123.31</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-
-     
         </div>
       </div>
     </div>

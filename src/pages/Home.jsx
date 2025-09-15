@@ -225,7 +225,7 @@ const Home = () => {
 
   return (
     <motion.div 
-      className="min-h-screen"
+      className="min-h-screen overflow-clip"
       style={{
         scrollBehavior: 'smooth'
       }}
