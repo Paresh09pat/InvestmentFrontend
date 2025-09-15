@@ -1,0 +1,38 @@
+services:
+  investment-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3001:80"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      # Mount .env file if it exists
+      - ./.env:/app/.env:ro
+    restart: unless-stopped
+    networks:
+      - investment-network
+
+  # Optional: Add a development service
+  investment-frontend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./.env:/app/.env:ro
+    environment:
+      - NODE_ENV=development
+    command: npm run dev
+    profiles:
+      - dev
+    networks:
+      - investment-network
+
+networks:
+  investment-network:
+    driver: bridge
