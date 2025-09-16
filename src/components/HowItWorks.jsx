@@ -144,13 +144,13 @@ const HowItWorks = () => {
                 transition={{ duration: 0.8, delay: 0.3 }}
                 className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4"
               >
-                <button className="bg-white text-black px-6 py-3 sm:px-8 sm:py-4 rounded-full font-medium hover:bg-gray-100 transition-colors flex items-center justify-center space-x-3">
+                <button className="bg-white cursor-pointer text-black px-6 py-3 sm:px-8 sm:py-4 rounded-full font-medium hover:bg-gray-100 transition-colors flex items-center justify-center space-x-3">
                   <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-200 rounded-full flex items-center justify-center">
                     <div className="w-2 h-2 sm:w-3 sm:h-3 bg-gray-600 rounded-full"></div>
                   </div>
                   <span className="text-base sm:text-lg">Invest Now</span>
                 </button>
-                <button className="text-white border border-gray-600 px-6 py-3 sm:px-8 sm:py-4 rounded-full hover:border-gray-400 transition-colors text-base sm:text-lg">
+                <button className="text-white cursor-pointer border border-gray-600 px-6 py-3 sm:px-8 sm:py-4 rounded-full hover:border-gray-400 transition-colors text-base sm:text-lg">
                   Learn More
                 </button>
               </motion.div>

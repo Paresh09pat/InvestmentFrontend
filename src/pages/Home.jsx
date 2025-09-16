@@ -24,6 +24,8 @@ import Card from '../components/common/Card';
 import { motion, useInView, useAnimation, useMotionValue, useSpring } from 'framer-motion';
 import Hero from '../components/Hero';
 import HowItWorks from '../components/HowItWorks';
+import WhyChooseUs from '../components/WhyChooseUs';
+import Testimonials from '../components/Testimonials';
 
 const Home = () => {
   const { user } = useAuth();
@@ -270,142 +272,11 @@ const Home = () => {
       {/* How It Works Section */}
       <HowItWorks />
 
-      {/* Features Section */}
-      <motion.section 
-        ref={featuresRef} 
-        className="py-32 bg-gradient-to-br from-gray-50 to-white relative"
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-      >
-        {/* Background Pattern */}
-        <motion.div 
-          className="absolute inset-0 opacity-20" 
-          style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23f3f4f6' fill-opacity='0.1'%3E%3Cpath d='M50 0L100 50L50 100L0 50z'/%3E%3C/g%3E%3C/svg%3E")`
-          }}
-          animate={{ 
-            backgroundPosition: ['0% 0%', '100% 100%'],
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        />
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            className="text-center mb-12 sm:mb-16 lg:mb-20"
-            initial={{ y: 50, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <motion.h2 
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-gray-900 mb-4 sm:mb-6 px-4"
-              initial={{ scale: 0.8, opacity: 0 }}
-              whileInView={{ scale: 1, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
-            >
-              Why Choose <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">InvestPro?</span>
-            </motion.h2>
-            <motion.p 
-              className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed px-4"
-              initial={{ y: 30, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4, duration: 0.8 }}
-            >
-              Experience the future of investing with our revolutionary platform powered by 
-              <span className="font-semibold text-gray-800"> artificial intelligence</span> and 
-              <span className="font-semibold text-gray-800"> cutting-edge technology</span>.
-            </motion.p>
-          </motion.div>
-
-          <motion.div 
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-          >
-            {features.map((feature, index) => (
-              <motion.div
-                key={index} 
-                variants={itemVariants}
-                whileHover={{ 
-                  y: -10,
-                  transition: { type: "spring", stiffness: 300 }
-                }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Card 
-                hover 
-                  className="text-center group relative overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-500 h-full"
-              >
-                {/* Gradient Background */}
-                  <motion.div 
-                    className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-5 group-hover:opacity-10 transition-opacity duration-300`}
-                    whileHover={{ opacity: 0.1 }}
-                  />
-                  
-                  <div className="relative z-10 p-6 sm:p-8">
-                    <motion.div 
-                      className={`bg-gradient-to-r ${feature.color} w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg`}
-                      whileHover={{ 
-                        scale: 1.1, 
-                        rotate: 6,
-                        transition: { type: "spring", stiffness: 300 }
-                      }}
-                      initial={{ scale: 0, rotate: -180 }}
-                      whileInView={{ scale: 1, rotate: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ 
-                        delay: feature.delay,
-                        type: "spring", 
-                        stiffness: 200 
-                      }}
-                    >
-                    <feature.icon size={32} className="text-white sm:w-10 sm:h-10" />
-                    </motion.div>
-                    
-                    <motion.h3 
-                      className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 group-hover:text-gray-700 transition-colors duration-300"
-                      initial={{ y: 20, opacity: 0 }}
-                      whileInView={{ y: 0, opacity: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: feature.delay + 0.1 }}
-                    >
-                    {feature.title}
-                    </motion.h3>
-                    
-                    <motion.p 
-                      className="text-gray-600 leading-relaxed text-base sm:text-lg"
-                      initial={{ y: 20, opacity: 0 }}
-                      whileInView={{ y: 0, opacity: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: feature.delay + 0.2 }}
-                    >
-                    {feature.description}
-                    </motion.p>
-                </div>
-
-                {/* Hover Effect */}
-                  <motion.div 
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 transform -skew-x-12 translate-x-full"
-                    whileHover={{ 
-                      opacity: 0.1,
-                      x: '-100%',
-                      transition: { duration: 0.7 }
-                    }}
-                  />
-              </Card>
-              </motion.div>
-            ))}
-          </motion.div>
-          </div>
-      </motion.section>
+        {/* Why Choose Us Section */}
+        <WhyChooseUs />
 
       {/* Testimonials */}
+      <Testimonials />
       <motion.section 
         ref={testimonialsRef} 
         className="py-32 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative"
