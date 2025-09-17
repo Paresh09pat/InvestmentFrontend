@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { FiShield, FiFileText, FiCalendar, FiAlertCircle } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/common/Navbar';
-import Footer from '../components/common/Footer';
+          
 
 const Terms = () => {
   const containerVariants = {
@@ -31,11 +31,11 @@ const Terms = () => {
   const sections = [
     {
       title: "1. Acceptance of Terms",
-      content: "By accessing and using InvestPro services, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service."
+      content: "By accessing and using Trdexa services, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service."
     },
     {
       title: "2. Description of Service",
-      content: "InvestPro provides investment management services, portfolio management, and financial advisory services through our digital platform. We offer access to various investment instruments including stocks, bonds, ETFs, and other securities."
+      content: "Trdexa provides investment management services, portfolio management, and financial advisory services through our digital platform. We offer access to various investment instruments including stocks, bonds, ETFs, and other securities."
     },
     {
       title: "3. User Responsibilities",
@@ -43,15 +43,15 @@ const Terms = () => {
     },
     {
       title: "4. Investment Risks",
-      content: "All investments carry risk, including the potential loss of principal. Past performance does not guarantee future results. Users acknowledge that they understand the risks associated with investing and that InvestPro does not guarantee any specific returns or outcomes."
+      content: "All investments carry risk, including the potential loss of principal. Past performance does not guarantee future results. Users acknowledge that they understand the risks associated with investing and that Trdexa does not guarantee any specific returns or outcomes."
     },
     {
       title: "5. Fees and Charges",
-      content: "InvestPro charges a management fee of 0.5% annually on assets under management. Additional fees may apply for certain services. All fees are clearly disclosed before execution. Users agree to pay all applicable fees as outlined in our fee schedule."
+      content: "Trdexa charges a management fee of 0.5% annually on assets under management. Additional fees may apply for certain services. All fees are clearly disclosed before execution. Users agree to pay all applicable fees as outlined in our fee schedule."
     },
     {
       title: "6. Account Security",
-      content: "Users are responsible for maintaining the confidentiality of their account information and passwords. InvestPro implements security measures but cannot guarantee absolute security. Users must notify us immediately of any unauthorized access or security breaches."
+      content: "Users are responsible for maintaining the confidentiality of their account information and passwords. Trdexa implements security measures but cannot guarantee absolute security. Users must notify us immediately of any unauthorized access or security breaches."
     },
     {
       title: "7. Privacy and Data Protection",
@@ -63,19 +63,19 @@ const Terms = () => {
     },
     {
       title: "9. Limitation of Liability",
-      content: "InvestPro's liability is limited to the extent permitted by law. We are not liable for indirect, incidental, or consequential damages. Our total liability shall not exceed the fees paid by the user in the 12 months preceding the claim."
+      content: "Trdexa's liability is limited to the extent permitted by law. We are not liable for indirect, incidental, or consequential damages. Our total liability shall not exceed the fees paid by the user in the 12 months preceding the claim."
     },
     {
       title: "10. Termination",
-      content: "Either party may terminate this agreement at any time. Upon termination, users may withdraw their funds subject to applicable fees and processing times. InvestPro reserves the right to suspend or terminate accounts for violations of these terms."
+      content: "Either party may terminate this agreement at any time. Upon termination, users may withdraw their funds subject to applicable fees and processing times. Trdexa reserves the right to suspend or terminate accounts for violations of these terms."
     },
     {
       title: "11. Governing Law",
-      content: "These terms are governed by the laws of the jurisdiction where InvestPro is incorporated. Any disputes shall be resolved through binding arbitration in accordance with the rules of the relevant arbitration association."
+      content: "These terms are governed by the laws of the jurisdiction where Trdexa is incorporated. Any disputes shall be resolved through binding arbitration in accordance with the rules of the relevant arbitration association."
     },
     {
       title: "12. Changes to Terms",
-      content: "InvestPro reserves the right to modify these terms at any time. Users will be notified of significant changes via email or through our platform. Continued use of our services constitutes acceptance of the modified terms."
+      content: "Trdexa reserves the right to modify these terms at any time. Users will be notified of significant changes via email or through our platform. Continued use of our services constitutes acceptance of the modified terms."
     }
   ];
 
@@ -118,25 +118,7 @@ const Terms = () => {
         transition={{ duration: 1, ease: "easeOut" }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Back Button */}
-          <motion.div 
-            className="mb-8"
-            initial={{ x: -50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-          >
-            <Link 
-              to="/"
-              className="inline-flex items-center space-x-2 text-gray-400 hover:text-white transition-colors duration-300"
-            >
-              <motion.div
-                whileHover={{ x: -5 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                ← Back to Home
-              </motion.div>
-            </Link>
-          </motion.div>
+
 
           {/* Logo and Title */}
           <motion.div 
@@ -177,7 +159,7 @@ const Terms = () => {
             transition={{ delay: 0.7, duration: 0.8 }}
           >
             Please read these terms carefully before using our services. 
-            <span className="text-white font-semibold"> By using InvestPro</span>, you agree to be bound by these terms.
+            <span className="text-white font-semibold"> By using Trdexa</span>, you agree to be bound by these terms.
           </motion.p>
         </div>
       </motion.div>
@@ -333,11 +315,10 @@ const Terms = () => {
               </motion.button>
             </motion.div>
           </motion.div>
-        </div>
+        </div>  
       </motion.section>
 
-      {/* Footer */}
-      <Footer />
+    
     </motion.div>
   );
 };

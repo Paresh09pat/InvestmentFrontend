@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { FiShield, FiLock, FiEye, FiKey, FiServer, FiCheckCircle, FiAlertTriangle, FiGlobe } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/common/Navbar';
-import Footer from '../components/common/Footer';
+  
 
 const Security = () => {
   const containerVariants = {
@@ -80,7 +80,7 @@ const Security = () => {
       status: "Compliant",
       icon: FiCheckCircle
     }
-  ];
+  ];  
 
   const securityTips = [
     {
@@ -164,25 +164,7 @@ const Security = () => {
         transition={{ duration: 1, ease: "easeOut" }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Back Button */}
-          <motion.div 
-            className="mb-8"
-            initial={{ x: -50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-          >
-            <Link 
-              to="/"
-              className="inline-flex items-center space-x-2 text-gray-400 hover:text-white transition-colors duration-300"
-            >
-              <motion.div
-                whileHover={{ x: -5 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                ← Back to Home
-              </motion.div>
-            </Link>
-          </motion.div>
+
 
           {/* Logo and Title */}
           <motion.div 
@@ -464,8 +446,7 @@ const Security = () => {
         </div>
       </motion.section>
 
-      {/* Footer */}
-      <Footer />
+     
     </motion.div>
   );
 };

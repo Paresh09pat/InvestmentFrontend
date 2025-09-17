@@ -229,11 +229,11 @@ const PaymentVerification = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-blue-700">UPI ID:</span>
-                      <span className="font-medium text-blue-900">admin@investpro</span>
+                      <span className="font-medium text-blue-900">admin@Trdexa</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-blue-700">Merchant:</span>
-                      <span className="font-medium text-blue-900">InvestPro</span>
+                      <span className="font-medium text-blue-900">Trdexa</span>
                     </div>
                   </div>
                 </div>

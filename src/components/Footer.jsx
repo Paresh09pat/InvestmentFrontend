@@ -53,7 +53,7 @@ const Footer = () => {
   ];
 
   const contactInfo = [
-    { icon: FiMail, text: "support@investpro.com", href: "mailto:support@investpro.com" },
+    { icon: FiMail, text: "support@Trdexa.com", href: "mailto:support@Trdexa.com" },
     { icon: FiPhone, text: "+1 (555) 123-4567", href: "tel:+15551234567" },
     { icon: FiMapPin, text: "123 Financial District, NY 10004", href: "#" }
   ];
@@ -191,7 +191,7 @@ const Footer = () => {
                 <FiShield className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
               </motion.div>
               <span className="text-xl sm:text-2xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                InvestPro
+                Trdexa
               </span>
             </motion.div>
 
@@ -393,7 +393,7 @@ const Footer = () => {
               viewport={{ once: true }}
               transition={{ delay: 0.8, duration: 0.8 }}
             >
-              © 2024 InvestPro. All rights reserved. Built with ❤️ for smart investors.
+              © 2024 Trdexa. All rights reserved. Built with ❤️ for smart investors.
             </motion.p>
             <motion.div
               className="flex items-center space-x-4"

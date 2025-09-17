@@ -3,7 +3,7 @@ import { FiShield, FiHelpCircle, FiSearch, FiBookOpen, FiVideo, FiMessageCircle,
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import Navbar from '../components/common/Navbar';
-import Footer from '../components/common/Footer';
+  
 
 const HelpCenter = () => {
   const [expandedFAQ, setExpandedFAQ] = useState(null);
@@ -36,7 +36,7 @@ const HelpCenter = () => {
     {
       icon: FiBookOpen,
       title: "Getting Started",
-      description: "Learn the basics of investing with InvestPro",
+      description: "Learn the basics of investing with Trdexa",
       articles: 12,
       color: "from-blue-500 to-blue-600"
     },
@@ -161,25 +161,7 @@ const HelpCenter = () => {
         transition={{ duration: 1, ease: "easeOut" }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Back Button */}
-          <motion.div 
-            className="mb-8"
-            initial={{ x: -50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-          >
-            <Link 
-              to="/"
-              className="inline-flex items-center space-x-2 text-gray-400 hover:text-white transition-colors duration-300"
-            >
-              <motion.div
-                whileHover={{ x: -5 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                ← Back to Home
-              </motion.div>
-            </Link>
-          </motion.div>
+      
 
           {/* Logo and Title */}
           <motion.div 
@@ -210,7 +192,7 @@ const HelpCenter = () => {
             transition={{ delay: 0.5, duration: 0.8 }}
           >
             Find answers, tutorials, and support to help you 
-            <span className="text-white font-semibold"> succeed with InvestPro</span>.
+            <span className="text-white font-semibold"> succeed with Trdexa</span>.
           </motion.p>
 
           {/* Search Bar */}
@@ -434,8 +416,7 @@ const HelpCenter = () => {
         </div>
       </motion.section>
 
-      {/* Footer */}
-      <Footer />
+
     </motion.div>
   );
 };

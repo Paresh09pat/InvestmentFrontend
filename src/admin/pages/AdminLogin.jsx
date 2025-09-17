@@ -121,7 +121,7 @@ const AdminLogin = () => {
             </div>
             <div className="text-left">
               <span className="text-2xl font-bold text-white">
-                InvestPro
+                Trdexa
               </span>
               <div className="text-sm text-gray-300">Admin Panel</div>
             </div>

@@ -60,7 +60,7 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
             </div>
             <div className="min-w-0">
               <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                InvestPro
+                Trdexa
               </span>
               <div className="text-xs text-gray-500">Admin Panel</div>
             </div>

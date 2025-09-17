@@ -3,7 +3,7 @@ import { FiShield, FiMail, FiPhone, FiMapPin, FiClock, FiSend, FiMessageCircle, 
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import Navbar from '../components/common/Navbar';
-import Footer from '../components/common/Footer';
+  
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -54,7 +54,7 @@ const Contact = () => {
       icon: FiMail,
       title: "Email Support",
       description: "Get help via email",
-      contact: "support@investpro.com",
+      contact: "support@Trdexa.com",
       color: "from-blue-500 to-blue-600",
       delay: 0.1
     },
@@ -78,7 +78,7 @@ const Contact = () => {
       icon: FiHeadphones,
       title: "Help Center",
       description: "Browse our guides",
-      contact: "help.investpro.com",
+      contact: "help.Trdexa.com",
       color: "from-orange-500 to-orange-600",
       delay: 0.4
     }
@@ -154,25 +154,7 @@ const Contact = () => {
         transition={{ duration: 1, ease: "easeOut" }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Back Button */}
-          <motion.div 
-            className="mb-8"
-            initial={{ x: -50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-          >
-            <Link 
-              to="/"
-              className="inline-flex items-center space-x-2 text-gray-400 hover:text-white transition-colors duration-300"
-            >
-              <motion.div
-                whileHover={{ x: -5 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                ← Back to Home
-              </motion.div>
-            </Link>
-          </motion.div>
+
 
           {/* Logo and Title */}
           <motion.div 
@@ -510,8 +492,7 @@ const Contact = () => {
         </div>
       </motion.section>
 
-      {/* Footer */}
-      <Footer />
+     
     </motion.div>
   );
 };

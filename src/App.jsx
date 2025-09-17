@@ -1,7 +1,8 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useEffect } from 'react';
 
 // User Pages
 import Home from './pages/Home';
@@ -37,9 +38,16 @@ import AdminProfile from './admin/pages/AdminProfile';
 // Components
 import ProtectedRoute from './components/common/ProtectedRoute';
 import LoadingSpinner from './components/common/LoadingSpinner';
+import Footer from './components/Footer';
 
 function App() {
   const { loading } = useAuth();
+  const location = useLocation();
+
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   if (loading) {
     return (
@@ -54,7 +62,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
@@ -119,6 +126,9 @@ function App() {
         {/* 404 Route */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+
+      {/* Footer - Show on all pages except admin */}
+      {!location.pathname.startsWith('/admin') && <Footer />}
 
       {/* Toast Container */}
       <ToastContainer

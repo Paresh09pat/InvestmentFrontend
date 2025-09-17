@@ -152,7 +152,7 @@ const CallToAction = () => {
           viewport={{ once: true }}
           transition={{ delay: 0.2, duration: 0.8 }}
         >
-          Join the elite community of smart investors who trust InvestPro for{' '}
+          Join the elite community of smart investors who trust Trdexa for{' '}
           <span className="font-semibold bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent">
             secure, profitable, and innovative
           </span>{' '}

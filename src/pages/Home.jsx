@@ -19,7 +19,6 @@ import HowItWorks from '../components/HowItWorks';
 import WhyChooseUs from '../components/WhyChooseUs';
 import Testimonials from '../components/Testimonials';
 import CallToAction from '../components/CallToAction';
-import Footer from '../components/Footer';
 
 const Home = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -198,9 +197,6 @@ const Home = () => {
 
       {/* Call to Action */}
       <CallToAction />
-
-      {/* Footer */}
-      <Footer />
     </motion.div>
   );
 };
