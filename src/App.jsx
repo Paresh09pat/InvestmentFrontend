@@ -51,35 +51,31 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* Protected User Routes */}
-        <Route path="/dashboard" element={
+        {/* Protected User Routes - Grouped under single ProtectedRoute */}
+        <Route path="/*" element={
           <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/invest" element={
-          <ProtectedRoute requireVerification={true}>
-            <InvestmentForm />
-          </ProtectedRoute>
-        } />
-        <Route path="/investment-success" element={
-          <ProtectedRoute requireVerification={true}>
-            <InvestmentSuccess />
-          </ProtectedRoute>
-        } />
-        <Route path="/investment-history" element={
-          <ProtectedRoute requireVerification={true}>
-            <InvestmentHistory />
-          </ProtectedRoute>
-        } />
-        <Route path="/profile" element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        } />
-        <Route path="/notifications" element={
-          <ProtectedRoute>
-            <Notifications />
+            <Routes>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/notifications" element={<Notifications />} />
+              
+              {/* Investment Routes (require verification) */}
+              <Route path="/invest" element={
+                <ProtectedRoute requireVerification={true}>
+                  <InvestmentForm />
+                </ProtectedRoute>
+              } />
+              <Route path="/investment-success" element={
+                <ProtectedRoute requireVerification={true}>
+                  <InvestmentSuccess />
+                </ProtectedRoute>
+              } />
+              <Route path="/investment-history" element={
+                <ProtectedRoute requireVerification={true}>
+                  <InvestmentHistory />
+                </ProtectedRoute>
+              } />
+            </Routes>
           </ProtectedRoute>
         } />
 

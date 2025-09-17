@@ -45,12 +45,12 @@ const AdminDashboard = () => {
     try {
       // Fetch stats and recent users in parallel
       const [statsResponse, usersResponse] = await Promise.all([
-        axios.get(`${VITE_APP_API_URL}/api/auth/admin/stats`, { withCredentials: true }),
-        axios.get(`${VITE_APP_API_URL}/api/auth/admin/recent-users`, { withCredentials: true })
+        axios.get(`${VITE_APP_API_URL}/api/admin/stats`, { withCredentials: true }),
+        axios.get(`${VITE_APP_API_URL}/api/admin/recent-users`, { withCredentials: true })
       ]);
 
       setStats(statsResponse.data.stats);
-      setRecentUsers(usersResponse.data.users.slice(0, 5)); // Get only first 5 for display
+      setRecentUsers(usersResponse.data.users.slice(0, 5)); 
       
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);

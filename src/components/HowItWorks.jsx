@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { FaArrowRight, FaCheckCircle, FaChartLine, FaWallet, FaShieldAlt, FaUsers } from 'react-icons/fa';
+import { motion, useScroll } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
+import { FaArrowRight, FaChartLine, FaCheckCircle, FaShieldAlt, FaUsers, FaWallet } from 'react-icons/fa';
 
 const HowItWorks = () => {
   const containerRef = useRef(null);
@@ -82,7 +82,7 @@ const HowItWorks = () => {
   }, [scrollYProgress, steps.length]);
 
   // Transform scroll progress for animations
-  const imageOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [1, 1, 1, 0.8]);
+  // const imageOpacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [1, 1, 1, 0.8]);
 
   return (
     <div 
@@ -199,7 +199,7 @@ const HowItWorks = () => {
                 </p>
 
                 {/* Feature list */}
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {steps[activeStep].details.map((detail, index) => (
                     <motion.div
                       key={index}

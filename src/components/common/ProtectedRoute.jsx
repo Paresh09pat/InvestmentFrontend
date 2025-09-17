@@ -6,8 +6,13 @@ import { useAuth } from '../../context/AuthContext';
 import { USER_VERIFICATION_STATUS } from '../../utils/constants';
 import LoadingSpinner from './LoadingSpinner';
 
-const ProtectedRoute = ({ children, requireAdmin = false, requireVerification = false }) => {
-  const { user, isAdmin, loading } = useAuth();
+const ProtectedRoute = ({ 
+  children, 
+  requireAdmin = false, 
+  requireVerification = false,
+  redirectTo = null 
+}) => {
+  const { user, isAdmin, loading, isAuthenticated } = useAuth();
 
   // Show verification notification when user tries to access investment pages
   useEffect(() => {
@@ -57,6 +62,7 @@ const ProtectedRoute = ({ children, requireAdmin = false, requireVerification = 
     }
   }, [requireVerification, user]);
 
+  // Show loading spinner while checking authentication
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -65,12 +71,21 @@ const ProtectedRoute = ({ children, requireAdmin = false, requireVerification = 
     );
   }
 
+  // Check if user is authenticated at all
+  if (!isAuthenticated) {
+    // Use custom redirect path if provided, otherwise use default based on route type
+    const defaultRedirect = requireAdmin ? "/admin/login" : "/login";
+    return <Navigate to={redirectTo || defaultRedirect} replace />;
+  }
+
+  // Check admin requirement
   if (requireAdmin && !isAdmin) {
     return <Navigate to="/admin/login" replace />;
   }
 
-  if (!requireAdmin && !user) {
-    return <Navigate to="/login" replace />;
+  // Check if regular user is trying to access admin routes
+  if (!requireAdmin && isAdmin && !user) {
+    return <Navigate to="/admin/dashboard" replace />;
   }
 
   // Check document verification for investment-related routes
@@ -78,6 +93,7 @@ const ProtectedRoute = ({ children, requireAdmin = false, requireVerification = 
     return <Navigate to="/profile" replace />;
   }
 
+  // All checks passed, render the protected content
   return children;
 };
 

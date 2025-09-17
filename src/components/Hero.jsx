@@ -145,7 +145,7 @@ const Hero = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="space-y-4"
+              className=""
             >
               <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
                 Your Gateway to{' '}

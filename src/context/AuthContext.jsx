@@ -1,7 +1,6 @@
 // AuthContext
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import { toast } from 'react-toastify';
 import { VITE_APP_API_URL } from '../utils/constants';
 
 const AuthContext = createContext();
@@ -18,61 +17,12 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [sessionExpiry, setSessionExpiry] = useState(null);
 
   // Configure axios to send cookies with requests
   useEffect(() => {
     axios.defaults.withCredentials = true;
   }, []);
 
-  // Session monitoring and auto-logout
-  useEffect(() => {
-    if (sessionExpiry) {
-      const checkSession = () => {
-        const now = new Date().getTime();
-        const expiryTime = new Date(sessionExpiry).getTime();
-        const timeUntilExpiry = expiryTime - now;
-        
-        // If session expires in less than 5 minutes, show warning
-        if (timeUntilExpiry < 5 * 60 * 1000 && timeUntilExpiry > 0) {
-          toast.warning('Your session will expire soon. Please save your work.', {
-            position: "top-right",
-            autoClose: 10000,
-          });
-        }
-        
-        // If session has expired, logout
-        if (timeUntilExpiry <= 0) {
-          handleSessionExpiry();
-        }
-      };
-
-      const interval = setInterval(checkSession, 60000); // Check every minute
-      return () => clearInterval(interval);
-    }
-  }, [sessionExpiry]);
-
-  const handleSessionExpiry = async () => {
-    toast.error('Your session has expired. Please login again.', {
-      position: "top-right",
-      autoClose: 5000,
-    });
-    
-    // Clear all sessions
-    await clearAllSessions();
-    
-    // Reset state
-    setUser(null);
-    setIsAdmin(false);
-    setSessionExpiry(null);
-    
-    // Redirect to appropriate login page
-    if (window.location.pathname.startsWith('/admin')) {
-      window.location.href = '/admin/login';
-    } else {
-      window.location.href = '/login';
-    }
-  };
 
   useEffect(() => {
     // Check if user is logged in by making a request to the server
@@ -124,7 +74,6 @@ export const AuthProvider = ({ children }) => {
       // Clear local state regardless of server response
       setUser(null);
       setIsAdmin(false);
-      setSessionExpiry(null);
     }
   };
 
@@ -152,7 +101,6 @@ export const AuthProvider = ({ children }) => {
       const currentPath = window.location.pathname;
       const isAdminRoute = currentPath.startsWith('/admin');
       
-      
       if (isAdminRoute) {
         // For admin routes, check admin auth first
         try {
@@ -161,12 +109,7 @@ export const AuthProvider = ({ children }) => {
           setUser(adminData);
           setIsAdmin(true);
           
-          // Set session expiry (24 hours from now)
-          const expiryTime = new Date();
-          expiryTime.setHours(expiryTime.getHours() + 24);
-          setSessionExpiry(expiryTime);
-          
-          } catch (adminError) {
+        } catch {
           // If admin auth fails, try user auth
           try {
             const userResponse = await axios.get(`${VITE_APP_API_URL}/api/auth/profile`);
@@ -174,15 +117,9 @@ export const AuthProvider = ({ children }) => {
             setUser(userData);
             setIsAdmin(false);
             
-            // Set session expiry (24 hours from now)
-            const expiryTime = new Date();
-            expiryTime.setHours(expiryTime.getHours() + 24);
-            setSessionExpiry(expiryTime);
-            
-          } catch (userError) {
+          } catch {
             setUser(null);
             setIsAdmin(false);
-            setSessionExpiry(null);
           }
         }
       } else {
@@ -193,28 +130,17 @@ export const AuthProvider = ({ children }) => {
           setUser(userData);
           setIsAdmin(false);
           
-          // Set session expiry (24 hours from now)
-          const expiryTime = new Date();
-          expiryTime.setHours(expiryTime.getHours() + 24);
-          setSessionExpiry(expiryTime);
-          
-        } catch (userError) {
+        } catch {
           // If user auth fails, try admin auth
           try {
             const adminResponse = await axios.get(`${VITE_APP_API_URL}/api/admin/profile`);
             const adminData = adminResponse.data.user;
             setUser(adminData);
             setIsAdmin(true);
-            
-            // Set session expiry (24 hours from now)
-            const expiryTime = new Date();
-            expiryTime.setHours(expiryTime.getHours() + 24);
-            setSessionExpiry(expiryTime);
 
-          } catch (adminError) {
+          } catch {
             setUser(null);
             setIsAdmin(false);
-            setSessionExpiry(null);
           }
         }
       }
@@ -279,8 +205,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Admin logout error:', error);
     } finally {
-        setIsAdmin(false);
-        setSessionExpiry(null);
+      setIsAdmin(false);
     }
   };
 
@@ -293,7 +218,6 @@ export const AuthProvider = ({ children }) => {
     user,
     isAdmin,
     loading,
-    sessionExpiry,
     login,
     signup,
     logout,
@@ -302,7 +226,6 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus,
     adminLogin,
     clearAllSessions,
-    handleSessionExpiry,
     isAuthenticated: !!user || isAdmin
   };
 

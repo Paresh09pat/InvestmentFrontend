@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, Outlet } from 'react-router-dom';
 import AdminSidebar from './components/AdminSidebar';
-import SessionManager from '../components/common/SessionManager';
+
 
 const AdminLayout = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -124,7 +124,7 @@ const AdminLayout = () => {
       )}
 
       {/* Session Manager for admin pages */}
-      <SessionManager />
+      
     </div>
   );
 };
