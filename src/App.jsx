@@ -79,7 +79,7 @@ function App() {
         <Route path="/blog" element={<Blog />} />
 
         {/* Protected User Routes */}
-        <Route path="/dashboard" element={
+        <Route path="/*" element={
           <ProtectedRoute>
             <Routes>
               <Route path="/dashboard" element={<Dashboard />} />
@@ -128,7 +128,7 @@ function App() {
       </Routes>
 
       {/* Footer - Show on all pages except admin */}
-      {!location.pathname.startsWith('/admin') && <Footer />}
+      {!location.pathname.startsWith('/admin') || !location.pathname.startsWith('/login') || !location.pathname.startsWith('/signup') && <Footer />}
 
       {/* Toast Container */}
       <ToastContainer
