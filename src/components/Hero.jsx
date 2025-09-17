@@ -20,15 +20,16 @@ const Hero = () => {
   const innermostRingSpeed = useTransform(scrollYProgress, [0, 1], [15, 4]); // Slower to faster
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-900 via-purple-900 to-indigo-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
       {/* Background pattern with scroll animation */}
       <motion.div 
         className="absolute inset-0 bg-gradient-to-r from-blue-900/20 to-purple-900/20"
         style={{ y: backgroundY, opacity: backgroundOpacity }}
       ></motion.div>
 
+      {/* Left decorative SVG - Hidden on mobile, visible on larger screens */}
       <motion.svg
-        className="absolute left-8 top-[90%] w-64 h-96 -translate-y-1/2 z-0 rotate-90"
+        className="absolute left-2 sm:left-4 md:left-8 top-[90%] w-32 h-48 sm:w-48 sm:h-72 md:w-64 md:h-96 -translate-y-1/2 z-0 rotate-90 hidden sm:block"
         viewBox="0 0 200 300"
         fill="none"
         animate={{
@@ -78,9 +79,9 @@ const Hero = () => {
         </defs>
       </motion.svg>
 
-      {/* Additional curved thread on right */}
+      {/* Additional curved thread on right - Hidden on mobile, visible on larger screens */}
       <motion.svg
-        className="absolute right-8 top-[10%] w-48 h-64 z-0"
+        className="absolute right-2 sm:right-4 md:right-8 top-[10%] w-24 h-32 sm:w-36 sm:h-48 md:w-48 md:h-64 z-0 hidden sm:block"
         viewBox="0 0 150 200"
         fill="none"
         animate={{
@@ -120,8 +121,8 @@ const Hero = () => {
       {/* Floating particles with scroll animation */}
 
 
-      <div className="container mx-auto px-6 py-12 flex items-center min-h-screen">
-        <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 flex items-center min-h-screen mt-10 md:mt-4">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full">
           {/* Left Content with scroll animation */}
           <motion.div 
             className="text-white space-y-8"
@@ -132,12 +133,12 @@ const Hero = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="flex items-center space-x-3 bg-blue-600/20 backdrop-blur-sm rounded-full px-4 py-2 w-fit border border-blue-400/30"
+              className="flex items-center space-x-2 sm:space-x-3 bg-blue-600/20 backdrop-blur-sm rounded-full px-3 py-2 sm:px-4 w-fit border border-blue-400/30"
             >
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">X</span>
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-xs sm:text-sm">X</span>
               </div>
-              <span className="text-blue-300 text-sm font-medium">One step solution for all investment</span>
+              <span className="text-blue-300 text-xs sm:text-sm font-medium">One step solution for all investment</span>
             </motion.div>
 
             {/* Main heading */}
@@ -147,7 +148,7 @@ const Hero = () => {
               transition={{ duration: 0.8, delay: 0.2 }}
               className=""
             >
-              <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
                 Your Gateway to{' '}
                 <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                   FOREX, CFD
@@ -167,7 +168,7 @@ const Hero = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-gray-300 text-lg max-w-lg leading-relaxed"
+              className="text-gray-300 text-base sm:text-lg max-w-lg leading-relaxed"
             >
               A smart platform for diversified, expert-managed investments in Forex, CFDs, and cryptocurrencies.
             </motion.p>
@@ -177,13 +178,13 @@ const Hero = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className="flex flex-wrap gap-4"
+              className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4"
             >
-              <button className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold flex items-center space-x-2 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25">
+              <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 sm:px-8 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25">
                 <FaUser className="text-sm" />
                 <span>Sign up Now</span>
               </button>
-              <button className="bg-transparent border-2 border-gray-600 hover:border-gray-500 text-white px-8 py-3 rounded-lg font-semibold flex items-center space-x-2 transition-all duration-300 hover:bg-gray-700/20">
+              <button className="bg-transparent border-2 border-gray-600 hover:border-gray-500 text-white px-6 py-3 sm:px-8 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all duration-300 hover:bg-gray-700/20">
                 <FaPlay className="text-sm" />
                 <span>How It Works</span>
               </button>
@@ -192,52 +193,52 @@ const Hero = () => {
 
           {/* Right Content - Animated Solar System */}
           <div className="relative flex justify-center items-center">
-            {/* Stats Cards with scroll animation */}
+            {/* Stats Cards with scroll animation - Hidden on mobile, visible on larger screens */}
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="absolute top-4 right-8 bg-blue-600/20 backdrop-blur-md rounded-lg p-4 border border-blue-400/30 z-10"
+              className="absolute top-2 right-2 sm:top-4 sm:right-4 md:right-8 bg-blue-600/20 backdrop-blur-md rounded-lg p-2 sm:p-3 md:p-4 border border-blue-400/30 z-10 hidden sm:block"
               style={{ 
                 y: useTransform(scrollYProgress, [0, 1], [0, -100]),
                 opacity: useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [1, 1, 0.8, 0])
               }}
             >
-              <div className="text-blue-300 text-sm font-medium mb-1">Total Funds Traded</div>
-              <div className="text-white text-xl font-bold">$3,820,633,321</div>
+              <div className="text-blue-300 text-xs sm:text-sm font-medium mb-1">Total Funds Traded</div>
+              <div className="text-white text-sm sm:text-lg md:text-xl font-bold">$3,820,633,321</div>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="absolute top-32 left-8 bg-blue-600/20 backdrop-blur-md rounded-lg p-4 border border-blue-400/30 z-10"
+              className="absolute top-16 sm:top-24 md:top-32 left-2 sm:left-4 md:left-8 bg-blue-600/20 backdrop-blur-md rounded-lg p-2 sm:p-3 md:p-4 border border-blue-400/30 z-10 hidden sm:block"
               style={{ 
                 y: useTransform(scrollYProgress, [0, 1], [0, -80]),
                 opacity: useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [1, 1, 0.8, 0])
               }}
             >
-              <div className="text-blue-300 text-sm font-medium mb-1">Active Client</div>
-              <div className="text-white text-xl font-bold">4,236,308</div>
+              <div className="text-blue-300 text-xs sm:text-sm font-medium mb-1">Active Client</div>
+              <div className="text-white text-sm sm:text-lg md:text-xl font-bold">4,236,308</div>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="absolute bottom-32 right-8 bg-blue-600/20 backdrop-blur-md rounded-lg p-4 border border-blue-400/30 z-10"
+              className="absolute bottom-16 sm:bottom-24 md:bottom-32 right-2 sm:right-4 md:right-8 bg-blue-600/20 backdrop-blur-md rounded-lg p-2 sm:p-3 md:p-4 border border-blue-400/30 z-10 hidden sm:block"
               style={{ 
                 y: useTransform(scrollYProgress, [0, 1], [0, -60]),
                 opacity: useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [1, 1, 0.8, 0])
               }}
             >
-              <div className="text-blue-300 text-sm font-medium mb-1">Partners Earned</div>
-              <div className="text-white text-xl font-bold">$2,125,616,729</div>
+              <div className="text-blue-300 text-xs sm:text-sm font-medium mb-1">Partners Earned</div>
+              <div className="text-white text-sm sm:text-lg md:text-xl font-bold">$2,125,616,729</div>
             </motion.div>
 
             {/* Solar System Animation with scroll effects */}
             <motion.div 
-              className="relative w-96 h-96"
+              className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96"
               style={{ 
                 scale: solarSystemScale,
                 rotate: solarSystemRotate
@@ -407,8 +408,8 @@ const Hero = () => {
                   opacity: useTransform(scrollYProgress, [0, 0.7, 1], [1, 0.9, 0.7])
                 }}
               >
-                <div className="w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl border-4 border-white/20 relative z-10">
-                  <span className="text-2xl font-bold text-white">X</span>
+                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl border-2 sm:border-4 border-white/20 relative z-10">
+                  <span className="text-lg sm:text-xl md:text-2xl font-bold text-white">X</span>
                 </div>
               </motion.div>
             </motion.div>
@@ -417,24 +418,24 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Partners section with scroll animation */}
+      {/* Partners section with scroll animation - Hidden on mobile, visible on larger screens */}
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.8 }}
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center"
+        className="absolute bottom-4 sm:bottom-8 left-1/2 transform -translate-x-1/2 text-center hidden sm:block"
         style={{ 
           y: useTransform(scrollYProgress, [0, 1], [0, -200]),
           opacity: useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.3])
         }}
       >
-        <div className="text-gray-400 text-sm mb-4">Our Trading Partners</div>
-        <div className="flex items-center space-x-8 text-gray-500">
-          <div className="font-semibold">eToro</div>
-          <div className="font-semibold">Kraken</div>
-          <div className="font-semibold">3Commas</div>
-          <div className="font-semibold">FXCM</div>
-          <div className="font-semibold">Huobi</div>
+        <div className="text-gray-400 text-xs sm:text-sm mb-2 sm:mb-4">Our Trading Partners</div>
+        <div className="flex items-center space-x-4 sm:space-x-6 md:space-x-8 text-gray-500">
+          <div className="font-semibold text-xs sm:text-sm">eToro</div>
+          <div className="font-semibold text-xs sm:text-sm">Kraken</div>
+          <div className="font-semibold text-xs sm:text-sm">3Commas</div>
+          <div className="font-semibold text-xs sm:text-sm">FXCM</div>
+          <div className="font-semibold text-xs sm:text-sm">Huobi</div>
         </div>
       </motion.div>
     </div>

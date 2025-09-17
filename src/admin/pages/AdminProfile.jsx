@@ -29,7 +29,7 @@ const AdminProfile = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [adminData, setAdminData] = useState({
     name: 'Admin User',
-    email: 'admin@investpro.com',
+    email: 'admin@gmail.com',
     role: 'Super Admin',
     lastLogin: new Date().toLocaleDateString(),
     permissions: ['User Management', 'Investment Management', 'Document Verification', 'System Settings'],
@@ -75,7 +75,7 @@ const AdminProfile = () => {
         const parsed = JSON.parse(adminUser);
         return {
           name: parsed.name || 'Admin User',
-          email: parsed.email || 'admin@investpro.com',
+          email: parsed.email || 'admin@gmail.com',
           role: 'Super Admin',
           lastLogin: new Date().toLocaleDateString(),
           permissions: ['User Management', 'Investment Management', 'Document Verification', 'System Settings'],
@@ -91,7 +91,7 @@ const AdminProfile = () => {
     // Fallback data if no admin user found
     return {
       name: 'Admin User',
-      email: 'admin@investpro.com',
+      email: 'admin@gmail.com',
       role: 'Super Admin',
       lastLogin: new Date().toLocaleDateString(),
       permissions: ['User Management', 'Investment Management', 'Document Verification', 'System Settings'],
