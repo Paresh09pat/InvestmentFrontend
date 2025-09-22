@@ -1,19 +1,14 @@
 
 
+import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, PieChart, Pie, Cell, Area, AreaChart, Tooltip } from 'recharts';
-import { FaApple, FaMicrosoft, FaShopify, FaStar, FaArrowUp, FaArrowDown, FaPlus, FaEye, FaEyeSlash, FaDollarSign, FaEuroSign, FaPoundSign, FaYenSign, FaBitcoin, FaEthereum } from 'react-icons/fa';
+import { FaArrowDown, FaArrowUp, FaBitcoin, FaDollarSign, FaEthereum, FaEuroSign, FaPoundSign, FaYenSign } from 'react-icons/fa';
+import { Area, AreaChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 const HowItWorks = () => {
-  const { scrollY } = useScroll();
   const [mounted, setMounted] = useState(false);
-  const [showBalance, setShowBalance] = useState(false);
   const [activeTimeframe, setActiveTimeframe] = useState('1 Year');
-  
-  // Transform scroll to beam height
-  const beamHeight = useTransform(scrollY, [0, 1000], [200, 800]);
-  const beamOpacity = useTransform(scrollY, [0, 500], [0.8, 0.3]);
+
   
   useEffect(() => {
     setMounted(true);

@@ -51,7 +51,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* Protected User Routes - Grouped under single ProtectedRoute */}
+        {/* Protected User Routes - Grouped under single ProtectedRoute */}ls
+        
         <Route path="/*" element={
           <ProtectedRoute>
             <Routes>
