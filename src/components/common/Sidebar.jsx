@@ -38,7 +38,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
             </div>
             {!isCollapsed && (
               <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                InvestPro
+                Trdexa
               </span>
             )}
           </div>

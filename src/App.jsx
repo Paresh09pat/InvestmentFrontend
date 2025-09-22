@@ -1,7 +1,8 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useEffect } from 'react';
 
 // User Pages
 import Home from './pages/Home';
@@ -13,6 +14,16 @@ import InvestmentSuccess from './pages/InvestmentSuccess';
 import InvestmentHistory from './pages/InvestmentHistory';
 import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
+
+// Footer Pages
+import About from './pages/About';
+import Contact from './pages/Contact';
+import HelpCenter from './pages/HelpCenter';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
+import Security from './pages/Security';
+import Features from './pages/Features';
+import Blog from './pages/Blog';
 
 // Admin Pages
 import AdminLayout from './admin/AdminLayout';
@@ -27,9 +38,16 @@ import AdminProfile from './admin/pages/AdminProfile';
 // Components
 import ProtectedRoute from './components/common/ProtectedRoute';
 import LoadingSpinner from './components/common/LoadingSpinner';
+import Footer from './components/Footer';
 
 function App() {
   const { loading } = useAuth();
+  const location = useLocation();
+
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   if (loading) {
     return (
@@ -44,15 +62,23 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* Protected User Routes - Grouped under single ProtectedRoute */}ls
-        
+        {/* Footer Pages - Public Access */}
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/help" element={<HelpCenter />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/security" element={<Security />} />
+        <Route path="/features" element={<Features />} />
+        <Route path="/blog" element={<Blog />} />
+
+        {/* Protected User Routes */}
         <Route path="/*" element={
           <ProtectedRoute>
             <Routes>
@@ -100,6 +126,9 @@ function App() {
         {/* 404 Route */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+
+      {/* Footer - Show on all pages except admin */}
+      {!location.pathname.startsWith('/admin') || !location.pathname.startsWith('/login') || !location.pathname.startsWith('/signup') && <Footer />}
 
       {/* Toast Container */}
       <ToastContainer
