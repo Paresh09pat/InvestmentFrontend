@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { FiShield, FiSettings, FiTool, FiClock, FiMail, FiArrowLeft } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/common/Navbar';
 
 
 const Features = () => {
@@ -66,7 +65,6 @@ const Features = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
-      <Navbar />
       
       {/* Background Elements */}
       <motion.div 

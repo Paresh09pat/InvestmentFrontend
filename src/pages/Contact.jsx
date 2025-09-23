@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { FiShield, FiMail, FiPhone, FiMapPin, FiClock, FiSend, FiMessageCircle, FiHeadphones } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import Navbar from '../components/common/Navbar';
   
 
 const Contact = () => {
@@ -112,7 +111,6 @@ const Contact = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
-      <Navbar />
       
       {/* Background Elements */}
       <motion.div 

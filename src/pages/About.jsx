@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { FiShield, FiTrendingUp, FiUsers, FiAward, FiTarget, FiGlobe, FiHeart } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/common/Navbar';
 
 
 const About = () => {
@@ -69,8 +68,6 @@ const About = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
-      <Navbar />
-      
       {/* Background Elements */}
       <motion.div 
         className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl"

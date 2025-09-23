@@ -39,6 +39,7 @@ import AdminProfile from './admin/pages/AdminProfile';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import Footer from './components/Footer';
+import Navbar from './components/common/Navbar';
 
 function App() {
   const { loading } = useAuth();
@@ -62,6 +63,9 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Navbar - Show on all pages except admin */}
+      {!location.pathname.startsWith('/admin') && <Navbar />}
+      
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
@@ -128,7 +132,7 @@ function App() {
       </Routes>
 
       {/* Footer - Show on all pages except admin */}
-      {!location.pathname.startsWith('/admin') || !location.pathname.startsWith('/login') || !location.pathname.startsWith('/signup') && <Footer />}
+      {!location.pathname.startsWith('/admin') && <Footer />}
 
       {/* Toast Container */}
       <ToastContainer

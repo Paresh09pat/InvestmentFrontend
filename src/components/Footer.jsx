@@ -393,7 +393,7 @@ const Footer = () => {
               viewport={{ once: true }}
               transition={{ delay: 0.8, duration: 0.8 }}
             >
-              © 2024 Trdexa. All rights reserved. Built with ❤️ for smart investors.
+              © 2025 Trdexa. All rights reserved. Built with ❤️ for smart investors.
             </motion.p>
             <motion.div
               className="flex items-center space-x-4"
@@ -402,28 +402,7 @@ const Footer = () => {
               viewport={{ once: true }}
               transition={{ delay: 1, duration: 0.8 }}
             >
-              <div className="flex items-center space-x-2">
-                <span className="text-gray-400 text-sm sm:text-base">Secured by</span>
-                <motion.div
-                  className="flex items-center space-x-1"
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <FiShield className="text-green-500" size={14} />
-                  <span className="text-green-500 font-semibold text-sm sm:text-base">SSL</span>
-                </motion.div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-gray-400 text-sm sm:text-base">Certified</span>
-                <motion.div
-                  className="flex items-center space-x-1"
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <FiShield className="text-blue-500" size={14} />
-                  <span className="text-blue-500 font-semibold text-sm sm:text-base">SOC2</span>
-                </motion.div>
-              </div>
+              <div className="text-gray-400 text-sm sm:text-base">Developed by : <a href="https://www.linkedin.com/in/deepak-kumar-9012b0269/" target="_blank" className="text-blue-400 hover:text-blue-300 transition-colors duration-300">PYP Technology</a></div>
             </motion.div>
           </div>
         </motion.div>

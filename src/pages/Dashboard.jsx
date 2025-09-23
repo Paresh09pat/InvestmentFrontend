@@ -14,7 +14,6 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { dummyInvestments } from '../utils/dummyData';
 import { INVESTMENT_STATUS, USER_VERIFICATION_STATUS } from '../utils/constants';
-import Navbar from '../components/common/Navbar';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Wallet from '../components/Wallet';
@@ -89,8 +88,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
       <div className="pt-20 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}

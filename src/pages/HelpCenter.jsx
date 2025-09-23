@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { FiShield, FiHelpCircle, FiSearch, FiBookOpen, FiVideo, FiMessageCircle, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import Navbar from '../components/common/Navbar';
   
 
 const HelpCenter = () => {
@@ -119,7 +118,6 @@ const HelpCenter = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
-      <Navbar />
       
       {/* Background Elements */}
       <motion.div 

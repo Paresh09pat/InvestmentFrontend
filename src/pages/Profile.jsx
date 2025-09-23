@@ -18,7 +18,6 @@ import {
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 import { USER_VERIFICATION_STATUS, VITE_APP_API_URL } from '../utils/constants';
-import Navbar from '../components/common/Navbar';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Input from '../components/forms/Input';
@@ -260,25 +259,23 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
-      <div className="pt-20 pb-8">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+      <div className="pt-16 sm:pt-20 pb-6 sm:pb-8">
+        <div className="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
               Profile Settings
             </h1>
-            <p className="text-gray-600">
+            <p className="text-sm sm:text-base text-gray-600">
               Manage your account information and verification documents
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Profile Information */}
             <div className="lg:col-span-2">
               <Card className="animate-fade-in">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
                     Personal Information
                   </h2>
                   {!isEditing ? (
@@ -291,11 +288,12 @@ const Profile = () => {
                         setErrors({});
                       }}
                       icon={<FiEdit />}
+                      className="self-start sm:self-auto"
                     >
                       Edit
                     </Button>
                   ) : (
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                       <Button
                         variant="ghost"
                         size="small"
@@ -309,6 +307,7 @@ const Profile = () => {
                           setErrors({});
                         }}
                         icon={<FiX />}
+                        className="self-start sm:self-auto"
                       >
                         Cancel
                       </Button>
@@ -317,6 +316,7 @@ const Profile = () => {
                         onClick={handleSave}
                         loading={loading}
                         icon={<FiSave />}
+                        className="self-start sm:self-auto"
                       >
                         Save
                       </Button>
@@ -382,25 +382,25 @@ const Profile = () => {
                   Document Verification
                 </h2>
 
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   {/* Aadhaar Card */}
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <FiShield className="text-blue-600" size={24} />
-                      <div>
-                        <h3 className="font-medium text-gray-900">Aadhaar Card</h3>
-                        <p className="text-sm text-gray-600">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-gray-50 rounded-lg gap-3 sm:gap-4">
+                    <div className="flex items-start sm:items-center space-x-3 flex-1">
+                      <FiShield className="text-blue-600 flex-shrink-0" size={20} />
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-medium text-gray-900 text-sm sm:text-base">Aadhaar Card</h3>
+                        <p className="text-xs sm:text-sm text-gray-600 mt-1">
                           Upload your Aadhaar card for identity verification
                         </p>
                         {user?.documents?.aadhaar?.rejectionReason && (
-                          <p className="text-sm text-red-600 mt-1">
+                          <p className="text-xs sm:text-sm text-red-600 mt-1 break-words">
                             Rejection reason: {user.documents.aadhaar.rejectionReason}
                           </p>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full text-center ${
                         getDocumentStatus('aadhaar') === 'verified' 
                           ? 'text-green-600 bg-green-100'
                           : getDocumentStatus('aadhaar') === 'pending'
@@ -414,44 +414,53 @@ const Profile = () => {
                           : getDocumentStatus('aadhaar')
                         }
                       </span>
-                      {(user?.documents?.aadhaar?.fileName || user?.documents?.aadhaar?.cloudinaryUrl) && (
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        {(user?.documents?.aadhaar?.fileName || user?.documents?.aadhaar?.cloudinaryUrl) && (
+                          <Button
+                            variant="ghost"
+                            size="small"
+                            onClick={() => viewDocument('aadhaar')}
+                            icon={<FiEye />}
+                            title="View Document"
+                            className="flex-shrink-0"
+                          />
+                        )}
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="small"
-                          onClick={() => viewDocument('aadhaar')}
-                          icon={<FiEye />}
-                          title="View Document"
-                        />
-                      )}
-                      <Button
-                        variant="outline"
-                        size="small"
-                        onClick={() => openDocumentModal('aadhaar')}
-                        icon={<FiUpload />}
-                      >
-                        {getDocumentStatus('aadhaar') === 'not_uploaded' ? 'Upload' : 'Update'}
-                      </Button>
+                          onClick={() => openDocumentModal('aadhaar')}
+                          icon={<FiUpload />}
+                          className="flex-shrink-0 text-xs sm:text-sm"
+                        >
+                          <span className="hidden sm:inline">
+                            {getDocumentStatus('aadhaar') === 'not_uploaded' ? 'Upload' : 'Update'}
+                          </span>
+                          <span className="sm:hidden">
+                            {getDocumentStatus('aadhaar') === 'not_uploaded' ? 'Upload' : 'Update'}
+                          </span>
+                        </Button>
+                      </div>
                     </div>
                   </div>
 
                   {/* PAN Card */}
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <FiShield className="text-purple-600" size={24} />
-                      <div>
-                        <h3 className="font-medium text-gray-900">PAN Card</h3>
-                        <p className="text-sm text-gray-600">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 bg-gray-50 rounded-lg gap-3 sm:gap-4">
+                    <div className="flex items-start sm:items-center space-x-3 flex-1">
+                      <FiShield className="text-purple-600 flex-shrink-0" size={20} />
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-medium text-gray-900 text-sm sm:text-base">PAN Card</h3>
+                        <p className="text-xs sm:text-sm text-gray-600 mt-1">
                           Upload your PAN card for income tax verification
                         </p>
                         {user?.documents?.pan?.rejectionReason && (
-                          <p className="text-sm text-red-600 mt-1">
+                          <p className="text-xs sm:text-sm text-red-600 mt-1 break-words">
                             Rejection reason: {user.documents.pan.rejectionReason}
                           </p>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full text-center ${
                         getDocumentStatus('pan') === 'verified' 
                           ? 'text-green-600 bg-green-100'
                           : getDocumentStatus('pan') === 'pending'
@@ -465,23 +474,32 @@ const Profile = () => {
                           : getDocumentStatus('pan')
                         }
                       </span>
-                      {(user?.documents?.pan?.fileName || user?.documents?.pan?.cloudinaryUrl) && (
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        {(user?.documents?.pan?.fileName || user?.documents?.pan?.cloudinaryUrl) && (
+                          <Button
+                            variant="ghost"
+                            size="small"
+                            onClick={() => viewDocument('pan')}
+                            icon={<FiEye />}
+                            title="View Document"
+                            className="flex-shrink-0"
+                          />
+                        )}
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="small"
-                          onClick={() => viewDocument('pan')}
-                          icon={<FiEye />}
-                          title="View Document"
-                        />
-                      )}
-                      <Button
-                        variant="outline"
-                        size="small"
-                        onClick={() => openDocumentModal('pan')}
-                        icon={<FiUpload />}
-                      >
-                        {getDocumentStatus('pan') === 'not_uploaded' ? 'Upload' : 'Update'}
-                      </Button>
+                          onClick={() => openDocumentModal('pan')}
+                          icon={<FiUpload />}
+                          className="flex-shrink-0 text-xs sm:text-sm"
+                        >
+                          <span className="hidden sm:inline">
+                            {getDocumentStatus('pan') === 'not_uploaded' ? 'Upload' : 'Update'}
+                          </span>
+                          <span className="sm:hidden">
+                            {getDocumentStatus('pan') === 'not_uploaded' ? 'Upload' : 'Update'}
+                          </span>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -492,9 +510,9 @@ const Profile = () => {
             <div>
               <Card className="animate-slide-up " style={{ animationDelay: '0.2s' }}>
                 <div className="text-center mb-6">
-                  <div className="relative w-20 h-20 mx-auto mb-4">
+                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4">
                     {user?.profilePicture?.cloudinaryUrl ? (
-                      <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-gray-200">
                         <img
                           src={user.profilePicture.cloudinaryUrl}
                           alt="Profile"
@@ -502,29 +520,30 @@ const Profile = () => {
                         />
                       </div>
                     ) : (
-                      <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-2xl font-bold">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-lg sm:text-2xl font-bold">
                       {user?.name?.charAt(0) || 'U'}
                     </span>
                       </div>
                     )}
                     <button
                       onClick={() => setShowProfilePictureModal(true)}
-                      className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center transition-colors"
+                      className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center transition-colors"
                       title="Change profile picture"
                     >
-                      <FiCamera size={12} />
+                      <FiCamera size={10} className="sm:hidden" />
+                      <FiCamera size={12} className="hidden sm:block" />
                     </button>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 break-words">
                     {user?.name}
                   </h3>
-                  <p className="text-gray-600">{user?.email}</p>
+                  <p className="text-sm sm:text-base text-gray-600 break-all">{user?.email}</p>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Verification Status</span>
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <span className="text-sm sm:text-base text-gray-600">Verification Status</span>
                     <div className="flex items-center space-x-2">
                       {getVerificationIcon(user?.verificationStatus)}
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${getVerificationStatusColor(user?.verificationStatus)}`}>
@@ -533,16 +552,16 @@ const Profile = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Total Invested</span>
-                    <span className="font-semibold">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <span className="text-sm sm:text-base text-gray-600">Total Invested</span>
+                    <span className="font-semibold text-sm sm:text-base">
                       ₹{user?.totalInvested?.toLocaleString() || '0'}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Current Balance</span>
-                    <span className="font-semibold text-green-600">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <span className="text-sm sm:text-base text-gray-600">Current Balance</span>
+                    <span className="font-semibold text-green-600 text-sm sm:text-base">
                       ₹{user?.currentBalance?.toLocaleString() || '0'}
                     </span>
                   </div>
@@ -551,16 +570,16 @@ const Profile = () => {
                 </div>
 
                 {user?.verificationStatus !== USER_VERIFICATION_STATUS.VERIFIED && (
-                  <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <div className="flex items-center space-x-2 mb-2">
-                      <FiAlertCircle className="text-yellow-600" size={16} />
-                      <span className="font-medium text-yellow-800">Action Required</span>
+                      <FiAlertCircle className="text-yellow-600 flex-shrink-0" size={14} />
+                      <span className="font-medium text-yellow-800 text-sm sm:text-base">Action Required</span>
                     </div>
-                    <p className="text-sm text-yellow-700 mb-3">
+                    <p className="text-xs sm:text-sm text-yellow-700 mb-3">
                       Complete your document verification to unlock all investment features.
                     </p>
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 text-xs sm:text-sm">
                         <span>Aadhaar Card:</span>
                         <span className={`px-2 py-1 rounded text-xs ${
                           user?.documents?.aadhaar?.status === 'verified' ? 'bg-green-100 text-green-800' :
@@ -571,7 +590,7 @@ const Profile = () => {
                           {user?.documents?.aadhaar?.status || 'Not uploaded'}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between text-sm">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 text-xs sm:text-sm">
                         <span>PAN Card:</span>
                         <span className={`px-2 py-1 rounded text-xs ${
                           user?.documents?.pan?.status === 'verified' ? 'bg-green-100 text-green-800' :

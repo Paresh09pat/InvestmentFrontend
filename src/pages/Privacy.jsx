@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { FiShield, FiLock, FiEye, FiDatabase, FiUserCheck, FiCalendar } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/common/Navbar';
   
 
 const Privacy = () => {
@@ -88,7 +87,6 @@ const Privacy = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
-      <Navbar />
       
       {/* Background Elements */}
       <motion.div 

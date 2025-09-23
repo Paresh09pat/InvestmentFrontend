@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { FiShield, FiLock, FiEye, FiKey, FiServer, FiCheckCircle, FiAlertTriangle, FiGlobe } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/common/Navbar';
   
 
 const Security = () => {
@@ -122,7 +121,6 @@ const Security = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
-      <Navbar />
       
       {/* Background Elements */}
       <motion.div 

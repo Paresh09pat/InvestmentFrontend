@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 
 import { FiTrendingUp, FiUpload, FiCreditCard } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
-import Navbar from '../components/common/Navbar';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Input from '../components/forms/Input';
@@ -150,7 +149,6 @@ const InvestmentForm = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
 
       <div className="pt-20 pb-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
