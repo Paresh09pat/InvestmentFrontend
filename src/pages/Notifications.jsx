@@ -13,7 +13,6 @@ import {
   FiChevronLeft,
   FiChevronRight,
 } from "react-icons/fi";
-import Navbar from "../components/common/Navbar";
 import Card from "../components/common/Card";
 import Button from "../components/common/Button";
 import Input from "../components/forms/Input";

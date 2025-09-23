@@ -90,7 +90,6 @@ function App() {
         {/* Protected User Routes */}
         <Route path="/*" element={
           <ProtectedRoute>
-            <Navbar />
             <Routes>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/profile" element={<Profile />} />
