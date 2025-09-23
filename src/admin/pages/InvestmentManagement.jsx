@@ -86,7 +86,7 @@ const InvestmentManagement = () => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'INR',
+      currency: 'USD',
       maximumFractionDigits: 0
     }).format(amount);
   };
@@ -290,7 +290,7 @@ const InvestmentManagement = () => {
               <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalInvestmentAmount)}</p>
             </div>
             <div className="bg-green-100 p-3 rounded-full">
-              <span className="text-green-600 text-2xl font-bold">₹</span>
+              <span className="text-green-600 text-2xl font-bold">$</span>
             </div>
           </div>
         </Card>

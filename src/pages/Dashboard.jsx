@@ -147,7 +147,7 @@ const Dashboard = () => {
                   </p>
                 </div>
                 <div className="bg-blue-100 p-3 rounded-full">
-                  <span className="text-blue-600 text-2xl font-bold">₹</span>
+                  <span className="text-blue-600 text-2xl font-bold">$</span>
                 </div>
               </div>
             </Card>

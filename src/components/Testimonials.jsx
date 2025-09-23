@@ -170,11 +170,11 @@ const Testimonials = () => {
               {visibleTestimonials.map((testimonial, itemIndex) => {
                 const slidePosition = getTestimonialIndex(testimonial);
                 const isCenter = slidePosition === "center";
-                
-                return (
-                  <motion.div
+              
+              return (
+                <motion.div
                     key={testimonial.id}
-                    className={`absolute cursor-pointer ${isAnimating ? 'pointer-events-none' : ''}`}
+                  className={`absolute cursor-pointer ${isAnimating ? 'pointer-events-none' : ''}`}
                     layout
                     custom={{
                       slidePosition,
@@ -187,20 +187,20 @@ const Testimonials = () => {
                     exit="exit"
                     transition={{ duration: 1 }}
                     onClick={() => handleCardClick(itemIndex)}
-                    whileHover={
-                      !isAnimating && !isCenter 
-                        ? { 
+                  whileHover={
+                    !isAnimating && !isCenter 
+                      ? { 
                             scale: slidePosition === "leftCenter" || slidePosition === "rightCenter" ? 0.75 : 0.55,
-                            y: -5,
-                            transition: { duration: 0.3, ease: "easeOut" }
-                          } 
-                        : !isAnimating && { 
-                            scale: 1.05,
-                            y: -15,
-                            transition: { duration: 0.3, ease: "easeOut" }
-                          }
-                    }
-                  >
+                          y: -5,
+                          transition: { duration: 0.3, ease: "easeOut" }
+                        } 
+                      : !isAnimating && { 
+                          scale: 1.05,
+                          y: -15,
+                          transition: { duration: 0.3, ease: "easeOut" }
+                        }
+                  }
+                >
                     <div 
                       className={`
                         w-64 sm:w-72 md:w-80 lg:w-80 bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-3xl overflow-hidden

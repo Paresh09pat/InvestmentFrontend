@@ -56,15 +56,15 @@ const InvestmentSuccess = () => {
                 <div className="space-y-2 text-left">
                   <div className="flex justify-between">
                     <span>Amount:</span>
-                    <span className="font-medium">₹{investmentData.principal?.toLocaleString()}</span>
+                    <span className="font-medium">${investmentData.principal?.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Expected Returns:</span>
-                    <span className="font-medium text-green-600">₹{investmentData.returns?.toLocaleString()}</span>
+                    <span className="font-medium text-green-600">${investmentData.returns?.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Total Value:</span>
-                    <span className="font-bold text-blue-600">₹{investmentData.total?.toLocaleString()}</span>
+                    <span className="font-bold text-blue-600">${investmentData.total?.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Date:</span>

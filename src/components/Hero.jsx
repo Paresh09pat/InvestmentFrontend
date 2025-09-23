@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { FaPlay, FaUser } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 const Hero = () => {
   const { scrollYProgress } = useScroll();
@@ -14,10 +15,10 @@ const Hero = () => {
   const textOpacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [1, 1, 0.8, 0]);
   
   // Ring rotation speeds - slower by default, faster when scrolling
-  const outerRingSpeed = useTransform(scrollYProgress, [0, 1], [30, 8]); // Slower to faster
-  const middleRingSpeed = useTransform(scrollYProgress, [0, 1], [25, 6]); // Slower to faster
-  const innerRingSpeed = useTransform(scrollYProgress, [0, 1], [20, 5]); // Slower to faster
-  const innermostRingSpeed = useTransform(scrollYProgress, [0, 1], [15, 4]); // Slower to faster
+  const outerRingSpeed = useTransform(scrollYProgress, [0, 1], [30, 8]); 
+  const middleRingSpeed = useTransform(scrollYProgress, [0, 1], [25, 6]); 
+  const innerRingSpeed = useTransform(scrollYProgress, [0, 1], [20, 5]); 
+  const innermostRingSpeed = useTransform(scrollYProgress, [0, 1], [15, 4]); 
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
@@ -180,14 +181,13 @@ const Hero = () => {
               transition={{ duration: 0.6, delay: 0.6 }}
               className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4"
             >
-              <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 sm:px-8 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25">
+              <Link to="/signup"> 
+              <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 sm:px-8 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25 cursor-pointer">
                 <FaUser className="text-sm" />
                 <span>Sign up Now</span>
               </button>
-              <button className="bg-transparent border-2 border-gray-600 hover:border-gray-500 text-white px-6 py-3 sm:px-8 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all duration-300 hover:bg-gray-700/20">
-                <FaPlay className="text-sm" />
-                <span>How It Works</span>
-              </button>
+              </Link>
+             
             </motion.div>
           </motion.div>
 
