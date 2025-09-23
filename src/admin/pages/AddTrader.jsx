@@ -1,0 +1,597 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { 
+  FiUserCheck, 
+  FiArrowLeft, 
+  FiSave, 
+  FiUpload, 
+  FiX,
+  FiMail,
+  FiPhone,
+  FiBriefcase,
+  FiDollarSign,
+  FiPercent,
+  FiFileText,
+  FiImage
+} from 'react-icons/fi';
+
+const AddTrader = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    traderType: '',
+    traderName: '',
+    email: '',
+    phone: '',
+    minInterestRate: '',
+    maxInterestRate: '',
+    description: '',
+    experience: '',
+    profilePicture: null,
+    status: 'active',
+    commission: '',
+    maxClients: '',
+    specializations: []
+  });
+
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const traderTypes = [
+    { value: 'silver', label: 'Silver Trader', color: 'from-gray-400 to-gray-600' },
+    { value: 'gold', label: 'Gold Trader', color: 'from-yellow-400 to-yellow-600' },
+    { value: 'platinum', label: 'Platinum Trader', color: 'from-purple-500 to-indigo-600' }
+  ];
+
+  const specializations = [
+    'Forex Trading',
+    'Stock Trading',
+    'Cryptocurrency',
+    'Commodities',
+    'Options Trading',
+    'Day Trading',
+    'Swing Trading',
+    'Long-term Investment'
+  ];
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5 }
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    
+    if (type === 'checkbox') {
+      const updatedSpecializations = checked
+        ? [...formData.specializations, value]
+        : formData.specializations.filter(item => item !== value);
+      
+      setFormData(prev => ({
+        ...prev,
+        specializations: updatedSpecializations
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setErrors(prev => ({
+          ...prev,
+          profilePicture: 'Please select a valid image file'
+        }));
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors(prev => ({
+          ...prev,
+          profilePicture: 'File size must be less than 5MB'
+        }));
+        return;
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        profilePicture: file
+      }));
+
+      if (errors.profilePicture) {
+        setErrors(prev => ({
+          ...prev,
+          profilePicture: ''
+        }));
+      }
+    }
+  };
+
+  const removeProfilePicture = () => {
+    setFormData(prev => ({
+      ...prev,
+      profilePicture: null
+    }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.traderType) newErrors.traderType = 'Trader type is required';
+    if (!formData.traderName.trim()) newErrors.traderName = 'Trader name is required';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
+    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
+    if (!formData.minInterestRate) newErrors.minInterestRate = 'Minimum interest rate is required';
+    if (!formData.maxInterestRate) newErrors.maxInterestRate = 'Maximum interest rate is required';
+    if (parseFloat(formData.minInterestRate) >= parseFloat(formData.maxInterestRate)) {
+      newErrors.maxInterestRate = 'Maximum rate must be greater than minimum rate';
+    }
+    if (!formData.description.trim()) newErrors.description = 'Description is required';
+    if (!formData.experience) newErrors.experience = 'Experience is required';
+    if (!formData.commission) newErrors.commission = 'Commission rate is required';
+    if (!formData.maxClients) newErrors.maxClients = 'Maximum clients is required';
+    if (formData.specializations.length === 0) newErrors.specializations = 'At least one specialization is required';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      // Create FormData for file upload
+      const submitData = new FormData();
+      Object.keys(formData).forEach(key => {
+        if (key === 'specializations') {
+          submitData.append(key, JSON.stringify(formData[key]));
+        } else {
+          submitData.append(key, formData[key]);
+        }
+      });
+
+      // TODO: Replace with actual API call
+      console.log('Submitting trader data:', formData);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Success - redirect to manage traders
+      navigate('/admin/manage-trader');
+      
+    } catch (error) {
+      console.error('Error creating trader:', error);
+      // Handle error (show toast, etc.)
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const selectedTraderType = traderTypes.find(type => type.value === formData.traderType);
+
+  return (
+    <motion.div
+      className="p-6 space-y-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      {/* Header */}
+      <motion.div variants={itemVariants} className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => navigate('/admin/manage-trader')}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+          >
+            <FiArrowLeft className="h-5 w-5 text-gray-600" />
+          </button>
+          <div className="flex items-center space-x-3">
+            <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-3 rounded-lg">
+              <FiUserCheck className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Add New Trader</h1>
+              <p className="text-gray-600">Create a new trader profile with all necessary details</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Form */}
+      <motion.div variants={itemVariants} className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Basic Information */}
+          <div className="space-y-6">
+            <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
+              Basic Information
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Trader Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Trader Type *
+                </label>
+                <select
+                  name="traderType"
+                  value={formData.traderType}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    errors.traderType ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="">Select trader type</option>
+                  {traderTypes.map(type => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.traderType && (
+                  <p className="mt-1 text-sm text-red-600">{errors.traderType}</p>
+                )}
+              </div>
+
+              {/* Trader Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Trader Name *
+                </label>
+                <div className="relative">
+                  <FiUserCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <input
+                    type="text"
+                    name="traderName"
+                    value={formData.traderName}
+                    onChange={handleInputChange}
+                    placeholder="Enter trader name"
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.traderName ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                </div>
+                {errors.traderName && (
+                  <p className="mt-1 text-sm text-red-600">{errors.traderName}</p>
+                )}
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address *
+                </label>
+                <div className="relative">
+                  <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="Enter email address"
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.email ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                </div>
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                )}
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone Number *
+                </label>
+                <div className="relative">
+                  <FiPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    placeholder="Enter phone number"
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.phone ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                </div>
+                {errors.phone && (
+                  <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Trading Information */}
+          <div className="space-y-6">
+            <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
+              Trading Information
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+               {/* Minimum Invest Amount */}
+               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Minimum Invest Amount ($) *
+                </label>
+                <div className="relative">
+                  <FiDollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <input
+                    type="number"
+                    name="minInvestAmount"
+                    value={formData.minInterestRate}
+                    onChange={handleInputChange}
+                    placeholder="100.0"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.minInvestAmount ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                </div>
+                {errors.minInvestAmount && (
+                  <p className="mt-1 text-sm text-red-600">{errors.minInterestRate}</p>
+                )}
+              </div>
+
+              {/* Maximum Invest Amount */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Maximum Invest Amount ($) *
+                </label>
+                <div className="relative">
+                  <FiDollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <input
+                    type="number"
+                    name="maxInvestAmount"
+                      value={formData.maxInterestRate}
+                    onChange={handleInputChange}
+                    placeholder="1000.0"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.maxInvestAmount ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                </div>
+                {errors.maxInvestAmount && (
+                  <p className="mt-1 text-sm text-red-600">{errors.maxInterestRate}</p>
+                )}
+              </div>
+
+              {/* Minimum Interest Rate */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Minimum Interest Rate (%) *
+                </label>
+                <div className="relative">
+                  <FiPercent className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <input
+                    type="number"
+                    name="minInterestRate"
+                    value={formData.minInterestRate}
+                    onChange={handleInputChange}
+                    placeholder="6.0"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.minInterestRate ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                </div>
+                {errors.minInterestRate && (
+                  <p className="mt-1 text-sm text-red-600">{errors.minInterestRate}</p>
+                )}
+              </div>
+
+              {/* Maximum Interest Rate */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Maximum Interest Rate (%) *
+                </label>
+                <div className="relative">
+                  <FiPercent className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <input
+                    type="number"
+                    name="maxInterestRate"
+                    value={formData.maxInterestRate}
+                    onChange={handleInputChange}
+                    placeholder="7.0"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.maxInterestRate ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                </div>
+                {errors.maxInterestRate && (
+                  <p className="mt-1 text-sm text-red-600">{errors.maxInterestRate}</p>
+                )}
+              </div>
+
+              {/* Experience */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Experience (Years) *
+                </label>
+                <div className="relative">
+                  <FiBriefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <input
+                    type="number"
+                    name="experience"
+                    value={formData.experience}
+                    onChange={handleInputChange}
+                    placeholder="5"
+                    min="0"
+                    max="50"
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.experience ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                </div>
+                {errors.experience && (
+                  <p className="mt-1 text-sm text-red-600">{errors.experience}</p>
+                )}
+              </div>
+
+            
+            </div>
+          </div>
+
+      
+          {/* Description */}
+          <div className="space-y-6">
+            <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
+              Description *
+            </h2>
+            <div>
+              <div className="relative">
+                <FiFileText className="absolute left-3 top-3 text-gray-400 h-4 w-4" />
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder="Describe the trader's expertise, trading style, and any additional information..."
+                  rows={4}
+                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none ${
+                    errors.description ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+              </div>
+              {errors.description && (
+                <p className="mt-1 text-sm text-red-600">{errors.description}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Profile Picture */}
+          <div className="space-y-6">
+            <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
+              Profile Picture
+            </h2>
+            <div>
+              {formData.profilePicture ? (
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <img
+                      src={URL.createObjectURL(formData.profilePicture)}
+                      alt="Profile preview"
+                      className="w-20 h-20 rounded-lg object-cover border border-gray-300"
+                    />
+            <button
+              type="button"
+              onClick={removeProfilePicture}
+              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors cursor-pointer"
+            >
+                      <FiX className="h-3 w-3" />
+                    </button>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{formData.profilePicture.name}</p>
+                    <p className="text-xs text-gray-500">
+                      {(formData.profilePicture.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                  <FiImage className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <label className="cursor-pointer">
+                    <span className="text-sm font-medium text-blue-600 hover:text-blue-500">
+                      Click to upload profile picture
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                  <p className="text-xs text-gray-500 mt-2">
+                    PNG, JPG, GIF up to 5MB
+                  </p>
+                </div>
+              )}
+              {errors.profilePicture && (
+                <p className="mt-1 text-sm text-red-600">{errors.profilePicture}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Form Actions */}
+          <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={() => navigate('/admin/manage-trader')}
+              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 sm:flex-none bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Creating...</span>
+                </>
+              ) : (
+                <>
+                  <FiSave className="h-4 w-4" />
+                  <span>Create Trader</span>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+export default AddTrader;

@@ -197,7 +197,7 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="bg-green-100 p-3 rounded-full">
-              <span className="text-green-600 text-2xl font-bold">₹</span>
+              <span className="text-green-600 text-2xl font-bold">$</span>
             </div>
           </div>
         </Card>

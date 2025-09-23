@@ -8,7 +8,11 @@ import {
   FiSettings,
   FiLogOut,
   FiShield,
-  FiUser
+  FiUser,
+  FiUserCheck,
+  FiAward,
+  FiStar,
+  FiZap
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/common/Button';
@@ -24,11 +28,21 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
     { name: 'User Management', path: '/admin/users', icon: FiUsers },
     { name: 'Investments', path: '/admin/investments', icon: FiTrendingUp },
     { name: 'Documents', path: '/admin/documents', icon: FiFileText },
+    { name: 'Manage Trader', path: '/admin/manage-trader', icon: FiUserCheck },
+    { name: 'Manage Silver', path: '/admin/manage-silver', icon: FiAward },
+    { name: 'Manage Gold', path: '/admin/manage-gold', icon: FiStar },
+    { name: 'Manage Platinum', path: '/admin/manage-platinum', icon: FiZap },
     { name: 'Profile', path: '/admin/profile', icon: FiUser },
     // { name: 'Settings', path: '/admin/settings', icon: FiSettings },
   ];
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => {
+    // For manage-trader, also check if we're on the add-trader sub-route
+    if (path === '/admin/manage-trader') {
+      return location.pathname === path || location.pathname.startsWith('/admin/manage-trader/');
+    }
+    return location.pathname === path;
+  };
 
   const handleLogout = () => {
     logout();

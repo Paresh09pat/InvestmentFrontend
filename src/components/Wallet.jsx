@@ -198,7 +198,7 @@ const Wallet = ({ userInvestments = [], totalInvested = 0, currentValue = 0 }) =
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setShowBalance(!showBalance)}
-                  className="p-2 rounded-full bg-violet-500 bg-opacity-20 hover:bg-opacity-30 transition-all duration-200 text-white"
+                  className="p-2 rounded-full bg-violet-500 bg-opacity-20 hover:bg-opacity-30 transition-all duration-200 text-white cursor-pointer"
                 >
                   {showBalance ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                 </button>

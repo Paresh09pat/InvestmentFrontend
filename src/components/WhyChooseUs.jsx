@@ -428,7 +428,7 @@ const WhyChooseUs = () => {
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${
+                  className={`w-2 h-2 rounded-full transition-all cursor-pointer ${
                     index === currentSlide ? 'w-8 bg-white' : 'bg-white/40'
                   }`}
                 />

@@ -120,7 +120,7 @@ export const dummyNotifications = [
   {
     id: 1,
     title: 'Investment Completed',
-    message: 'Your Basic Plan investment of ₹50,000 has matured successfully.',
+    message: 'Your Basic Plan investment of $50,000 has matured successfully.',
     type: 'success',
     date: '2024-03-15',
     read: false
@@ -144,7 +144,7 @@ export const dummyNotifications = [
   {
     id: 4,
     title: 'Monthly Returns Credited',
-    message: 'Your monthly returns of ₹8,000 have been credited to your account.',
+    message: 'Your monthly returns of $8,000 have been credited to your account.',
     type: 'success',
     date: '2024-03-01',
     read: true
@@ -152,7 +152,7 @@ export const dummyNotifications = [
   {
     id: 5,
     title: 'Investment Milestone',
-    message: 'Congratulations! You have reached ₹1,00,000 in total investments.',
+    message: 'Congratulations! You have reached $1,00,000 in total investments.',
     type: 'info',
     date: '2024-02-28',
     read: true

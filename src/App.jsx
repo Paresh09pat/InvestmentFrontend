@@ -33,6 +33,11 @@ import UserManagement from './admin/pages/UserManagement';
 import InvestmentManagement from './admin/pages/InvestmentManagement';
 import DocumentVerification from './admin/pages/DocumentVerification';
 import AdminProfile from './admin/pages/AdminProfile';
+import ManageTrader from './admin/pages/ManageTrader';
+import AddTrader from './admin/pages/AddTrader';
+import ManageSilver from './admin/pages/ManageSilver';
+import ManageGold from './admin/pages/ManageGold';
+import ManagePlatinum from './admin/pages/ManagePlatinum';
 // import AdminSettings from './admin/pages/AdminSettings';
 
 // Components
@@ -120,6 +125,11 @@ function App() {
           <Route path="users" element={<UserManagement />} />
           <Route path="investments" element={<InvestmentManagement />} />
           <Route path="documents" element={<DocumentVerification />} />
+          <Route path="manage-trader" element={<ManageTrader />} />
+          <Route path="manage-trader/add-trader" element={<AddTrader />} />
+          <Route path="manage-silver" element={<ManageSilver />} />
+          <Route path="manage-gold" element={<ManageGold />} />
+          <Route path="manage-platinum" element={<ManagePlatinum />} />
           <Route path="profile" element={<AdminProfile />} />
           {/* <Route path="settings" element={<AdminSettings />} /> */}
           <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />

@@ -43,7 +43,7 @@ const Navbar = () => {
     {
       name: "Invest",
       path: "/invest",
-      icon: () => <span className="text-lg font-bold">₹</span>,
+      icon: () => <span className="text-lg font-bold">$</span>,
     },
     { name: "History", path: "/investment-history", icon: FiClock },
     { name: "Profile", path: "/profile", icon: FiUser },

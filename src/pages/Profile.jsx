@@ -510,7 +510,7 @@ const Profile = () => {
                     )}
                     <button
                       onClick={() => setShowProfilePictureModal(true)}
-                      className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center transition-colors"
+                      className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center transition-colors cursor-pointer"
                       title="Change profile picture"
                     >
                       <FiCamera size={12} />
@@ -536,14 +536,14 @@ const Profile = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Total Invested</span>
                     <span className="font-semibold">
-                      ₹{user?.totalInvested?.toLocaleString() || '0'}
+                      ${user?.totalInvested?.toLocaleString() || '0'}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Current Balance</span>
                     <span className="font-semibold text-green-600">
-                      ₹{user?.currentBalance?.toLocaleString() || '0'}
+                      ${user?.currentBalance?.toLocaleString() || '0'}
                     </span>
                   </div>
 

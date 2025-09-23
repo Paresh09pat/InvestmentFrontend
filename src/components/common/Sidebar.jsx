@@ -16,7 +16,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: FiHome },
-    { name: 'Invest', path: '/invest', icon: () => <span className="text-lg font-bold">₹</span> },
+    { name: 'Invest', path: '/invest', icon: () => <span className="text-lg font-bold">$</span> },
     { name: 'Portfolio', path: '/portfolio', icon: FiTrendingUp },
     { name: 'Profile', path: '/profile', icon: FiUser },
     { name: 'Notifications', path: '/notifications', icon: FiBell },
