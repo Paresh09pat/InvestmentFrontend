@@ -1,6 +1,6 @@
 // Navbar component
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   FiMenu,
   FiX,
@@ -9,13 +9,13 @@ import {
   FiLogOut,
   FiTrendingUp,
   FiShield,
-  FiClock
-} from 'react-icons/fi';
-import { useAuth } from '../../context/AuthContext';
-import Button from './Button';
+  FiClock,
+} from "react-icons/fi";
+import { useAuth } from "../../context/AuthContext";
+import Button from "./Button";
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, notificationCount } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -27,33 +27,45 @@ const Navbar = () => {
       setScrolled(isScrolled);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
     logout();
-    navigate('/');
+    navigate("/");
     setIsProfileOpen(false);
   };
 
   const navLinks = [
-    { name: 'Dashboard', path: '/dashboard', icon: FiTrendingUp },
-    { name: 'Invest', path: '/invest', icon: () => <span className="text-lg font-bold">₹</span> },
-    { name: 'History', path: '/investment-history', icon: FiClock },
-    { name: 'Profile', path: '/profile', icon: FiUser },
-    { name: 'Notifications', path: '/notifications', icon: FiBell },
+    { name: "Dashboard", path: "/dashboard", icon: FiTrendingUp },
+    {
+      name: "Invest",
+      path: "/invest",
+      icon: () => <span className="text-lg font-bold">₹</span>,
+    },
+    { name: "History", path: "/investment-history", icon: FiClock },
+    { name: "Profile", path: "/profile", icon: FiUser },
+    {
+      name: "Notifications",
+      path: "/notifications",
+      icon: FiBell,
+      count: notificationCount,
+    },
   ];
 
   return (
-    <nav className={`
+    <nav
+      className={`
       fixed w-full z-50 transition-all duration-300 
-      ${scrolled
-        ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200'
-        : 'bg-white/90 backdrop-blur-md shadow-sm'
+      ${
+        scrolled
+          ? "bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200"
+          : "bg-white/90 backdrop-blur-md shadow-sm"
       }
-    `}>
+    `}
+    >
       <div className="max-w-4xl md:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -62,7 +74,7 @@ const Navbar = () => {
               <FiShield className="h-6 w-6 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Trdexa
+              Trdexa
             </span>
           </Link>
 
@@ -78,6 +90,11 @@ const Navbar = () => {
                   >
                     <link.icon size={18} />
                     <span>{link.name}</span>
+                    {link.count > 0 && (
+                      <span className="text-xs text-white bg-blue-500 rounded-full px-2 py-1">
+                        {link.count}
+                      </span>
+                    )}
                   </Link>
                 ))}
 
@@ -90,22 +107,23 @@ const Navbar = () => {
                     {user?.profilePicture?.cloudinaryUrl ? (
                       <img
                         src={user.profilePicture.cloudinaryUrl}
-                        alt={user?.name || 'User'}
+                        alt={user?.name || "User"}
                         className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm"
                       />
                     ) : (
                       <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
                         <span className="text-white text-sm font-medium">
-                          {user?.name?.charAt(0) || 'U'}
+                          {user?.name?.charAt(0) || "U"}
                         </span>
                       </div>
                     )}
-                    <span className="font-medium text-gray-700">{user?.name || 'User'}</span>
+                    <span className="font-medium text-gray-700">
+                      {user?.name || "User"}
+                    </span>
                   </button>
 
                   {isProfileOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 animate-fade-in border border-gray-200">
-
                       <Link
                         to="/profile"
                         className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
@@ -133,10 +151,7 @@ const Navbar = () => {
                 >
                   Login
                 </Link>
-                <Button
-                  variant="primary"
-                  onClick={() => navigate('/signup')}
-                >
+                <Button variant="primary" onClick={() => navigate("/signup")}>
                   Get Started
                 </Button>
               </div>
@@ -170,6 +185,11 @@ const Navbar = () => {
                   >
                     <link.icon size={20} />
                     <span className="font-medium">{link.name}</span>
+                    {link.count > 0 && (
+                      <span className="text-xs text-white bg-blue-500 rounded-full px-2 py-1">
+                        {link.count}
+                      </span>
+                    )}
                   </Link>
                 ))}
                 <button
@@ -193,7 +213,7 @@ const Navbar = () => {
                   variant="primary"
                   fullWidth
                   onClick={() => {
-                    navigate('/signup');
+                    navigate("/signup");
                     setIsOpen(false);
                   }}
                 >

@@ -39,6 +39,7 @@ import AdminProfile from './admin/pages/AdminProfile';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import Footer from './components/Footer';
+import Navbar from './components/common/Navbar';
 
 function App() {
   const { loading } = useAuth();
@@ -58,7 +59,7 @@ function App() {
         </div>
       </div>
     );
-  }
+  } 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -81,6 +82,7 @@ function App() {
         {/* Protected User Routes */}
         <Route path="/*" element={
           <ProtectedRoute>
+            <Navbar />
             <Routes>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/profile" element={<Profile />} />
