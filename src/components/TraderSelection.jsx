@@ -385,7 +385,7 @@ const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader }) => 
       </motion.div>
 
       {/* Traders Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
         {traders.map((trader, index) => (
           <motion.div
             key={trader.id}
@@ -393,7 +393,7 @@ const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader }) => 
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: index * 0.1 }}
             className={`
-              relative border-2 rounded-2xl p-6 transition-all duration-300 cursor-pointer
+              relative border-2 rounded-2xl p-6 transition-all duration-300 cursor-pointer flex flex-col min-h-[450px]
               ${selectedTrader?.id === trader.id 
                 ? 'border-blue-500 bg-blue-50 shadow-xl scale-105' 
                 : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-lg hover:scale-102'
@@ -412,95 +412,101 @@ const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader }) => 
               </motion.div>
             )}
 
-            {/* Trader Header */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                  {trader.profilePic ? (
-                    <img src={trader.profilePic} alt={trader.name} className="w-full h-full rounded-full object-cover" />
-                  ) : (
-                    <span className="text-white font-bold text-lg">{trader.name.charAt(0)}</span>
-                  )}
+            {/* Card Content - Fixed Height */}
+            <div className="flex flex-col h-full">
+              {/* Trader Header */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-3">
+                  <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    {trader.profilePic ? (
+                      <img src={trader.profilePic} alt={trader.name} className="w-full h-full rounded-full object-cover" />
+                    ) : (
+                      <span className="text-white font-bold text-lg">{trader.name.charAt(0)}</span>
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 text-lg">{trader.name}</h4>
+                    <p className="text-sm text-gray-600">{trader.experience}</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-lg">{trader.name}</h4>
-                  <p className="text-sm text-gray-600">{trader.experience}</p>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowTraderInfo(trader);
+                  }}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+                >
+                  <FiInfo className="h-4 w-4 text-gray-500" />
+                </button>
+              </div>
+
+              {/* Rating */}
+              <div className="flex items-center mb-3">
+                {[...Array(5)].map((_, i) => (
+                  <FiStar
+                    key={i}
+                    className={`h-4 w-4 ${
+                      i < Math.floor(trader.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                    }`}
+                  />
+                ))}
+                <span className="ml-2 text-sm text-gray-600">({trader.rating})</span>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div className="bg-green-50 p-2 rounded-lg text-center">
+                  <div className="text-lg font-bold text-green-600">{trader.returnRate}</div>
+                  <div className="text-xs text-green-700">Return Rate</div>
+                </div>
+                <div className="bg-blue-50 p-2 rounded-lg text-center">
+                  <div className="text-lg font-bold text-blue-600">{trader.successRate}</div>
+                  <div className="text-xs text-blue-700">Success Rate</div>
                 </div>
               </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowTraderInfo(trader);
-                }}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+
+              {/* Description */}
+              <p className="text-sm text-gray-600 mb-3 line-clamp-2">{trader.description}</p>
+
+              {/* Specialties */}
+              <div className="flex flex-wrap gap-1 mb-3">
+                {trader.specialties.slice(0, 2).map((specialty, index) => (
+                  <span key={index} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
+                    {specialty}
+                  </span>
+                ))}
+                {trader.specialties.length > 2 && (
+                  <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
+                    +{trader.specialties.length - 2}
+                  </span>
+                )}
+              </div>
+
+              {/* Additional Info */}
+              <div className="flex justify-between items-center text-xs text-gray-500 mb-3">
+                <span>{trader.totalClients} clients</span>
+                <span>{trader.riskLevel}</span>
+              </div>
+
+              {/* Spacer to push button to bottom */}
+              <div className="flex-grow"></div>
+
+              {/* Select Button - Always at bottom */}
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`
+                  w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-300
+                  ${selectedTrader?.id === trader.id
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }
+                  cursor-pointer
+                `}
               >
-                <FiInfo className="h-4 w-4 text-gray-500" />
-              </button>
+                {selectedTrader?.id === trader.id ? 'Selected' : 'Select Trader'}
+              </motion.button>
             </div>
-
-            {/* Rating */}
-            <div className="flex items-center mb-4">
-              {[...Array(5)].map((_, i) => (
-                <FiStar
-                  key={i}
-                  className={`h-4 w-4 ${
-                    i < Math.floor(trader.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                  }`}
-                />
-              ))}
-              <span className="ml-2 text-sm text-gray-600">({trader.rating})</span>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="bg-green-50 p-3 rounded-lg text-center">
-                <div className="text-xl font-bold text-green-600">{trader.returnRate}</div>
-                <div className="text-xs text-green-700">Return Rate</div>
-              </div>
-              <div className="bg-blue-50 p-3 rounded-lg text-center">
-                <div className="text-xl font-bold text-blue-600">{trader.successRate}</div>
-                <div className="text-xs text-blue-700">Success Rate</div>
-              </div>
-            </div>
-
-            {/* Description */}
-            <p className="text-sm text-gray-600 mb-4 line-clamp-3">{trader.description}</p>
-
-            {/* Specialties */}
-            <div className="flex flex-wrap gap-1 mb-4">
-              {trader.specialties.slice(0, 2).map((specialty, index) => (
-                <span key={index} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                  {specialty}
-                </span>
-              ))}
-              {trader.specialties.length > 2 && (
-                <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                  +{trader.specialties.length - 2}
-                </span>
-              )}
-            </div>
-
-            {/* Additional Info */}
-            <div className="flex justify-between items-center text-xs text-gray-500 mb-4">
-              <span>{trader.totalClients} clients</span>
-              <span>{trader.riskLevel}</span>
-            </div>
-
-            {/* Select Button */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className={`
-                w-full py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-300
-                ${selectedTrader?.id === trader.id
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }
-                cursor-pointer
-              `}
-            >
-              {selectedTrader?.id === trader.id ? 'Selected' : 'Select Trader'}
-            </motion.button>
           </motion.div>
         ))}
       </div>
