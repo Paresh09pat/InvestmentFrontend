@@ -9,10 +9,7 @@ import {
   FiLogOut,
   FiShield,
   FiUser,
-  FiUserCheck,
-  FiAward,
-  FiStar,
-  FiZap
+  FiUserCheck
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/common/Button';
@@ -29,9 +26,6 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
     { name: 'Investments', path: '/admin/investments', icon: FiTrendingUp },
     { name: 'Documents', path: '/admin/documents', icon: FiFileText },
     { name: 'Manage Trader', path: '/admin/manage-trader', icon: FiUserCheck },
-    { name: 'Manage Silver', path: '/admin/manage-silver', icon: FiAward },
-    { name: 'Manage Gold', path: '/admin/manage-gold', icon: FiStar },
-    { name: 'Manage Platinum', path: '/admin/manage-platinum', icon: FiZap },
     { name: 'Profile', path: '/admin/profile', icon: FiUser },
     // { name: 'Settings', path: '/admin/settings', icon: FiSettings },
   ];

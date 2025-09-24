@@ -77,9 +77,9 @@ const Wallet = ({ userInvestments = [], totalInvested = 0, currentValue = 0 }) =
   }, []);
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'INR',
+      currency: 'USD',
       maximumFractionDigits: 0
     }).format(amount);
   };
@@ -144,7 +144,7 @@ const Wallet = ({ userInvestments = [], totalInvested = 0, currentValue = 0 }) =
 
   const handleWithdraw = async () => {
     if (walletBalance < 5000) {
-      alert('Minimum withdrawal amount is ₹5,000');
+      alert('Minimum withdrawal amount is $5,000');
       return;
     }
     
@@ -319,7 +319,7 @@ const Wallet = ({ userInvestments = [], totalInvested = 0, currentValue = 0 }) =
             Available Balance: <span className="font-semibold text-gray-900">{formatCurrency(walletBalance)}</span>
             {walletBalance < 5000 && (
               <span className="block text-orange-600 text-xs mt-1">
-                Minimum ₹5,000 required for withdrawal
+                Minimum $5,000 required for withdrawal
               </span>
             )}
           </p>

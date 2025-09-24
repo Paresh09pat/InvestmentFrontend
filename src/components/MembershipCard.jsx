@@ -153,7 +153,7 @@ const MembershipCard = ({ tier, onSelect, isSelected = false }) => {
       </div>
 
       {/* Duration */}
-      <div className="mb-6 p-3 bg-blue-50 rounded-lg text-center">
+      <div className="mb-4 p-3 bg-blue-50 rounded-lg text-center">
         <p className="text-sm text-blue-800">
           <span className="font-semibold">Duration:</span> {data.duration}
         </p>
