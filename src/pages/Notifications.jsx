@@ -49,8 +49,8 @@ const Notifications = () => {
   };
 
   const getNotificationBg = (type, read) => {
-    const baseClasses = read 
-      ? "bg-white border-gray-200" 
+    const baseClasses = read
+      ? "bg-white border-gray-200"
       : "bg-blue-50 border-blue-200 shadow-sm";
     const borderClasses = {
       success: "border-l-green-500",
@@ -70,13 +70,14 @@ const Notifications = () => {
         {},
         { withCredentials: true }
       );
-      
+
       setNotifications((prev) =>
-        prev.map((notif) => (notif._id === id ? { ...notif, read: true } : notif))
+        prev.map((notif) =>
+          notif._id === id ? { ...notif, read: true } : notif
+        )
       );
-      
+      await checkAuthStatus();
       toast.success("Notification marked as read successfully");
-     
     } catch (error) {
       toast.error("Failed to mark notification as read");
       console.error("Failed to mark notification as read:", error);
@@ -90,8 +91,10 @@ const Notifications = () => {
         {},
         { withCredentials: true }
       );
-      
-      setNotifications((prev) => prev.map((notif) => ({ ...notif, read: true })));
+
+      setNotifications((prev) =>
+        prev.map((notif) => ({ ...notif, read: true }))
+      );
       toast.success("All notifications marked as read successfully");
       await checkAuthStatus();
     } catch (error) {
@@ -106,9 +109,9 @@ const Notifications = () => {
         `${VITE_APP_API_URL}/api/auth/notifications/delete/${id}`,
         { withCredentials: true }
       );
-      
+
       setNotifications((prev) => prev.filter((notif) => notif._id !== id));
-      setTotal(prev => prev - 1);
+      setTotal((prev) => prev - 1);
       await checkAuthStatus();
       toast.success("Notification deleted successfully");
     } catch (error) {
@@ -123,7 +126,7 @@ const Notifications = () => {
         `${VITE_APP_API_URL}/api/auth/notifications/delete-all`,
         { withCredentials: true }
       );
-      
+
       setNotifications([]);
       setTotal(0);
       await checkAuthStatus();
@@ -161,36 +164,39 @@ const Notifications = () => {
     return date.toLocaleDateString();
   };
 
-  const getNotifications = useCallback(async (pageNumber = 1, append = false) => {
-    try {
-      if (pageNumber === 1) {
-        setLoading(true);
-      } else {
-        setLoadingMore(true);
+  const getNotifications = useCallback(
+    async (pageNumber = 1, append = false) => {
+      try {
+        if (pageNumber === 1) {
+          setLoading(true);
+        } else {
+          setLoadingMore(true);
+        }
+
+        const response = await axios.get(
+          `${VITE_APP_API_URL}/api/auth/notifications?page=${pageNumber}&limit=10`,
+          { withCredentials: true }
+        );
+
+        if (pageNumber === 1 || !append) {
+          setNotifications(response.data.notifications);
+        } else {
+          setNotifications((prev) => [...prev, ...response.data.notifications]);
+        }
+
+        setTotalPages(response.data.totalPages);
+        setCurrentPage(response.data.currentPage);
+        setTotal(response.data.total);
+      } catch (error) {
+        toast.error("Failed to fetch notifications");
+        console.error("Failed to fetch notifications:", error);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
       }
-
-      const response = await axios.get(
-        `${VITE_APP_API_URL}/api/auth/notifications?page=${pageNumber}&limit=10`,
-        { withCredentials: true }
-      );
-
-      if (pageNumber === 1 || !append) {
-        setNotifications(response.data.notifications);
-      } else {
-        setNotifications((prev) => [...prev, ...response.data.notifications]);
-      }
-
-      setTotalPages(response.data.totalPages);
-      setCurrentPage(response.data.currentPage);
-      setTotal(response.data.total);
-    } catch (error) {
-      toast.error("Failed to fetch notifications");
-      console.error("Failed to fetch notifications:", error);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   const loadMoreNotifications = useCallback(() => {
     if (currentPage < totalPages && !loadingMore) {
@@ -198,8 +204,6 @@ const Notifications = () => {
     }
   }, [currentPage, totalPages, loadingMore, getNotifications]);
 
-  
-  
   useEffect(() => {
     getNotifications();
   }, [getNotifications]);
@@ -208,7 +212,11 @@ const Notifications = () => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && currentPage < totalPages && !loadingMore) {
+        if (
+          entries[0].isIntersecting &&
+          currentPage < totalPages &&
+          !loadingMore
+        ) {
           loadMoreNotifications();
         }
       },
@@ -320,18 +328,22 @@ const Notifications = () => {
                 <Card
                   key={notification._id}
                   className={`
-                    ${getNotificationBg('default', notification.read)}
+                    ${getNotificationBg("default", notification.read)}
                     hover:shadow-md transition-all duration-200 animate-slide-up cursor-pointer
-                    ${!notification.read ? 'ring-1 ring-blue-200' : ''}
-                    hover:${!notification.read ? 'ring-blue-300' : 'ring-gray-200'}
+                    ${!notification.read ? "ring-1 ring-blue-200" : ""}
+                    hover:${
+                      !notification.read ? "ring-blue-300" : "ring-gray-200"
+                    }
                   `}
                   style={{ animationDelay: `${index * 0.1}s` }}
-                  onClick={() => !notification.read && markAsRead(notification._id)}
+                  onClick={() =>
+                    !notification.read && markAsRead(notification._id)
+                  }
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-start space-x-4 flex-1">
                       <div className="flex-shrink-0 mt-1">
-                        {getNotificationIcon('info')}
+                        {getNotificationIcon("info")}
                       </div>
 
                       <div className="flex-1">
@@ -399,7 +411,7 @@ const Notifications = () => {
                   </div>
                 </Card>
               ))}
-              
+
               {/* Load More Section */}
               {currentPage < totalPages && (
                 <div ref={loaderRef} className="flex justify-center py-4">

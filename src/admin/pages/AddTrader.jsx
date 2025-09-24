@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 import { 
   FiUserCheck, 
   FiArrowLeft, 
@@ -15,23 +17,22 @@ import {
   FiFileText,
   FiImage
 } from 'react-icons/fi';
+import { VITE_APP_API_URL } from '../../utils/constants';
 
 const AddTrader = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     traderType: '',
-    traderName: '',
+    name: '',
     email: '',
     phone: '',
-    minInterestRate: '',
-    maxInterestRate: '',
+    minInvestment: '',
+    maxInvestment: '',
+    minInterstRate: '',
+    maxInterstRate: '',
     description: '',
     experience: '',
-    profilePicture: null,
-    status: 'active',
-    commission: '',
-    maxClients: '',
-    specializations: []
+    profilePicture: null
   });
 
   const [errors, setErrors] = useState({});
@@ -41,17 +42,6 @@ const AddTrader = () => {
     { value: 'silver', label: 'Silver Trader', color: 'from-gray-400 to-gray-600' },
     { value: 'gold', label: 'Gold Trader', color: 'from-yellow-400 to-yellow-600' },
     { value: 'platinum', label: 'Platinum Trader', color: 'from-purple-500 to-indigo-600' }
-  ];
-
-  const specializations = [
-    'Forex Trading',
-    'Stock Trading',
-    'Cryptocurrency',
-    'Commodities',
-    'Options Trading',
-    'Day Trading',
-    'Swing Trading',
-    'Long-term Investment'
   ];
 
   const containerVariants = {
@@ -75,23 +65,12 @@ const AddTrader = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     
-    if (type === 'checkbox') {
-      const updatedSpecializations = checked
-        ? [...formData.specializations, value]
-        : formData.specializations.filter(item => item !== value);
-      
-      setFormData(prev => ({
-        ...prev,
-        specializations: updatedSpecializations
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
 
     // Clear error when user starts typing
     if (errors[name]) {
@@ -144,24 +123,56 @@ const AddTrader = () => {
     }));
   };
 
+  const resetForm = () => {
+    setFormData({
+      traderType: '',
+      name: '',
+      email: '',
+      phone: '',
+      minInvestment: '',
+      maxInvestment: '',
+      minInterstRate: '',
+      maxInterstRate: '',
+      description: '',
+      experience: '',
+      profilePicture: null
+    });
+    setErrors({});
+  };
+
+  const handleCancel = () => {
+    if (Object.values(formData).some(value => 
+      value !== '' && value !== null && 
+      !(Array.isArray(value) && value.length === 0)
+    )) {
+      if (window.confirm('Are you sure you want to cancel? All form data will be lost.')) {
+        navigate('/admin/manage-trader');
+      }
+    } else {
+      navigate('/admin/manage-trader');
+    }
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
     if (!formData.traderType) newErrors.traderType = 'Trader type is required';
-    if (!formData.traderName.trim()) newErrors.traderName = 'Trader name is required';
+    if (!formData.name.trim()) newErrors.name = 'Trader name is required';
     if (!formData.email.trim()) newErrors.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
     if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
-    if (!formData.minInterestRate) newErrors.minInterestRate = 'Minimum interest rate is required';
-    if (!formData.maxInterestRate) newErrors.maxInterestRate = 'Maximum interest rate is required';
-    if (parseFloat(formData.minInterestRate) >= parseFloat(formData.maxInterestRate)) {
-      newErrors.maxInterestRate = 'Maximum rate must be greater than minimum rate';
+    if (!formData.minInvestment) newErrors.minInvestment = 'Minimum investment is required';
+    if (!formData.maxInvestment) newErrors.maxInvestment = 'Maximum investment is required';
+    if (parseFloat(formData.minInvestment) >= parseFloat(formData.maxInvestment)) {
+      newErrors.maxInvestment = 'Maximum amount must be greater than minimum amount';
+    }
+    if (!formData.minInterstRate) newErrors.minInterstRate = 'Minimum interest rate is required';
+    if (!formData.maxInterstRate) newErrors.maxInterstRate = 'Maximum interest rate is required';
+    if (parseFloat(formData.minInterstRate) >= parseFloat(formData.maxInterstRate)) {
+      newErrors.maxInterstRate = 'Maximum rate must be greater than minimum rate';
     }
     if (!formData.description.trim()) newErrors.description = 'Description is required';
     if (!formData.experience) newErrors.experience = 'Experience is required';
-    if (!formData.commission) newErrors.commission = 'Commission rate is required';
-    if (!formData.maxClients) newErrors.maxClients = 'Maximum clients is required';
-    if (formData.specializations.length === 0) newErrors.specializations = 'At least one specialization is required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -171,6 +182,7 @@ const AddTrader = () => {
     e.preventDefault();
     
     if (!validateForm()) {
+      toast.error('Please fix the form errors before submitting');
       return;
     }
 
@@ -179,32 +191,59 @@ const AddTrader = () => {
     try {
       // Create FormData for file upload
       const submitData = new FormData();
+      
+      // Add form data fields
       Object.keys(formData).forEach(key => {
-        if (key === 'specializations') {
-          submitData.append(key, JSON.stringify(formData[key]));
-        } else {
+        if (key === 'profilePicture' && formData[key]) {
+          // Backend expects 'picture' field name for file upload
+          submitData.append('picture', formData[key]);
+        } else if (formData[key] !== null && formData[key] !== '') {
           submitData.append(key, formData[key]);
         }
       });
 
-      // TODO: Replace with actual API call
-      console.log('Submitting trader data:', formData);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Success - redirect to manage traders
-      navigate('/admin/manage-trader');
+      // Make API call to create trader
+      const response = await axios.post(
+        `${VITE_APP_API_URL}/api/admin/trader`,
+        submitData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          withCredentials: true,
+        }
+      );
+
+      // Check if trader was created successfully
+      if (response.data.trader && response.data.message) {
+        toast.success(response.data.message);
+        navigate('/admin/manage-trader');
+      } else {
+        throw new Error('Failed to create trader');
+      }
       
     } catch (error) {
       console.error('Error creating trader:', error);
-      // Handle error (show toast, etc.)
+      
+      if (error.response?.data?.message) {
+        toast.error(`Server Error: ${error.response.data.message}`);
+      } else if (error.response?.data?.errors) {
+        // Handle validation errors from server
+        const serverErrors = error.response.data.errors;
+        setErrors(serverErrors);
+        toast.error('Please fix the form errors');
+      } else if (error.response?.status === 500) {
+        toast.error('Internal server error. Please check the server logs and try again.');
+      } else if (error.code === 'ERR_NETWORK') {
+        toast.error('Network error: Cannot connect to server. Please check your connection.');
+      } else {
+        toast.error(`Failed to create trader: ${error.message || 'Unknown error'}`);
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const selectedTraderType = traderTypes.find(type => type.value === formData.traderType);
 
   return (
     <motion.div
@@ -278,17 +317,17 @@ const AddTrader = () => {
                   <FiUserCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <input
                     type="text"
-                    name="traderName"
-                    value={formData.traderName}
+                    name="name"
+                    value={formData.name}
                     onChange={handleInputChange}
                     placeholder="Enter trader name"
                     className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.traderName ? 'border-red-500' : 'border-gray-300'
+                      errors.name ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
                 </div>
-                {errors.traderName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.traderName}</p>
+                {errors.name && (
+                  <p className="mt-1 text-sm text-red-600">{errors.name}</p>
                 )}
               </div>
 
@@ -357,20 +396,19 @@ const AddTrader = () => {
                   <FiDollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <input
                     type="number"
-                    name="minInvestAmount"
-                    value={formData.minInterestRate}
+                    name="minInvestment"
+                    value={formData.minInvestment}
                     onChange={handleInputChange}
                     placeholder="100.0"
                     step="0.1"
                     min="0"
-                    max="100"
                     className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.minInvestAmount ? 'border-red-500' : 'border-gray-300'
+                      errors.minInvestment ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
                 </div>
-                {errors.minInvestAmount && (
-                  <p className="mt-1 text-sm text-red-600">{errors.minInterestRate}</p>
+                {errors.minInvestment && (
+                  <p className="mt-1 text-sm text-red-600">{errors.minInvestment}</p>
                 )}
               </div>
 
@@ -383,20 +421,19 @@ const AddTrader = () => {
                   <FiDollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <input
                     type="number"
-                    name="maxInvestAmount"
-                      value={formData.maxInterestRate}
+                    name="maxInvestment"
+                    value={formData.maxInvestment}
                     onChange={handleInputChange}
                     placeholder="1000.0"
                     step="0.1"
                     min="0"
-                    max="100"
                     className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.maxInvestAmount ? 'border-red-500' : 'border-gray-300'
+                      errors.maxInvestment ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
                 </div>
-                {errors.maxInvestAmount && (
-                  <p className="mt-1 text-sm text-red-600">{errors.maxInterestRate}</p>
+                {errors.maxInvestment && (
+                  <p className="mt-1 text-sm text-red-600">{errors.maxInvestment}</p>
                 )}
               </div>
 
@@ -409,20 +446,20 @@ const AddTrader = () => {
                   <FiPercent className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <input
                     type="number"
-                    name="minInterestRate"
-                    value={formData.minInterestRate}
+                    name="minInterstRate"
+                    value={formData.minInterstRate}
                     onChange={handleInputChange}
                     placeholder="6.0"
                     step="0.1"
                     min="0"
                     max="100"
                     className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.minInterestRate ? 'border-red-500' : 'border-gray-300'
+                      errors.minInterstRate ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
                 </div>
-                {errors.minInterestRate && (
-                  <p className="mt-1 text-sm text-red-600">{errors.minInterestRate}</p>
+                {errors.minInterstRate && (
+                  <p className="mt-1 text-sm text-red-600">{errors.minInterstRate}</p>
                 )}
               </div>
 
@@ -435,20 +472,20 @@ const AddTrader = () => {
                   <FiPercent className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <input
                     type="number"
-                    name="maxInterestRate"
-                    value={formData.maxInterestRate}
+                    name="maxInterstRate"
+                    value={formData.maxInterstRate}
                     onChange={handleInputChange}
                     placeholder="7.0"
                     step="0.1"
                     min="0"
                     max="100"
                     className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.maxInterestRate ? 'border-red-500' : 'border-gray-300'
+                      errors.maxInterstRate ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
                 </div>
-                {errors.maxInterestRate && (
-                  <p className="mt-1 text-sm text-red-600">{errors.maxInterestRate}</p>
+                {errors.maxInterstRate && (
+                  <p className="mt-1 text-sm text-red-600">{errors.maxInterstRate}</p>
                 )}
               </div>
 
@@ -476,8 +513,6 @@ const AddTrader = () => {
                   <p className="mt-1 text-sm text-red-600">{errors.experience}</p>
                 )}
               </div>
-
-            
             </div>
           </div>
 
@@ -565,24 +600,31 @@ const AddTrader = () => {
           <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
             <button
               type="button"
-              onClick={() => navigate('/admin/manage-trader')}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+              onClick={handleCancel}
+              className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer font-medium"
             >
               Cancel
             </button>
             <button
+              type="button"
+              onClick={resetForm}
+              className="px-6 py-3 border border-orange-300 rounded-lg text-orange-700 hover:bg-orange-50 transition-colors cursor-pointer font-medium"
+            >
+              Reset Form
+            </button>
+            <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 sm:flex-none bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-2 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 sm:flex-none bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
             >
               {isSubmitting ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Creating...</span>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <span>Creating Trader...</span>
                 </>
               ) : (
                 <>
-                  <FiSave className="h-4 w-4" />
+                  <FiSave className="h-5 w-5" />
                   <span>Create Trader</span>
                 </>
               )}
