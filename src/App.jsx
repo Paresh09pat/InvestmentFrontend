@@ -35,6 +35,7 @@ import DocumentVerification from './admin/pages/DocumentVerification';
 import AdminProfile from './admin/pages/AdminProfile';
 import ManageTrader from './admin/pages/ManageTrader';
 import AddTrader from './admin/pages/AddTrader';
+import CardManagement from './admin/pages/CardManagement';
 // import AdminSettings from './admin/pages/AdminSettings';
 
 // Components
@@ -124,8 +125,8 @@ function App() {
           <Route path="users" element={<UserManagement />} />
           <Route path="investments" element={<InvestmentManagement />} />
           <Route path="documents" element={<DocumentVerification />} />
-          <Route path="manage-trader" element={<ManageTrader />} />
           <Route path="manage-trader/add-trader" element={<AddTrader />} />
+          <Route path="manage-trader" element={<ManageTrader />} />
           <Route path="profile" element={<AdminProfile />} />
           {/* <Route path="settings" element={<AdminSettings />} /> */}
           <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />

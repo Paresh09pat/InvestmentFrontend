@@ -1,13 +1,10 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, memo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { 
   FiUserCheck, 
-  FiArrowLeft, 
   FiSave, 
-  FiUpload, 
   FiX,
   FiMail,
   FiPhone,
@@ -19,8 +16,7 @@ import {
 } from 'react-icons/fi';
 import { VITE_APP_API_URL } from '../../utils/constants';
 
-const AddTrader = () => {
-  const navigate = useNavigate();
+const TraderEditModal = ({ isOpen, onClose, trader, getTraders }) => {
   const [formData, setFormData] = useState({
     traderType: '',
     name: '',
@@ -38,31 +34,32 @@ const AddTrader = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Initialize form data when trader prop changes
+  useEffect(() => {
+    if (trader && isOpen) {
+      setFormData({
+        traderType: trader.traderType || '',
+        name: trader.name || '',
+        email: trader.email || '',
+        phone: trader.phone || '',
+        minInvestment: trader.minInvestment || '',
+        maxInvestment: trader.maxInvestment || '',
+        minInterstRate: trader.minInterstRate || '',
+        maxInterstRate: trader.maxInterstRate || '',
+        description: trader.description || '',
+        experience: trader.experience || '',
+        profilePicture: null // Don't pre-populate file input
+      });
+      setErrors({});
+    }
+  }, [trader, isOpen]);
+
   const traderTypes = [
     { value: 'silver', label: 'Silver Trader', color: 'from-gray-400 to-gray-600' },
     { value: 'gold', label: 'Gold Trader', color: 'from-yellow-400 to-yellow-600' },
     { value: 'platinum', label: 'Platinum Trader', color: 'from-purple-500 to-indigo-600' }
   ];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 0.6,
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5 }
-    }
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -145,11 +142,11 @@ const AddTrader = () => {
       value !== '' && value !== null && 
       !(Array.isArray(value) && value.length === 0)
     )) {
-      if (window.confirm('Are you sure you want to cancel? All form data will be lost.')) {
-        navigate('/admin/manage-trader');
+      if (window.confirm('Are you sure you want to cancel? All changes will be lost.')) {
+        onClose();
       }
     } else {
-      navigate('/admin/manage-trader');
+      onClose();
     }
   };
 
@@ -202,9 +199,9 @@ const AddTrader = () => {
         }
       });
 
-      // Make API call to create trader
-      const response = await axios.post(
-        `${VITE_APP_API_URL}/api/admin/trader`,
+      // Make API call to update trader
+      const response = await axios.put(
+        `${VITE_APP_API_URL}/api/admin/trader/${trader._id}`,
         submitData,
         {
           headers: {
@@ -214,16 +211,17 @@ const AddTrader = () => {
         }
       );
 
-      // Check if trader was created successfully
+      // Check if trader was updated successfully
       if (response.data.trader && response.data.message) {
         toast.success(response.data.message);
-        navigate('/admin/manage-trader');
+        onClose();
+        getTraders();
       } else {
-        throw new Error('Failed to create trader');
+        throw new Error('Failed to update trader');
       }
       
     } catch (error) {
-      console.error('Error creating trader:', error);
+      console.error('Error updating trader:', error);
       
       if (error.response?.data?.message) {
         toast.error(`Server Error: ${error.response.data.message}`);
@@ -237,7 +235,7 @@ const AddTrader = () => {
       } else if (error.code === 'ERR_NETWORK') {
         toast.error('Network error: Cannot connect to server. Please check your connection.');
       } else {
-        toast.error(`Failed to create trader: ${error.message || 'Unknown error'}`);
+        toast.error(`Failed to update trader: ${error.message || 'Unknown error'}`);
       }
     } finally {
       setIsSubmitting(false);
@@ -245,44 +243,56 @@ const AddTrader = () => {
   };
 
 
-  return (
-    <motion.div
-      className="p-6 space-y-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {/* Header */}
-      <motion.div variants={itemVariants} className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="flex items-center space-x-3 lg:space-x-4">
-          <button
-            onClick={() => navigate('/admin/manage-trader')}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-          >
-            <FiArrowLeft className="h-5 w-5 text-gray-600" />
-          </button>
-          <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 lg:p-3 rounded-lg">
-              <FiUserCheck className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Add New Trader</h1>
-              <p className="text-sm lg:text-base text-gray-600">Create a new trader profile with all necessary details</p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+  if (!trader) return null;
 
-      {/* Form */}
-      <motion.div variants={itemVariants} className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <form onSubmit={handleSubmit} className="p-4 lg:p-6 space-y-4 lg:space-y-6">
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ type: "spring", duration: 0.5 }}
+            className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 space-y-6 overflow-y-auto max-h-[90vh]">
+              {/* Header */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-3 rounded-lg">
+                    <FiUserCheck className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Edit Trader</h1>
+                    <p className="text-gray-600">Update trader profile information</p>
+                  </div>
+                </div>
+                <button
+                  onClick={onClose}
+                  className="p-2 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+                >
+                  <FiX className="h-6 w-6 text-gray-600" />
+                </button>
+              </div>
+
+              {/* Form */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Basic Information */}
           <div className="space-y-6">
             <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
               Basic Information
             </h2>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Trader Type */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -292,7 +302,7 @@ const AddTrader = () => {
                   name="traderType"
                   value={formData.traderType}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.traderType ? 'border-red-500' : 'border-gray-300'
                   }`}
                 >
@@ -321,9 +331,9 @@ const AddTrader = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                     placeholder="Enter trader name"
-                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
-                    errors.name ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.name ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   />
                 </div>
                 {errors.name && (
@@ -344,9 +354,9 @@ const AddTrader = () => {
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder="Enter email address"
-                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.email ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   />
                 </div>
                 {errors.email && (
@@ -367,9 +377,9 @@ const AddTrader = () => {
                     value={formData.phone}
                     onChange={handleInputChange}
                     placeholder="Enter phone number"
-                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
-                    errors.phone ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      errors.phone ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   />
                 </div>
                 {errors.phone && (
@@ -385,7 +395,7 @@ const AddTrader = () => {
               Trading Information
             </h2>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                {/* Minimum Invest Amount */}
                <div>
@@ -402,7 +412,7 @@ const AddTrader = () => {
                     placeholder="100.0"
                     step="0.1"
                     min="0"
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       errors.minInvestment ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
@@ -427,7 +437,7 @@ const AddTrader = () => {
                     placeholder="1000.0"
                     step="0.1"
                     min="0"
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       errors.maxInvestment ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
@@ -453,7 +463,7 @@ const AddTrader = () => {
                     step="0.1"
                     min="0"
                     max="100"
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       errors.minInterstRate ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
@@ -479,7 +489,7 @@ const AddTrader = () => {
                     step="0.1"
                     min="0"
                     max="100"
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       errors.maxInterstRate ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
@@ -504,7 +514,7 @@ const AddTrader = () => {
                     placeholder="5"
                     min="0"
                     max="50"
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       errors.experience ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
@@ -531,7 +541,7 @@ const AddTrader = () => {
                   onChange={handleInputChange}
                   placeholder="Describe the trader's expertise, trading style, and any additional information..."
                   rows={4}
-                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm lg:text-base ${
+                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none ${
                     errors.description ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
@@ -597,43 +607,47 @@ const AddTrader = () => {
           </div>
 
           {/* Form Actions */}
-          <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 pt-4 lg:pt-6 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
             <button
               type="button"
               onClick={handleCancel}
-              className="px-4 lg:px-6 py-2 lg:py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer font-medium text-sm lg:text-base"
+              className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer font-medium"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={resetForm}
-              className="px-4 lg:px-6 py-2 lg:py-3 border border-orange-300 rounded-lg text-orange-700 hover:bg-orange-50 transition-colors cursor-pointer font-medium text-sm lg:text-base"
+              className="px-6 py-3 border border-orange-300 rounded-lg text-orange-700 hover:bg-orange-50 transition-colors cursor-pointer font-medium"
             >
               Reset Form
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 sm:flex-none bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 lg:px-6 py-2 lg:py-3 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl text-sm lg:text-base"
+              className="flex-1 sm:flex-none bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
             >
               {isSubmitting ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 lg:h-5 lg:w-5 border-b-2 border-white"></div>
-                  <span>Creating Trader...</span>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <span>Updating Trader...</span>
                 </>
               ) : (
                 <>
-                  <FiSave className="h-4 w-4 lg:h-5 lg:w-5" />
-                  <span>Create Trader</span>
+                  <FiSave className="h-5 w-5" />
+                  <span>Update Trader</span>
                 </>
               )}
             </button>
           </div>
-        </form>
-      </motion.div>
-    </motion.div>
+                </form>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
-export default AddTrader;
+export default memo(TraderEditModal);
