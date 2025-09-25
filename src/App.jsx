@@ -123,9 +123,8 @@ function App() {
           <Route path="users" element={<UserManagement />} />
           <Route path="investments" element={<InvestmentManagement />} />
           <Route path="documents" element={<DocumentVerification />} />
-          <Route path="manage-trader" element={<ManageTrader />} />
           <Route path="manage-trader/add-trader" element={<AddTrader />} />
-          <Route path="manage-trader/card-management" element={<CardManagement />} />
+          <Route path="manage-trader" element={<ManageTrader />} />
           <Route path="profile" element={<AdminProfile />} />
           {/* <Route path="settings" element={<AdminSettings />} /> */}
           <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
