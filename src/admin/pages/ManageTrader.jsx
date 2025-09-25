@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { FiUserCheck, FiPlus, FiSearch, FiFilter, FiEdit, FiTrash2, FiEye, FiAward, FiStar, FiZap, FiInfo } from 'react-icons/fi';
 import TraderViewModal from '../components/TraderViewModal';
+import TraderEditModal from '../components/TraderEditModal';
 import axios from 'axios';
 import { VITE_APP_API_URL } from '../../utils/constants';
 
@@ -12,6 +13,7 @@ const ManageTrader = () => {
   const [selectedTier, setSelectedTier] = useState('all');
   const [selectedTrader, setSelectedTrader] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [traders, setTraders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -63,8 +65,18 @@ const ManageTrader = () => {
     setIsViewModalOpen(true);
   };
 
+  const handleEditTrader = (trader) => {
+    setSelectedTrader(trader);
+    setIsEditModalOpen(true);
+  };
+
   const handleCloseViewModal = () => {
     setIsViewModalOpen(false);
+    setSelectedTrader(null);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
     setSelectedTrader(null);
   };
   const containerVariants = {
@@ -330,7 +342,10 @@ const ManageTrader = () => {
                             <FiEye className="h-4 w-4 mr-1" />
                             View
                           </button>
-                          <button className="flex-1 py-2 px-3 text-indigo-600 hover:text-indigo-900 text-sm font-medium cursor-pointer border border-indigo-200 hover:bg-indigo-50 rounded-lg transition-colors flex items-center justify-center">
+                          <button 
+                            onClick={() => handleEditTrader(trader)}
+                            className="flex-1 py-2 px-3 text-indigo-600 hover:text-indigo-900 text-sm font-medium cursor-pointer border border-indigo-200 hover:bg-indigo-50 rounded-lg transition-colors flex items-center justify-center"
+                          >
                             <FiEdit className="h-4 w-4 mr-1" />
                             Edit
                           </button>
@@ -438,7 +453,10 @@ const ManageTrader = () => {
                             <FiEye className="h-4 w-4 mr-1" />
                             View
                           </button>
-                          <button className="flex-1 py-2 px-3 text-indigo-600 hover:text-indigo-900 text-sm font-medium cursor-pointer border border-indigo-200 hover:bg-indigo-50 rounded-lg transition-colors flex items-center justify-center">
+                          <button 
+                            onClick={() => handleEditTrader(trader)}
+                            className="flex-1 py-2 px-3 text-indigo-600 hover:text-indigo-900 text-sm font-medium cursor-pointer border border-indigo-200 hover:bg-indigo-50 rounded-lg transition-colors flex items-center justify-center"
+                          >
                             <FiEdit className="h-4 w-4 mr-1" />
                             Edit
                           </button>
@@ -462,6 +480,16 @@ const ManageTrader = () => {
         isOpen={isViewModalOpen}
         onClose={handleCloseViewModal}
         trader={selectedTrader}
+        
+      />
+
+      {/* Trader Edit Modal */}
+      <TraderEditModal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        trader={selectedTrader}
+        getTraders={getTraders}
+
       />
     </motion.div>
   );

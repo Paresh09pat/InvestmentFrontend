@@ -4,17 +4,11 @@ import {
   FiX, 
   FiUser, 
   FiMail, 
-  FiPhone, 
   FiBriefcase, 
-  FiDollarSign, 
-  FiPercent, 
   FiFileText, 
-  FiImage,
   FiAward,
   FiStar,
   FiZap,
-  FiCalendar,
-  FiUsers,
   FiTrendingUp
 } from 'react-icons/fi';
 
@@ -34,6 +28,15 @@ const TraderViewModal = ({ isOpen, onClose, trader }) => {
   }, [isOpen]);
 
   if (!trader) return null;
+
+  // Normalize trader data with defaults for missing properties
+  const normalizedTrader = {
+    ...trader,
+    tier: trader.traderType || 'silver',
+    minInterestRate: trader.minInterstRate || 0,
+    maxInterestRate: trader.maxInterstRate || 0,
+    description: trader.description || 'No description provided.'
+  };
 
   const getTierConfig = (tier) => {
     const configs = {
@@ -62,7 +65,7 @@ const TraderViewModal = ({ isOpen, onClose, trader }) => {
     return configs[tier] || configs.silver;
   };
 
-  const tierConfig = getTierConfig(trader.tier);
+  const tierConfig = getTierConfig(normalizedTrader.tier);
   const TierIcon = tierConfig.icon;
 
   return (
@@ -91,7 +94,7 @@ const TraderViewModal = ({ isOpen, onClose, trader }) => {
                     <TierIcon className="h-8 w-8 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">{trader.name}</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">{normalizedTrader.name}</h2>
                     <p className="text-gray-600">{tierConfig.name} Trader</p>
                   </div>
                 </div>
@@ -112,41 +115,24 @@ const TraderViewModal = ({ isOpen, onClose, trader }) => {
                   {/* Profile Picture */}
                   <div className="text-center">
                     <div className="relative inline-block">
-                      {trader.profilePicture ? (
+                      {normalizedTrader.profilePicture ? (
                         <img
-                          src={trader.profilePicture}
-                          alt={trader.name}
+                          src={normalizedTrader.profilePicture}
+                          alt={normalizedTrader.name}
                           className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
                         />
                       ) : (
                         <div className="w-32 h-32 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center border-4 border-white shadow-lg">
                           <span className="text-white text-4xl font-bold">
-                            {trader.name.charAt(0)}
+                            {normalizedTrader.name.charAt(0)}
                           </span>
                         </div>
                       )}
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900 mt-4">{trader.name}</h3>
-                    <p className="text-gray-600">{trader.email}</p>
+                    <h3 className="text-xl font-semibold text-gray-900 mt-4">{normalizedTrader.name}</h3>
+                    <p className="text-gray-600">{normalizedTrader.email}</p>
                   </div>
 
-                  {/* Contact Information */}
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                      <FiUser className="h-5 w-5 mr-2 text-blue-600" />
-                      Contact Information
-                    </h4>
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-3">
-                        <FiMail className="h-4 w-4 text-gray-500" />
-                        <span className="text-gray-700">{trader.email}</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <FiPhone className="h-4 w-4 text-gray-500" />
-                        <span className="text-gray-700">{trader.phone}</span>
-                      </div>
-                    </div>
-                  </div>
 
                   {/* Trading Information */}
                   <div className="bg-gray-50 rounded-lg p-4">
@@ -157,71 +143,40 @@ const TraderViewModal = ({ isOpen, onClose, trader }) => {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-gray-600">Min Interest Rate</p>
-                        <p className="text-lg font-semibold text-green-600">{trader.minInterestRate}%</p>
+                        <p className="text-lg font-semibold text-green-600">{normalizedTrader.minInterestRate}%</p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-600">Max Interest Rate</p>
-                        <p className="text-lg font-semibold text-green-600">{trader.maxInterestRate}%</p>
+                        <p className="text-lg font-semibold text-green-600">{normalizedTrader.maxInterestRate}%</p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600">Commission</p>
-                        <p className="text-lg font-semibold text-blue-600">{trader.commission}%</p>
+                        <p className="text-sm text-gray-600">Min Investment</p>
+                        <p className="text-lg font-semibold text-blue-600">${normalizedTrader.minInvestment}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600">Max Clients</p>
-                        <p className="text-lg font-semibold text-purple-600">{trader.maxClients}</p>
+                        <p className="text-sm text-gray-600">Max Investment</p>
+                        <p className="text-lg font-semibold text-purple-600">${normalizedTrader.maxInvestment}</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Right Column - Experience & Specializations */}
+                {/* Right Column - Experience & Description */}
                 <div className="space-y-6">
-                  {/* Experience & Status */}
+                  {/* Experience */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                       <FiBriefcase className="h-5 w-5 mr-2 text-indigo-600" />
-                      Experience & Status
+                      Experience
                     </h4>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-600">Experience</span>
-                        <span className="font-semibold text-gray-900">{trader.experience}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-600">Status</span>
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          trader.status === 'active' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {trader.status.charAt(0).toUpperCase() + trader.status.slice(1)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-600">Join Date</span>
-                        <span className="font-semibold text-gray-900">{trader.joinDate}</span>
+                        <span className="text-gray-600">Years of Experience</span>
+                        <span className="font-semibold text-gray-900">{normalizedTrader.experience} years</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Specializations */}
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                      <FiAward className="h-5 w-5 mr-2 text-yellow-600" />
-                      Specializations
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {trader.specializations.map((specialty, index) => (
-                        <span
-                          key={index}
-                          className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full"
-                        >
-                          {specialty}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
 
                   {/* Description */}
                   <div className="bg-gray-50 rounded-lg p-4">
@@ -230,35 +185,10 @@ const TraderViewModal = ({ isOpen, onClose, trader }) => {
                       Description
                     </h4>
                     <p className="text-gray-700 leading-relaxed">
-                      {trader.description || 'No description provided.'}
+                      {normalizedTrader.description}
                     </p>
                   </div>
 
-                  {/* Performance Stats */}
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                      <FiTrendingUp className="h-5 w-5 mr-2 text-green-600" />
-                      Performance Statistics
-                    </h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Return Rate</p>
-                        <p className="text-2xl font-bold text-green-600">{trader.returnRate}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Success Rate</p>
-                        <p className="text-2xl font-bold text-blue-600">{trader.successRate}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Total Clients</p>
-                        <p className="text-2xl font-bold text-purple-600">{trader.totalClients}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-sm text-gray-600">Risk Level</p>
-                        <p className="text-2xl font-bold text-orange-600">{trader.riskLevel}</p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
