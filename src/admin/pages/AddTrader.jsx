@@ -253,8 +253,8 @@ const AddTrader = () => {
       animate="visible"
     >
       {/* Header */}
-      <motion.div variants={itemVariants} className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      <motion.div variants={itemVariants} className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="flex items-center space-x-3 lg:space-x-4">
           <button
             onClick={() => navigate('/admin/manage-trader')}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
@@ -262,12 +262,12 @@ const AddTrader = () => {
             <FiArrowLeft className="h-5 w-5 text-gray-600" />
           </button>
           <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-3 rounded-lg">
-              <FiUserCheck className="h-6 w-6 text-white" />
+            <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 lg:p-3 rounded-lg">
+              <FiUserCheck className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Add New Trader</h1>
-              <p className="text-gray-600">Create a new trader profile with all necessary details</p>
+              <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Add New Trader</h1>
+              <p className="text-sm lg:text-base text-gray-600">Create a new trader profile with all necessary details</p>
             </div>
           </div>
         </div>
@@ -275,14 +275,14 @@ const AddTrader = () => {
 
       {/* Form */}
       <motion.div variants={itemVariants} className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-4 lg:p-6 space-y-4 lg:space-y-6">
           {/* Basic Information */}
           <div className="space-y-6">
             <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-200 pb-2">
               Basic Information
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
               {/* Trader Type */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -292,7 +292,7 @@ const AddTrader = () => {
                   name="traderType"
                   value={formData.traderType}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
                     errors.traderType ? 'border-red-500' : 'border-gray-300'
                   }`}
                 >
@@ -321,9 +321,9 @@ const AddTrader = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                     placeholder="Enter trader name"
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.name ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
+                    errors.name ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   />
                 </div>
                 {errors.name && (
@@ -344,9 +344,9 @@ const AddTrader = () => {
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder="Enter email address"
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.email ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
+                    errors.email ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   />
                 </div>
                 {errors.email && (
@@ -367,9 +367,9 @@ const AddTrader = () => {
                     value={formData.phone}
                     onChange={handleInputChange}
                     placeholder="Enter phone number"
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.phone ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
+                    errors.phone ? 'border-red-500' : 'border-gray-300'
+                  }`}
                   />
                 </div>
                 {errors.phone && (
@@ -385,7 +385,7 @@ const AddTrader = () => {
               Trading Information
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
 
                {/* Minimum Invest Amount */}
                <div>
@@ -402,7 +402,7 @@ const AddTrader = () => {
                     placeholder="100.0"
                     step="0.1"
                     min="0"
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
                       errors.minInvestment ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
@@ -427,7 +427,7 @@ const AddTrader = () => {
                     placeholder="1000.0"
                     step="0.1"
                     min="0"
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
                       errors.maxInvestment ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
@@ -453,7 +453,7 @@ const AddTrader = () => {
                     step="0.1"
                     min="0"
                     max="100"
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
                       errors.minInterstRate ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
@@ -479,7 +479,7 @@ const AddTrader = () => {
                     step="0.1"
                     min="0"
                     max="100"
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
                       errors.maxInterstRate ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
@@ -504,7 +504,7 @@ const AddTrader = () => {
                     placeholder="5"
                     min="0"
                     max="50"
-                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base ${
                       errors.experience ? 'border-red-500' : 'border-gray-300'
                     }`}
                   />
@@ -531,7 +531,7 @@ const AddTrader = () => {
                   onChange={handleInputChange}
                   placeholder="Describe the trader's expertise, trading style, and any additional information..."
                   rows={4}
-                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none ${
+                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm lg:text-base ${
                     errors.description ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
@@ -597,34 +597,34 @@ const AddTrader = () => {
           </div>
 
           {/* Form Actions */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row gap-3 lg:gap-4 pt-4 lg:pt-6 border-t border-gray-200">
             <button
               type="button"
               onClick={handleCancel}
-              className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer font-medium"
+              className="px-4 lg:px-6 py-2 lg:py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer font-medium text-sm lg:text-base"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={resetForm}
-              className="px-6 py-3 border border-orange-300 rounded-lg text-orange-700 hover:bg-orange-50 transition-colors cursor-pointer font-medium"
+              className="px-4 lg:px-6 py-2 lg:py-3 border border-orange-300 rounded-lg text-orange-700 hover:bg-orange-50 transition-colors cursor-pointer font-medium text-sm lg:text-base"
             >
               Reset Form
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 sm:flex-none bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+              className="flex-1 sm:flex-none bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 lg:px-6 py-2 lg:py-3 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl text-sm lg:text-base"
             >
               {isSubmitting ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 lg:h-5 lg:w-5 border-b-2 border-white"></div>
                   <span>Creating Trader...</span>
                 </>
               ) : (
                 <>
-                  <FiSave className="h-5 w-5" />
+                  <FiSave className="h-4 w-4 lg:h-5 lg:w-5" />
                   <span>Create Trader</span>
                 </>
               )}
