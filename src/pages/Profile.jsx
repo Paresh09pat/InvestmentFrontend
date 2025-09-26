@@ -18,7 +18,6 @@ import {
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 import { USER_VERIFICATION_STATUS, VITE_APP_API_URL } from '../utils/constants';
-import Navbar from '../components/common/Navbar';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Input from '../components/forms/Input';
@@ -260,8 +259,6 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
       <div className="pt-20 pb-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-8">

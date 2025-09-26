@@ -13,7 +13,6 @@ import {
   FiChevronLeft,
   FiChevronRight,
 } from "react-icons/fi";
-import Navbar from "../components/common/Navbar";
 import Card from "../components/common/Card";
 import Button from "../components/common/Button";
 import Input from "../components/forms/Input";
@@ -237,7 +236,6 @@ const Notifications = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* <Navbar /> */}
       {loading && (
         <div className="min-h-screen flex items-center justify-center">
           <LoadingSpinner size="lg" />

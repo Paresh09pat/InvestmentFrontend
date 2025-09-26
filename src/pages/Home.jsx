@@ -10,7 +10,6 @@ import {
   FiZap
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
-import Navbar from '../components/common/Navbar';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
 import { motion, useInView, useAnimation, useMotionValue, useSpring } from 'framer-motion';
@@ -152,8 +151,6 @@ const Home = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-
-      <Navbar />
 
       {/* Floating Navigation Dots - Desktop Only */}
 

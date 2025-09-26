@@ -3,7 +3,6 @@ import { useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FiUpload, FiQrCode, FiCheck, FiArrowLeft } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
-import Navbar from '../components/common/Navbar';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Input from '../components/forms/Input';
@@ -147,7 +146,6 @@ const PaymentVerification = () => {
   if (!investmentData) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
         <div className="pt-20 pb-8">
           <div className="max-w-2xl mx-auto px-4">
             <Card className="text-center">
@@ -169,8 +167,6 @@ const PaymentVerification = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
       <div className="pt-20 pb-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}

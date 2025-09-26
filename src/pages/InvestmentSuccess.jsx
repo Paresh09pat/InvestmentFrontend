@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiCheck, FiHome } from 'react-icons/fi';
-import Navbar from '../components/common/Navbar';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 
@@ -36,8 +35,6 @@ const InvestmentSuccess = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
       <div className="pt-20 pb-8">
         <div className="max-w-2xl mx-auto px-4">
           <Card className="text-center p-8">

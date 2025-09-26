@@ -66,6 +66,9 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Navbar - Show on all pages except admin */}
+      {!location.pathname.startsWith('/admin') && <Navbar />}
+      
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
@@ -85,7 +88,6 @@ function App() {
         {/* Protected User Routes */}
         <Route path="/*" element={
           <ProtectedRoute>
-            <Navbar />
             <Routes>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/profile" element={<Profile />} />
@@ -135,7 +137,7 @@ function App() {
       </Routes>
 
       {/* Footer - Show on all pages except admin */}
-      {!location.pathname.startsWith('/admin') || !location.pathname.startsWith('/login') || !location.pathname.startsWith('/signup') && <Footer />}
+      {!location.pathname.startsWith('/admin') && <Footer />}
 
       {/* Toast Container */}
       <ToastContainer

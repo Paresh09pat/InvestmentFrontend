@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { FiShield, FiMail, FiPhone, FiMapPin, FiClock, FiSend, FiMessageCircle, FiHeadphones } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import Navbar from '../components/common/Navbar';
   
 
 const Contact = () => {
@@ -112,8 +111,6 @@ const Contact = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
-      <Navbar />
-      
       {/* Background Elements */}
       <motion.div 
         className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl"
