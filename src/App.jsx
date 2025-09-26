@@ -36,6 +36,8 @@ import AdminProfile from './admin/pages/AdminProfile';
 import ManageTrader from './admin/pages/ManageTrader';
 import AddTrader from './admin/pages/AddTrader';
 import CardManagement from './admin/pages/CardManagement';
+import AdminNotifications from './admin/pages/AdminNotifications';
+import AdminTransactionHistory from './admin/pages/AdminTransactionHistory';
 // import AdminSettings from './admin/pages/AdminSettings';
 
 // Components
@@ -127,7 +129,10 @@ function App() {
           <Route path="documents" element={<DocumentVerification />} />
           <Route path="manage-trader/add-trader" element={<AddTrader />} />
           <Route path="manage-trader" element={<ManageTrader />} />
+          <Route path="notifications" element={<AdminNotifications />} />
+          <Route path="transactions" element={<AdminTransactionHistory />} />
           <Route path="profile" element={<AdminProfile />} />
+          <Route path="card" element={<CardManagement />} />
           {/* <Route path="settings" element={<AdminSettings />} /> */}
           <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
         </Route>
