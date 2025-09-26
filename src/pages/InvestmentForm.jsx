@@ -10,6 +10,9 @@ import Input from '../components/forms/Input';
 import FileUpload from '../components/forms/FileUpload';
 import MembershipCard from '../components/MembershipCard';
 import TraderSelection from '../components/TraderSelection';
+import { toast } from 'react-toastify';
+import axios from 'axios';
+import { VITE_APP_API_URL } from '../utils/constants';
 
 const InvestmentForm = () => {
   const { user } = useAuth();
@@ -27,6 +30,7 @@ const InvestmentForm = () => {
   const [selectedMembership, setSelectedMembership] = useState(null);
   const [selectedTrader, setSelectedTrader] = useState(null);
   const [currentStep, setCurrentStep] = useState('membership'); // 'membership', 'trader', 'form'
+  const [plans, setPlans] = useState([]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -45,15 +49,16 @@ const InvestmentForm = () => {
   };
 
   const handleMembershipSelect = (tier) => {
+    console.log("tier>>",tier);
     setSelectedMembership(tier);
     setCurrentStep('trader');
     setSelectedTrader(null); // Reset trader selection when changing membership
-    
+
     // Auto-scroll to trader selection section
     setTimeout(() => {
       const traderSection = document.getElementById('trader-selection');
       if (traderSection) {
-        traderSection.scrollIntoView({ 
+        traderSection.scrollIntoView({
           behavior: 'smooth',
           block: 'start'
         });
@@ -72,7 +77,7 @@ const InvestmentForm = () => {
       setTimeout(() => {
         const formSection = document.getElementById('investment-form');
         if (formSection) {
-          formSection.scrollIntoView({ 
+          formSection.scrollIntoView({
             behavior: 'smooth',
             block: 'start'
           });
@@ -93,7 +98,7 @@ const InvestmentForm = () => {
     setTimeout(() => {
       const traderSection = document.getElementById('trader-selection');
       if (traderSection) {
-        traderSection.scrollIntoView({ 
+        traderSection.scrollIntoView({
           behavior: 'smooth',
           block: 'start'
         });
@@ -172,28 +177,45 @@ const InvestmentForm = () => {
     return limits[tier] || { min: 1000, max: 1000000 };
   };
 
+  const getAllPlans = async () => {
+    try {
+      const res = await axios.get(`${VITE_APP_API_URL}/api/auth/plans`, {
+        withCredentials: true
+      });
+      setPlans(res.data.plans)
+    }
+    catch (err) {
+      console.log(err);
+      toast.error(err.message)
+    }
+  }
+
+  useEffect(()=>{
+    getAllPlans()
+  },[])
+
   const validateAmount = (amount, tier) => {
     const limits = getMembershipLimits(tier);
     const numAmount = parseFloat(amount);
-    
+
     if (!amount || isNaN(numAmount)) {
       return 'Please enter a valid amount';
     }
-    
+
     if (numAmount < limits.min) {
       return `Minimum investment for ${tier} tier is $${limits.min.toLocaleString()}`;
     }
-    
+
     if (numAmount > limits.max) {
       return `Maximum investment for ${tier} tier is $${limits.max.toLocaleString()}`;
     }
-    
+
     return null;
   };
 
   const handleProceedToInvestment = (e) => {
     e.preventDefault();
-    
+
     const amountError = validateAmount(formData.amount, selectedMembership);
     if (amountError) {
       setErrors(prev => ({ ...prev, amount: amountError }));
@@ -222,10 +244,10 @@ const InvestmentForm = () => {
       investmentDate: new Date().toISOString().split('T')[0],
       timestamp: Date.now()
     };
-        
+
     // Store the result in localStorage
     localStorage.setItem('investmentResult', JSON.stringify(result));
-    
+
     // Navigate to success page
     navigate('/investment-success');
   };
@@ -240,6 +262,9 @@ const InvestmentForm = () => {
 
   const returns = calculateReturns();
 
+
+
+
   const renderMembershipSelection = () => (
     <div className="space-y-8">
       <div className="text-center">
@@ -252,7 +277,16 @@ const InvestmentForm = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <MembershipCard
+        {plans.map((plan) => (
+          <MembershipCard
+            key={plan._id}
+            tier={plan.name}
+            onSelect={handleMembershipSelect}
+            isSelected={selectedMembership === plan.name}
+            planData={plan}
+          />
+        ))}
+        {/* <MembershipCard
           tier="silver"
           onSelect={handleMembershipSelect}
           isSelected={selectedMembership === 'silver'}
@@ -266,7 +300,7 @@ const InvestmentForm = () => {
           tier="platinum"
           onSelect={handleMembershipSelect}
           isSelected={selectedMembership === 'platinum'}
-        />
+        /> */}
       </div>
 
       {/* Trader Selection Section */}
@@ -284,7 +318,7 @@ const InvestmentForm = () => {
 
   const renderInvestmentForm = () => {
     const limits = getMembershipLimits(selectedMembership);
-    
+
     return (
       <div id="investment-form" className="space-y-6">
         {/* Header with back button */}
@@ -347,88 +381,88 @@ const InvestmentForm = () => {
                   </p>
                 </div>
 
-                  {/* Auto-reinvest checkbox */}
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      id="autoReinvest"
-                      name="autoReinvest"
-                      checked={formData.autoReinvest}
-                      onChange={handleChange}
-                      disabled={showPaymentFields}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
-                    />
-                    <label htmlFor="autoReinvest" className="text-sm text-gray-700">
-                      Auto-reinvest returns at maturity
-                    </label>
-                  </div>
+                {/* Auto-reinvest checkbox */}
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    id="autoReinvest"
+                    name="autoReinvest"
+                    checked={formData.autoReinvest}
+                    onChange={handleChange}
+                    disabled={showPaymentFields}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
+                  />
+                  <label htmlFor="autoReinvest" className="text-sm text-gray-700">
+                    Auto-reinvest returns at maturity
+                  </label>
+                </div>
 
-                  {/* Payment Verification Fields */}
-                  {showPaymentFields && (
-                    <div className="space-y-6 p-6 bg-blue-50 rounded-lg border border-blue-200">
-                      <div className="flex items-center space-x-2 mb-4">
-                        <FiCreditCard className="text-blue-600" size={20} />
-                        <h3 className="text-lg font-semibold text-blue-800">
-                          Payment Verification
-                        </h3>
-                      </div>
-
-                      {/* QR Code Scanner Placeholder */}
-                      <div className="bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 text-center">
-                        <div className="w-48 h-48 bg-gray-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                          <div className="text-center">
-                            <div className="w-32 h-32 bg-gray-200 rounded-lg mx-auto mb-2 flex items-center justify-center">
-                              <span className="text-gray-500 text-sm">QR Code Scanner</span>
-                            </div>
-                            <p className="text-xs text-gray-500">Admin will add scanner here</p>
-                          </div>
-                        </div>
-                        <p className="text-sm text-gray-600">
-                          Scan the QR code to make payment
-                        </p>
-                      </div>
-
-                      {/* Transaction ID */}
-                      <Input
-                        label="Transaction ID"
-                        type="text"
-                        name="transactionId"
-                        value={formData.transactionId}
-                        onChange={handleChange}
-                        placeholder="Enter transaction ID from your payment"
-                        icon={<FiCreditCard />}
-                        error={errors.transactionId}
-                        required
-                      />
-
-                      {/* Payment Screenshot Upload */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Payment Screenshot *
-                        </label>
-                        <FileUpload
-                          onFileChange={handleFileUpload}
-                          accept="image/*"
-                          placeholder="Upload payment screenshot (JPG, PNG, etc.)"
-                          error={errors.paymentScreenshot}
-                        />
-                        {errors.paymentScreenshot && (
-                          <p className="mt-1 text-sm text-red-600">{errors.paymentScreenshot}</p>
-                        )}
-                      </div>
-
-                      {/* Payment Instructions */}
-                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                        <h4 className="font-semibold text-yellow-800 mb-2">Payment Instructions:</h4>
-                        <ul className="text-sm text-yellow-700 space-y-1">
-                          <li>• Scan the QR code to make payment</li>
-                          <li>• Save the transaction ID from your payment app</li>
-                          <li>• Take a screenshot of the payment confirmation</li>
-                          <li>• Upload both details to complete your investment</li>
-                        </ul>
-                      </div>
+                {/* Payment Verification Fields */}
+                {showPaymentFields && (
+                  <div className="space-y-6 p-6 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <FiCreditCard className="text-blue-600" size={20} />
+                      <h3 className="text-lg font-semibold text-blue-800">
+                        Payment Verification
+                      </h3>
                     </div>
-                  )}
+
+                    {/* QR Code Scanner Placeholder */}
+                    <div className="bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 text-center">
+                      <div className="w-48 h-48 bg-gray-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="w-32 h-32 bg-gray-200 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                            <span className="text-gray-500 text-sm">QR Code Scanner</span>
+                          </div>
+                          <p className="text-xs text-gray-500">Admin will add scanner here</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        Scan the QR code to make payment
+                      </p>
+                    </div>
+
+                    {/* Transaction ID */}
+                    <Input
+                      label="Transaction ID"
+                      type="text"
+                      name="transactionId"
+                      value={formData.transactionId}
+                      onChange={handleChange}
+                      placeholder="Enter transaction ID from your payment"
+                      icon={<FiCreditCard />}
+                      error={errors.transactionId}
+                      required
+                    />
+
+                    {/* Payment Screenshot Upload */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Payment Screenshot *
+                      </label>
+                      <FileUpload
+                        onFileChange={handleFileUpload}
+                        accept="image/*"
+                        placeholder="Upload payment screenshot (JPG, PNG, etc.)"
+                        error={errors.paymentScreenshot}
+                      />
+                      {errors.paymentScreenshot && (
+                        <p className="mt-1 text-sm text-red-600">{errors.paymentScreenshot}</p>
+                      )}
+                    </div>
+
+                    {/* Payment Instructions */}
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-yellow-800 mb-2">Payment Instructions:</h4>
+                      <ul className="text-sm text-yellow-700 space-y-1">
+                        <li>• Scan the QR code to make payment</li>
+                        <li>• Save the transaction ID from your payment app</li>
+                        <li>• Take a screenshot of the payment confirmation</li>
+                        <li>• Upload both details to complete your investment</li>
+                      </ul>
+                    </div>
+                  </div>
+                )}
 
                 {/* Submit Button */}
                 <Button

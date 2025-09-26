@@ -126,6 +126,25 @@ const ManageTrader = () => {
     }
   }, [debouncedSearchTerm, selectedTier]);
 
+  const deleteTrader = async(trader)=>{
+    console.log("trader>>",trader)
+    try{
+      const res = await axios.delete(`${VITE_APP_API_URL}/api/admin/trader/${trader._id}`);
+      if(res.data.success){
+        setTraders(traders.filter(trader => trader.id !== trader.id));
+        setSelectedTrader(null);
+        setIsViewModalOpen(false);
+        setIsEditModalOpen(false);
+        setError(null);
+        getTraders();
+      }
+    }
+    catch(err){
+      console.error('Error deleting trader:', err);
+      setError('Failed to delete trader');
+    }
+  }
+
   useEffect(() => {
     getTraders();
   }, [getTraders]);
@@ -358,7 +377,7 @@ const ManageTrader = () => {
                             <FiEdit className="h-4 w-4 mr-1" />
                             Edit
                           </button>
-                          <button className="flex-1 py-2 px-3 text-red-600 hover:text-red-900 text-xs lg:text-sm font-medium cursor-pointer border border-red-200 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center">
+                          <button className="flex-1 py-2 px-3 text-red-600 hover:text-red-900 text-xs lg:text-sm font-medium cursor-pointer border border-red-200 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center" onClick={()=>deleteTrader(trader)}>
                             <FiTrash2 className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
                             Delete
                           </button>
