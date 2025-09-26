@@ -9,10 +9,13 @@ import {
   FiLogOut,
   FiShield,
   FiUser,
-  FiUserCheck
+  FiUserCheck,
+  FiBell,
+  FiDollarSign
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/common/Button';
+import AdminNotificationBell from './AdminNotificationBell';
 
 const AdminSidebar = ({ isCollapsed, onToggle }) => {
   const location = useLocation();
@@ -26,6 +29,8 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
     { name: 'Investments', path: '/admin/investments', icon: FiTrendingUp },
     { name: 'Documents', path: '/admin/documents', icon: FiFileText },
     { name: 'Manage Trader', path: '/admin/manage-trader', icon: FiUserCheck },
+    { name: 'Transactions', path: '/admin/transactions', icon: FiDollarSign },
+    { name: 'Notifications', path: '/admin/notifications', icon: FiBell },
     { name: 'Profile', path: '/admin/profile', icon: FiUser },
     // { name: 'Settings', path: '/admin/settings', icon: FiSettings },
   ];
@@ -74,6 +79,9 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
             </div>
           </div>
           <div className="flex items-center space-x-2">
+            {/* Notification Bell */}
+            <AdminNotificationBell />
+            
             {/* Mobile Close Button - Only show on mobile */}
             {isMobile && (
               <button
