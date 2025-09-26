@@ -128,6 +128,7 @@ function App() {
           <Route path="manage-trader/add-trader" element={<AddTrader />} />
           <Route path="manage-trader" element={<ManageTrader />} />
           <Route path="profile" element={<AdminProfile />} />
+          <Route path="card" element={<CardManagement />} />
           {/* <Route path="settings" element={<AdminSettings />} /> */}
           <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
         </Route>

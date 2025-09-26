@@ -150,7 +150,7 @@ const ManageTrader = () => {
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <button 
-            onClick={() => navigate('/admin/manage-trader/card-management')}
+            onClick={() => navigate('/admin/card  ')}
             className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 flex items-center justify-center space-x-2 cursor-pointer text-sm lg:text-base"
           >
             <FiCreditCard className="h-4 w-4" />
