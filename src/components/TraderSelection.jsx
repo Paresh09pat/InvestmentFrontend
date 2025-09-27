@@ -88,17 +88,7 @@ const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader, trade
           </div>
           <h4 className="text-xl font-semibold text-gray-900">{trader.name}</h4>
           <p className="text-gray-600">{trader.experience} experience</p>
-          <div className="flex items-center justify-center mt-2">
-            {[...Array(5)].map((_, i) => (
-              <FiStar
-                key={i}
-                className={`h-4 w-4 ${
-                  i < Math.floor(trader.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                }`}
-              />
-            ))}
-            <span className="ml-2 text-sm text-gray-600">({trader.rating})</span>
-          </div>
+
         </div>
 
         <div className="space-y-4">
@@ -173,7 +163,7 @@ const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader, trade
           </div>
         </div>
       ) : transformedTraders.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
           {transformedTraders.map((trader, index) => (
           <motion.div
             key={trader.id}
@@ -228,18 +218,7 @@ const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader, trade
                 </button>
               </div>
 
-              {/* Rating */}
-              <div className="flex items-center mb-3">
-                {[...Array(5)].map((_, i) => (
-                  <FiStar
-                    key={i}
-                    className={`h-4 w-4 ${
-                      i < Math.floor(trader.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                    }`}
-                  />
-                ))}
-                <span className="ml-2 text-sm text-gray-600">({trader.rating})</span>
-              </div>
+               
 
               {/* Stats */}
               <div className="grid grid-cols-2 gap-3 mb-3">
@@ -297,7 +276,7 @@ const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader, trade
             </div>
           </motion.div>
         ))}
-        </div>
+      </div>
       ) : (
         <div className="flex justify-center items-center py-16">
           <div className="text-center">

@@ -20,7 +20,8 @@ import {
 import { useAuth } from '../context/AuthContext';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
-import { INVESTMENT_STATUS } from '../utils/constants';
+import { INVESTMENT_STATUS, VITE_APP_API_URL } from '../utils/constants';
+import axios from 'axios';
 
 const InvestmentHistory = () => {
   const { user } = useAuth();
@@ -38,8 +39,7 @@ const InvestmentHistory = () => {
       currentValue: 108000,
       monthlyReturns: 2000,
       transactionId: 'TXN123456789',
-      paymentScreenshot: 'payment_1.jpg',
-      autoReinvest: true
+      paymentScreenshot: 'payment_1.jpg'
     },
     {
       id: 2,
@@ -51,8 +51,7 @@ const InvestmentHistory = () => {
       currentValue: 54000,
       monthlyReturns: 1333,
       transactionId: 'TXN987654321',
-      paymentScreenshot: 'payment_2.jpg',
-      autoReinvest: false
+      paymentScreenshot: 'payment_2.jpg'
     },
     {
       id: 3,
@@ -64,8 +63,7 @@ const InvestmentHistory = () => {
       currentValue: 78000,
       monthlyReturns: 1500,
       transactionId: 'TXN456789123',
-      paymentScreenshot: 'payment_3.jpg',
-      autoReinvest: true
+      paymentScreenshot: 'payment_3.jpg'
     },
     {
       id: 4,
@@ -77,8 +75,7 @@ const InvestmentHistory = () => {
       currentValue: 25000,
       monthlyReturns: 667,
       transactionId: 'TXN789123456',
-      paymentScreenshot: 'payment_4.jpg',
-      autoReinvest: false
+      paymentScreenshot: 'payment_4.jpg'
     }
   ]);
 
@@ -214,6 +211,22 @@ const InvestmentHistory = () => {
   const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
   const totalReturns = investments.reduce((sum, inv) => sum + inv.expectedReturns, 0);
   const activeInvestments = investments.filter(inv => inv.status === INVESTMENT_STATUS.ACTIVE).length;
+
+
+  const getInvestments = async()=>{
+    try{
+      const response = await axios.get(`${VITE_APP_API_URL}/api/transaction`, { withCredentials: true });
+      // setInvestments(response.data.investments);
+    }
+    catch(err){
+      console.log(err);
+      toast.error("Failed to fetch investments");
+    }
+  }
+
+  useEffect(()=>{
+    getInvestments();
+  })
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -476,12 +489,6 @@ const InvestmentHistory = () => {
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(selectedInvestment.status)}`}>
                           {getStatusIcon(selectedInvestment.status)}
                           <span className="ml-1">{selectedInvestment.status.charAt(0).toUpperCase() + selectedInvestment.status.slice(1)}</span>
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Auto-reinvest:</span>
-                        <span className={selectedInvestment.autoReinvest ? 'text-green-600' : 'text-gray-600'}>
-                          {selectedInvestment.autoReinvest ? 'Yes' : 'No'}
                         </span>
                       </div>
                     </div>

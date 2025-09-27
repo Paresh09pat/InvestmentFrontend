@@ -82,7 +82,7 @@ const MembershipCard = ({ tier, onSelect, isSelected = false, planData }) => {
       transition={{ duration: 0.5 }}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      onClick={() => onSelect(tier)}
+      onClick={() => onSelect(tier, planData)}
       className={`
         relative flex flex-col justify-between cursor-pointer rounded-2xl p-6 border-2 transition-all duration-300
         ${isSelected 
