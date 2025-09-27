@@ -31,6 +31,8 @@ const InvestmentForm = () => {
   const [selectedTrader, setSelectedTrader] = useState(null);
   const [currentStep, setCurrentStep] = useState('membership'); // 'membership', 'trader', 'form'
   const [plans, setPlans] = useState([]);
+  const [traders, setTraders] = useState([]);
+  const [isLoadingTraders, setIsLoadingTraders] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -48,11 +50,30 @@ const InvestmentForm = () => {
     }
   };
 
+  const getTraders = async(tier) => {
+    console.log("tier>>", tier);
+    setIsLoadingTraders(true);
+    try{
+      const res = await axios.get(`${VITE_APP_API_URL}/api/auth/traders?search=${tier}`);
+      console.log("res>>",res.data.traders);
+      setTraders(res.data.traders);
+    }
+    catch(err){
+      console.log(err);
+      toast.error('Failed to fetch traders');
+    }
+    finally {
+      setIsLoadingTraders(false);
+    }
+  }
+
   const handleMembershipSelect = (tier) => {
     console.log("tier>>",tier);
     setSelectedMembership(tier);
     setCurrentStep('trader');
-    setSelectedTrader(null); // Reset trader selection when changing membership
+    setSelectedTrader(null); 
+
+    getTraders(tier);
 
     // Auto-scroll to trader selection section
     setTimeout(() => {
@@ -310,6 +331,8 @@ const InvestmentForm = () => {
             membershipTier={selectedMembership}
             onTraderSelect={handleTraderSelect}
             selectedTrader={selectedTrader}
+            traders={traders}
+            isLoading={isLoadingTraders}
           />
         </div>
       )}

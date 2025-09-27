@@ -127,8 +127,8 @@ function App() {
           <Route path="users" element={<UserManagement />} />
           <Route path="investments" element={<InvestmentManagement />} />
           <Route path="documents" element={<DocumentVerification />} />
-          <Route path="manage-trader/add-trader" element={<AddTrader />} />
           <Route path="manage-trader" element={<ManageTrader />} />
+          <Route path="manage-trader/add-trader" element={<AddTrader />} />
           <Route path="notifications" element={<AdminNotifications />} />
           <Route path="transactions" element={<AdminTransactionHistory />} />
           <Route path="profile" element={<AdminProfile />} />
