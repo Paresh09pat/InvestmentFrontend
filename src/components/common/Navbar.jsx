@@ -1,6 +1,6 @@
 // Navbar component
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   FiMenu,
   FiX,
@@ -20,6 +20,7 @@ const Navbar = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,6 +37,11 @@ const Navbar = () => {
     logout();
     navigate("/");
     setIsProfileOpen(false);
+  };
+
+  // Function to check if a link is active
+  const isActiveLink = (path) => {
+    return location.pathname === path;
   };
 
   const navLinks = [
@@ -86,7 +92,11 @@ const Navbar = () => {
                   <Link
                     key={link.name}
                     to={link.path}
-                    className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+                    className={`flex items-center space-x-1 transition-colors duration-200 font-medium px-3 py-2 rounded-lg ${
+                      isActiveLink(link.path)
+                        ? "text-blue-600 bg-blue-50"
+                        : "text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                    }`}
                   >
                     <link.icon size={18} />
                     <span>{link.name}</span>
@@ -180,7 +190,11 @@ const Navbar = () => {
                   <Link
                     key={link.name}
                     to={link.path}
-                    className="flex items-center space-x-3 py-2 text-gray-700 hover:text-blue-600 transition-colors duration-200"
+                    className={`flex items-center space-x-3 py-2 px-3 rounded-lg transition-colors duration-200 ${
+                      isActiveLink(link.path)
+                        ? "text-blue-600 bg-blue-50"
+                        : "text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                    }`}
                     onClick={() => setIsOpen(false)}
                   >
                     <link.icon size={20} />

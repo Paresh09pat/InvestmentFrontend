@@ -20,81 +20,39 @@ import {
 import { useAuth } from '../context/AuthContext';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
+import Pagination from '../components/common/Pagination';
 import { INVESTMENT_STATUS, VITE_APP_API_URL } from '../utils/constants';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const InvestmentHistory = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Sample investment history data (replace with actual API call)
-  const [investments, setInvestments] = useState([
-    {
-      id: 1,
-      amount: 100000,
-      investmentDate: '2024-01-20',
-      maturityDate: '2024-07-20',
-      status: INVESTMENT_STATUS.ACTIVE,
-      expectedReturns: 12000,
-      currentValue: 108000,
-      monthlyReturns: 2000,
-      transactionId: 'TXN123456789',
-      paymentScreenshot: 'payment_1.jpg'
-    },
-    {
-      id: 2,
-      amount: 50000,
-      investmentDate: '2023-12-15',
-      maturityDate: '2024-03-15',
-      status: INVESTMENT_STATUS.COMPLETED,
-      expectedReturns: 4000,
-      currentValue: 54000,
-      monthlyReturns: 1333,
-      transactionId: 'TXN987654321',
-      paymentScreenshot: 'payment_2.jpg'
-    },
-    {
-      id: 3,
-      amount: 75000,
-      investmentDate: '2024-02-25',
-      maturityDate: '2024-08-25',
-      status: INVESTMENT_STATUS.ACTIVE,
-      expectedReturns: 9000,
-      currentValue: 78000,
-      monthlyReturns: 1500,
-      transactionId: 'TXN456789123',
-      paymentScreenshot: 'payment_3.jpg'
-    },
-    {
-      id: 4,
-      amount: 25000,
-      investmentDate: '2024-03-12',
-      maturityDate: '2024-06-12',
-      status: INVESTMENT_STATUS.PENDING,
-      expectedReturns: 2000,
-      currentValue: 25000,
-      monthlyReturns: 667,
-      transactionId: 'TXN789123456',
-      paymentScreenshot: 'payment_4.jpg'
-    }
-  ]);
+  // Investment history data from API
+  const [investments, setInvestments] = useState([]);
 
   const [filteredInvestments, setFilteredInvestments] = useState(investments);
-  const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
   const [sortBy, setSortBy] = useState('date');
   const [sortOrder, setSortOrder] = useState('desc');
   const [selectedInvestment, setSelectedInvestment] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10
+  });
 
   // Filter and sort investments
   useEffect(() => {
     let filtered = investments.filter(investment => {
-      const matchesSearch = investment.transactionId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           investment.id.toString().includes(searchTerm);
       const matchesStatus = statusFilter === 'all' || investment.status === statusFilter;
-      return matchesSearch && matchesStatus;
+      const matchesType = typeFilter === 'all' || investment.type === typeFilter;
+      return matchesStatus && matchesType;
     });
 
     // Sort investments
@@ -106,14 +64,14 @@ const InvestmentHistory = () => {
           aValue = a.amount;
           bValue = b.amount;
           break;
-        case 'returns':
-          aValue = a.expectedReturns;
-          bValue = b.expectedReturns;
+        case 'plan':
+          aValue = a.plan;
+          bValue = b.plan;
           break;
         case 'date':
         default:
-          aValue = new Date(a.investmentDate);
-          bValue = new Date(b.investmentDate);
+          aValue = new Date(a.createdAt);
+          bValue = new Date(b.createdAt);
           break;
       }
 
@@ -125,14 +83,17 @@ const InvestmentHistory = () => {
     });
 
     setFilteredInvestments(filtered);
-  }, [investments, searchTerm, statusFilter, sortBy, sortOrder]);
+  }, [investments, statusFilter, typeFilter, sortBy, sortOrder]);
 
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
-  };
 
   const handleStatusFilter = (status) => {
     setStatusFilter(status);
+    setPagination(prev => ({ ...prev, currentPage: 1 }));
+  };
+
+  const handleTypeFilter = (type) => {
+    setTypeFilter(type);
+    setPagination(prev => ({ ...prev, currentPage: 1 }));
   };
 
   const handleSort = (field) => {
@@ -142,6 +103,11 @@ const InvestmentHistory = () => {
       setSortBy(field);
       setSortOrder('desc');
     }
+    setPagination(prev => ({ ...prev, currentPage: 1 }));
+  };
+
+  const handlePageChange = (page) => {
+    setPagination(prev => ({ ...prev, currentPage: page }));
   };
 
   const handleViewDetails = (investment) => {
@@ -156,13 +122,11 @@ const InvestmentHistory = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case INVESTMENT_STATUS.ACTIVE:
+      case 'completed':
         return 'bg-green-100 text-green-800 border-green-200';
-      case INVESTMENT_STATUS.COMPLETED:
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case INVESTMENT_STATUS.PENDING:
+      case 'pending':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case INVESTMENT_STATUS.CANCELLED:
+      case 'failed':
         return 'bg-red-100 text-red-800 border-red-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -171,13 +135,11 @@ const InvestmentHistory = () => {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case INVESTMENT_STATUS.ACTIVE:
-        return <FiClock className="text-green-600" />;
-      case INVESTMENT_STATUS.COMPLETED:
-        return <FiCheckCircle className="text-blue-600" />;
-      case INVESTMENT_STATUS.PENDING:
+      case 'completed':
+        return <FiCheckCircle className="text-green-600" />;
+      case 'pending':
         return <FiAlertCircle className="text-yellow-600" />;
-      case INVESTMENT_STATUS.CANCELLED:
+      case 'failed':
         return <FiXCircle className="text-red-600" />;
       default:
         return <FiClock className="text-gray-600" />;
@@ -209,24 +171,47 @@ const InvestmentHistory = () => {
   };
 
   const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
-  const totalReturns = investments.reduce((sum, inv) => sum + inv.expectedReturns, 0);
-  const activeInvestments = investments.filter(inv => inv.status === INVESTMENT_STATUS.ACTIVE).length;
+  const pendingInvestments = investments.filter(inv => inv.status === 'pending').length;
+  const completedInvestments = investments.filter(inv => inv.status === 'completed').length;
 
 
   const getInvestments = async()=>{
     try{
-      const response = await axios.get(`${VITE_APP_API_URL}/api/transaction`, { withCredentials: true });
-      // setInvestments(response.data.investments);
+      setLoading(true);
+      
+      // Build query parameters
+      const queryParams = new URLSearchParams();
+      
+      if (statusFilter !== 'all') queryParams.append('status', statusFilter);
+      if (typeFilter !== 'all') queryParams.append('type', typeFilter);
+      if (sortBy) queryParams.append('sortBy', sortBy);
+      if (sortOrder) queryParams.append('sortOrder', sortOrder);
+      queryParams.append('page', pagination.currentPage);
+      queryParams.append('limit', pagination.itemsPerPage);
+      
+      const response = await axios.get(`${VITE_APP_API_URL}/api/transaction?${queryParams.toString()}`, { withCredentials: true });
+      
+      if(response.data.success) {
+        setInvestments(response.data.data);
+        setFilteredInvestments(response.data.data);
+        if(response.data.pagination) {
+          setPagination(response.data.pagination);
+        }
+      }
     }
     catch(err){
       console.log(err);
       toast.error("Failed to fetch investments");
     }
+    finally {
+      setLoading(false);
+    }
   }
 
   useEffect(()=>{
     getInvestments();
-  })
+  }, [statusFilter, typeFilter, sortBy, sortOrder, pagination.currentPage, pagination.itemsPerPage])
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -279,23 +264,23 @@ const InvestmentHistory = () => {
             <Card>
               <div className="flex items-center">
                 <div className="p-3 bg-green-100 rounded-lg">
-                  <FiDollarSign className="text-green-600" size={24} />
+                  <FiCheckCircle className="text-green-600" size={24} />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Returns</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalReturns)}</p>
+                  <p className="text-sm font-medium text-gray-600">Completed</p>
+                  <p className="text-2xl font-bold text-gray-900">{completedInvestments}</p>
                 </div>
               </div>
             </Card>
 
             <Card>
               <div className="flex items-center">
-                <div className="p-3 bg-purple-100 rounded-lg">
-                  <FiClock className="text-purple-600" size={24} />
+                <div className="p-3 bg-yellow-100 rounded-lg">
+                  <FiClock className="text-yellow-600" size={24} />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Active Investments</p>
-                  <p className="text-2xl font-bold text-gray-900">{activeInvestments}</p>
+                  <p className="text-sm font-medium text-gray-600">Pending</p>
+                  <p className="text-2xl font-bold text-gray-900">{pendingInvestments}</p>
                 </div>
               </div>
             </Card>
@@ -313,26 +298,14 @@ const InvestmentHistory = () => {
             </Card>
           </div>
 
-          {/* Filters and Search */}
+          {/* Filters */}
           <Card className="mb-6">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-              {/* Search */}
-              <div className="relative flex-1 max-w-md">
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search by Transaction ID or Investment ID..."
-                  value={searchTerm}
-                  onChange={handleSearch}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
               {/* Status Filter */}
               <div className="flex items-center space-x-2">
                 <span className="text-sm font-medium text-gray-700">Status:</span>
                 <div className="flex space-x-2">
-                  {['all', ...Object.values(INVESTMENT_STATUS)].map((status) => (
+                  {['all', 'pending', 'completed', 'failed'].map((status) => (
                     <button
                       key={status}
                       onClick={() => handleStatusFilter(status)}
@@ -348,6 +321,26 @@ const InvestmentHistory = () => {
                 </div>
               </div>
 
+              {/* Type Filter */}
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium text-gray-700">Type:</span>
+                <div className="flex space-x-2">
+                  {['all', 'deposit', 'withdrawal'].map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => handleTypeFilter(type)}
+                      className={`px-3 py-1 text-sm rounded-full border transition-colors ${
+                        typeFilter === type
+                          ? 'bg-green-100 text-green-800 border-green-300'
+                          : 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200'
+                      }`}
+                    >
+                      {type === 'all' ? 'All' : type.charAt(0).toUpperCase() + type.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Sort */}
               <div className="flex items-center space-x-2">
                 <span className="text-sm font-medium text-gray-700">Sort by:</span>
@@ -358,7 +351,7 @@ const InvestmentHistory = () => {
                 >
                   <option value="date">Date</option>
                   <option value="amount">Amount</option>
-                  <option value="returns">Returns</option>
+                  <option value="plan">Plan</option>
                 </select>
                 <button
                   onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
@@ -376,77 +369,119 @@ const InvestmentHistory = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Investment ID</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Transaction ID</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">User</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Amount</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Investment Date</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Maturity Date</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Plan</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Trader</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Type</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Expected Returns</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredInvestments.map((investment) => (
-                    <tr key={investment.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-4 px-4">
-                        <span className="font-medium text-gray-900">#{investment.id}</span>
-                      </td>
-                      <td className="py-4 px-4">
-                        <span className="font-semibold text-gray-900">{formatCurrency(investment.amount)}</span>
-                      </td>
-                      <td className="py-4 px-4">
-                        <span className="text-gray-600">{formatDate(investment.investmentDate)}</span>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div>
-                          <span className="text-gray-600">{formatDate(investment.maturityDate)}</span>
-                          {investment.status === INVESTMENT_STATUS.ACTIVE && (
-                            <div className="text-xs text-gray-500 mt-1">
-                              {calculateDaysRemaining(investment.maturityDate)} days remaining
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(investment.status)}`}>
-                          {getStatusIcon(investment.status)}
-                          <span className="ml-1">{investment.status.charAt(0).toUpperCase() + investment.status.slice(1)}</span>
-                        </span>
-                      </td>
-                      <td className="py-4 px-4">
-                        <span className="font-semibold text-green-600">{formatCurrency(investment.expectedReturns)}</span>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => handleViewDetails(investment)}
-                            className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="View Details"
-                          >
-                            <FiEye size={16} />
-                          </button>
-                          <button
-                            className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
-                            title="Download Statement"
-                          >
-                            <FiDownload size={16} />
-                          </button>
+                  {loading ? (
+                    <tr>
+                      <td colSpan="9" className="py-12 text-center">
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                          <span className="ml-2 text-gray-600">Loading transactions...</span>
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    filteredInvestments.map((transaction) => (
+                      <tr key={transaction._id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="py-4 px-4">
+                          <span className="font-medium text-gray-900">#{transaction._id.slice(-8)}</span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div>
+                            <span className="font-medium text-gray-900">{transaction.userId?.name}</span>
+                            <div className="text-xs text-gray-500">{transaction.userId?.email}</div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="font-semibold text-gray-900">{formatCurrency(transaction.amount)}</span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {transaction.plan?.charAt(0).toUpperCase() + transaction.plan?.slice(1)}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div>
+                            {transaction.trader && transaction.trader.length > 0 ? (
+                              <>
+                                <span className="font-medium text-gray-900">{transaction.trader[0]?.name}</span>
+                                <div className="text-xs text-gray-500">{transaction.trader[0]?.traderType}</div>
+                              </>
+                            ) : (
+                              <span className="text-gray-500">No trader assigned</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            {transaction.type?.charAt(0).toUpperCase() + transaction.type?.slice(1)}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(transaction.status)}`}>
+                            {getStatusIcon(transaction.status)}
+                            <span className="ml-1">{transaction.status?.charAt(0).toUpperCase() + transaction.status?.slice(1)}</span>
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="text-gray-600">{formatDate(transaction.createdAt)}</span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => handleViewDetails(transaction)}
+                              className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                              title="View Details"
+                            >
+                              <FiEye size={16} />
+                            </button>
+                            <button
+                              className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
+                              title="Download Statement"
+                            >
+                              <FiDownload size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
 
-              {filteredInvestments.length === 0 && (
+              {!loading && filteredInvestments.length === 0 && (
                 <div className="text-center py-12">
                   <FiTrendingUp className="mx-auto text-gray-400 mb-4" size={48} />
-                  <p className="text-gray-600 mb-2">No investments found</p>
-                  <p className="text-sm text-gray-500">Try adjusting your search or filters</p>
+                  <p className="text-gray-600 mb-2">No transactions found</p>
+                  <p className="text-sm text-gray-500">Try adjusting your filters</p>
                 </div>
               )}
             </div>
+            
           </Card>
+          
+          {/* Pagination */}
+          {!loading && pagination.totalItems > 0 && (
+            <div className="mt-6">
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                totalItems={pagination.totalItems}
+                itemsPerPage={pagination.itemsPerPage}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -457,7 +492,7 @@ const InvestmentHistory = () => {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  Investment Details #{selectedInvestment.id}
+                  Transaction Details #{selectedInvestment._id?.slice(-8)}
                 </h2>
                 <button
                   onClick={closeDetails}
@@ -470,44 +505,52 @@ const InvestmentHistory = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Investment Information</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Transaction Information</h3>
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Amount:</span>
                         <span className="font-semibold">{formatCurrency(selectedInvestment.amount)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Investment Date:</span>
-                        <span>{formatDate(selectedInvestment.investmentDate)}</span>
+                        <span className="text-gray-600">Plan:</span>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {selectedInvestment.plan?.charAt(0).toUpperCase() + selectedInvestment.plan?.slice(1)}
+                        </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Maturity Date:</span>
-                        <span>{formatDate(selectedInvestment.maturityDate)}</span>
+                        <span className="text-gray-600">Type:</span>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          {selectedInvestment.type?.charAt(0).toUpperCase() + selectedInvestment.type?.slice(1)}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Status:</span>
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(selectedInvestment.status)}`}>
                           {getStatusIcon(selectedInvestment.status)}
-                          <span className="ml-1">{selectedInvestment.status.charAt(0).toUpperCase() + selectedInvestment.status.slice(1)}</span>
+                          <span className="ml-1">{selectedInvestment.status?.charAt(0).toUpperCase() + selectedInvestment.status?.slice(1)}</span>
                         </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Created Date:</span>
+                        <span>{formatDate(selectedInvestment.createdAt)}</span>
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Returns & Performance</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">User Information</h3>
                     <div className="space-y-3">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Expected Returns:</span>
-                        <span className="font-semibold text-green-600">{formatCurrency(selectedInvestment.expectedReturns)}</span>
+                        <span className="text-gray-600">Name:</span>
+                        <span className="font-semibold">{selectedInvestment.userId?.name}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Current Value:</span>
-                        <span className="font-semibold text-blue-600">{formatCurrency(selectedInvestment.currentValue)}</span>
+                        <span className="text-gray-600">Email:</span>
+                        <span className="text-sm">{selectedInvestment.userId?.email}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Monthly Returns:</span>
-                        <span className="font-semibold text-green-600">{formatCurrency(selectedInvestment.monthlyReturns)}</span>
+                        <span className="text-gray-600">Phone:</span>
+                        <span className="text-sm">{selectedInvestment.userId?.phone}</span>
                       </div>
                     </div>
                   </div>
@@ -515,38 +558,64 @@ const InvestmentHistory = () => {
 
                 <div className="space-y-4">
                   <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Trader Information</h3>
+                    <div className="space-y-3">
+                      {selectedInvestment.trader && selectedInvestment.trader.length > 0 ? (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Trader Name:</span>
+                            <span className="font-semibold">{selectedInvestment.trader[0]?.name}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Trader Type:</span>
+                            <span className="text-sm">{selectedInvestment.trader[0]?.traderType}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Trader Email:</span>
+                            <span className="text-sm">{selectedInvestment.trader[0]?.email}</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-gray-500 text-center py-4">No trader assigned</div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">Payment Details</h3>
                     <div className="space-y-3">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Transaction ID:</span>
-                        <span className="font-mono text-sm">{selectedInvestment.transactionId}</span>
+                        <span className="text-gray-600">Wallet TX ID:</span>
+                        <span className="font-mono text-sm">{selectedInvestment.walletTxId}</span>
                       </div>
+                      {selectedInvestment.walletAddress && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Wallet Address:</span>
+                          <span className="font-mono text-sm">{selectedInvestment.walletAddress}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Payment Screenshot:</span>
-                        <span className="text-blue-600 hover:text-blue-800 cursor-pointer">
-                          View
-                        </span>
+                        <span className="text-gray-600">Transaction Image:</span>
+                        {selectedInvestment.transactionImage ? (
+                          <a 
+                            href={selectedInvestment.transactionImage} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 cursor-pointer"
+                          >
+                            View Image
+                          </a>
+                        ) : (
+                          <span className="text-gray-500">No image</span>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  {selectedInvestment.status === INVESTMENT_STATUS.ACTIVE && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <h4 className="font-semibold text-blue-800 mb-2">Investment Progress</h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-blue-700">Days Remaining:</span>
-                          <span className="font-semibold">{calculateDaysRemaining(selectedInvestment.maturityDate)} days</span>
-                        </div>
-                        <div className="w-full bg-blue-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                            style={{
-                              width: `${Math.max(0, Math.min(100, ((new Date(selectedInvestment.maturityDate) - new Date()) / (new Date(selectedInvestment.maturityDate) - new Date(selectedInvestment.investmentDate))) * 100))}%`
-                            }}
-                          ></div>
-                        </div>
-                      </div>
+                  {selectedInvestment.rejectionReason && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-red-800 mb-2">Rejection Reason</h4>
+                      <p className="text-red-700 text-sm">{selectedInvestment.rejectionReason}</p>
                     </div>
                   )}
                 </div>
