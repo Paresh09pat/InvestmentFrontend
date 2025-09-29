@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FiBell } from 'react-icons/fi';
+import { FiBell, FiX } from 'react-icons/fi';
 import { generateDummyAdminNotifications } from '../../utils/adminNotificationDummyData';
 
 const AdminNotificationBell = () => {
@@ -60,6 +60,11 @@ const AdminNotificationBell = () => {
     }
   };
 
+  const markAsRead = (id) => {
+    setNotifications(notifications.map(notification => notification._id === id ? { ...notification, read: true } : notification));
+    setNotificationCount(notificationCount - 1);
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Notification Bell Button */}
@@ -76,15 +81,27 @@ const AdminNotificationBell = () => {
         )}
       </button>
 
+      {/* Full Screen Blur Background */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/25 backdrop-blur-sm bg-opacity-30 z-40"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto">
-          <div className="p-4 border-b border-gray-200">
+        <div className="absolute right-0 mt-2 w-80 md:w-[500px] lg:w-[700px] bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto md:fixed md:top-1/2 md:left-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2 md:right-auto md:mt-0">
+          <div className="p-4 border-b border-gray-200 relative">
+            <button
+              onClick={() => setIsOpen(false)}
+              className="absolute bg-black/50 size-6 rounded-full grid place-items-center top-1 right-1 text-white hover:text-gray-700 transition-colors duration-200"
+            >
+              <FiX size={20} />
+            </button>
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
-              <span className="text-sm text-gray-500">
-                {notificationCount} unread
-              </span>
+           
             </div>
           </div>
 
@@ -96,6 +113,7 @@ const AdminNotificationBell = () => {
                   className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 ${
                     !notification.read ? 'bg-blue-50' : ''
                   }`}
+                  onClick={() => !notification.read && markAsRead(notification._id)}
                 >
                   <div className="flex items-start space-x-3">
                     <span className="text-lg flex-shrink-0 mt-0.5">

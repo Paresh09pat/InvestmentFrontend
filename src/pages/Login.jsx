@@ -200,10 +200,10 @@ const Login = () => {
           {/* Admin Login Link */}
           <div className="mt-4 pt-4 border-t border-gray-200 text-center">
             <Link
-              to="/admin/login"
+              to="/"
               className="text-sm text-gray-500 hover:text-gray-700"
             >
-              Admin Login
+              Go to Home
             </Link>
           </div>
         </Card>

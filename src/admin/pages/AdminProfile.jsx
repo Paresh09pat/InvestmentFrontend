@@ -15,7 +15,14 @@ import {
   FiEyeOff,
   FiUsers,
   FiTrendingUp,
-  FiFileText
+  FiFileText,
+  FiGrid,
+  FiPlus,
+  FiTrash2,
+  FiDownload,
+  FiCopy,
+  FiUpload,
+  FiImage
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/common/Card';
@@ -27,6 +34,8 @@ const AdminProfile = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [adminData, setAdminData] = useState({
     name: 'Admin User',
     email: 'admin@gmail.com',
@@ -47,6 +56,11 @@ const AdminProfile = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  
+  // Ad Scanner state
+  const [qrImage, setQrImage] = useState(null);
+  const [selectedQrFile, setSelectedQrFile] = useState(null);
+  const [showUpload, setShowUpload] = useState(false);
 
   // Redirect if not admin
   useEffect(() => {
@@ -196,6 +210,61 @@ const AdminProfile = () => {
     });
   };
 
+  // QR Code functions
+  const handleQrUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setSelectedQrFile({
+          file: file,
+          preview: e.target.result
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const saveQrCode = async () => {
+    if (!selectedQrFile) return;
+    
+    setLoading(true);
+    try {
+      // Simulate backend API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Save QR code
+      setQrImage(selectedQrFile.preview);
+      setSelectedQrFile(null);
+      setShowUpload(false);
+      setSuccessMessage('QR Code saved successfully!');
+      
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Error saving QR code:', error);
+      setErrors({ qrSave: 'Failed to save QR code. Please try again.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeQrImage = async () => {
+    setLoading(true);
+    try {
+      // Simulate backend API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      setQrImage(null);
+      setSuccessMessage('QR Code removed successfully!');
+      
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Error removing QR code:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -293,16 +362,25 @@ const AdminProfile = () => {
                   <div className="border-t pt-6">
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Change Password</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <Input
-                        label="Current Password"
-                        name="currentPassword"
-                        type="password"
-                        value={formData.currentPassword}
-                        onChange={handleChange}
-                        icon={<FiShield />}
-                        error={errors.currentPassword}
-                        required
-                      />
+                      <div className="relative">
+                        <Input
+                          label="Current Password"
+                          name="currentPassword"
+                          type={showCurrentPassword ? 'text' : 'password'}
+                          value={formData.currentPassword}
+                          onChange={handleChange}
+                          icon={<FiShield />}
+                          error={errors.currentPassword}
+                          required
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-3 top-9 text-gray-400 hover:text-gray-600 cursor-pointer"
+                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        >
+                          {showCurrentPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                        </button>
+                      </div>
 
                       <div className="relative">
                         <Input
@@ -323,15 +401,24 @@ const AdminProfile = () => {
                         </button>
                       </div>
 
-                      <Input
-                        label="Confirm New Password"
-                        name="confirmPassword"
-                        type="password"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        icon={<FiShield />}
-                        error={errors.confirmPassword}
-                      />
+                      <div className="relative">
+                        <Input
+                          label="Confirm New Password"
+                          name="confirmPassword"
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          value={formData.confirmPassword}
+                          onChange={handleChange}
+                          icon={<FiShield />}
+                          error={errors.confirmPassword}
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-3 top-9 text-gray-400 hover:text-gray-600 cursor-pointer"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                          {showConfirmPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -366,6 +453,124 @@ const AdminProfile = () => {
                   <div className="text-sm text-purple-700">Permissions</div>
                 </div>
               </div>
+            </Card>
+
+            {/* Ad Scanner Section */}
+            <Card className="animate-slide-up">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900">Ad Scanner</h2>
+                {!qrImage && (
+                  <Button
+                    variant="primary"
+                    size="small"
+                    onClick={() => setShowUpload(true)}
+                    icon={<FiUpload />}
+                  >
+                    Upload QR Code
+                  </Button>
+                )}
+              </div>
+
+              {/* Upload Form */}
+              {showUpload && (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Upload QR Code Image</h3>
+                  
+                  <div className="mb-4">
+                    <input
+                      type="file"
+                      onChange={handleQrUpload}
+                      accept="image/*"
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      Upload a QR code image that will be shown to users in the investment section
+                    </p>
+                  </div>
+
+                  {/* Preview Selected QR */}
+                  {selectedQrFile && (
+                    <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <p className="text-sm font-medium text-gray-700 mb-2">Preview:</p>
+                      <div className="flex items-center space-x-3">
+                        <img
+                          src={selectedQrFile.preview}
+                          alt="QR Preview"
+                          className="w-16 h-16 border border-gray-200 rounded object-contain"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-gray-600">File: {selectedQrFile.file.name}</p>
+                          <p className="text-xs text-gray-500">
+                            Size: {(selectedQrFile.file.size / 1024).toFixed(1)} KB
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="small"
+                      onClick={() => {
+                        setShowUpload(false);
+                        setSelectedQrFile(null);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="small"
+                      onClick={saveQrCode}
+                      loading={loading}
+                      disabled={!selectedQrFile}
+                    >
+                      Save QR Code
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Current QR Code Display */}
+              {qrImage && (
+                <div className="text-center">
+                  <div className="inline-block p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                    <img
+                      src={qrImage}
+                      alt="Current QR Code"
+                      className="w-48 h-48 mx-auto object-contain"
+                    />
+                  </div>
+                  
+                  <div className="mt-4 flex justify-center space-x-3">
+                    <Button
+                      variant="outline"
+                      size="small"
+                      onClick={() => setShowUpload(true)}
+                      icon={<FiUpload />}
+                    >
+                      Upload New QR
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="small"
+                      onClick={removeQrImage}
+                      icon={<FiTrash2 />}
+                    >
+                      Remove QR Code
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Empty State */}
+              {!qrImage && !showUpload && (
+                <div className="text-center py-12 text-gray-500">
+                  <FiGrid size={64} className="mx-auto mb-4 text-gray-300" />
+                  <p className="text-lg font-medium mb-2">No QR Code Uploaded</p>
+                  <p className="text-sm">Upload a QR code image to display it to users in the investment section</p>
+                </div>
+              )}
             </Card>
           </div>
 

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, Outlet } from 'react-router-dom';
 import AdminSidebar from './components/AdminSidebar';
+import AdminNotificationBell from './components/AdminNotificationBell';
 
 
 const AdminLayout = () => {
@@ -85,6 +86,9 @@ const AdminLayout = () => {
                   <div className="text-sm text-gray-500">
                     Admin Panel
                   </div>
+                  
+                  {/* Notification Bell for Mobile */}
+                  <AdminNotificationBell />
                   
                   {/* Hamburger Menu Button - Now on the right */}
                   <button
