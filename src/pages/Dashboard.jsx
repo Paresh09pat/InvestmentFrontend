@@ -10,8 +10,10 @@ import {
   FiAlertCircle,
   FiCheckCircle,
   FiClock,
-  FiDollarSign
+  FiDollarSign,
+  FiBarChart
 } from 'react-icons/fi';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart, ComposedChart } from 'recharts';
 import { useAuth } from '../context/AuthContext';
 import { dummyInvestments } from '../utils/dummyData';
 import { INVESTMENT_STATUS, USER_VERIFICATION_STATUS } from '../utils/constants';
@@ -25,6 +27,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [userInvestments, setUserInvestments] = useState([]);
   const [portfolio, setPortfolio] = useState(null);
+  const [priceHistory, setPriceHistory] = useState([]);
   const [stats, setStats] = useState({
     totalInvested: 0,
     currentValue: 0,
@@ -80,6 +83,345 @@ const Dashboard = () => {
     return stats.totalReturnsPercentage.toFixed(2);
   };
 
+  // Interactive chart component for price history
+  const PriceHistoryChart = ({ data }) => {
+    if (!data || data.length === 0) return null;
+
+    // Get the current total invested from portfolio data
+    const currentTotalInvested = portfolio?.totalInvested || stats.totalInvested;
+
+    // Transform data for Recharts
+    const chartData = data.map((point, index) => {
+      const date = new Date(point.updatedAt);
+      return {
+        time: date.toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }),
+        timeShort: date.toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric'
+        }),
+        timeFull: date.toLocaleString(),
+        value: point.value, // This is the actual API value from priceHistory
+        date: date.toLocaleDateString(),
+        fullDate: date.toLocaleString(),
+        profitLoss: point.value - currentTotalInvested,
+        profitLossPercentage: ((point.value - currentTotalInvested) / currentTotalInvested) * 100,
+        timestamp: date.getTime(),
+        originalData: point // Keep reference to original API data
+      };
+    }).sort((a, b) => a.timestamp - b.timestamp);
+
+
+    const maxValue = Math.max(...data.map(d => d.value));
+    const minValue = Math.min(...data.map(d => d.value));
+    const range = maxValue - minValue;
+    const isPositive = data[data.length - 1]?.value > currentTotalInvested;
+    
+    // Calculate proper Y-axis domain
+    const yAxisMin = Math.min(minValue, currentTotalInvested) * 0.95;
+    const yAxisMax = Math.max(maxValue, currentTotalInvested) * 1.05;
+
+    // Custom tooltip component
+    const CustomTooltip = ({ active, payload, label }) => {
+      if (active && payload && payload.length) {
+        // Find the area chart payload (portfolio value)
+        const areaPayload = payload.find(p => p.dataKey === 'value');
+        if (!areaPayload) return null;
+        
+        const data = areaPayload.payload;
+        // Use the actual value from the chart data (which comes from priceHistory API)
+        const portfolioValue = data.value;
+        
+        // Debug logging to see what data we're getting
+        console.log('Tooltip Debug:', {
+          payload: payload,
+          areaPayload: areaPayload,
+          data: data,
+          portfolioValue: portfolioValue,
+          chartData: chartData
+        });
+        
+        const profitLoss = portfolioValue - currentTotalInvested;
+        const profitLossPercentage = (profitLoss / currentTotalInvested) * 100;
+        const isProfit = profitLoss > 0;
+        
+        return (
+          <div className="bg-white p-4 border border-gray-200 rounded-xl shadow-xl">
+            <div className="flex items-center space-x-2 mb-2">
+              <div className={`w-3 h-3 rounded-full ${isProfit ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <p className="text-sm font-semibold text-gray-900">{data.timeShort}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs text-gray-500">
+                {data.fullDate}
+              </p>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Portfolio Value:</span>
+                <span className="text-sm font-bold text-gray-900">
+                  ${portfolioValue.toLocaleString()}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Invested:</span>
+                <span className="text-sm font-medium text-gray-700">
+                  ${currentTotalInvested.toLocaleString()}
+                </span>
+              </div>
+              <div className="flex justify-between items-center pt-1 border-t border-gray-100">
+                <span className="text-sm font-medium text-gray-700">
+                  {isProfit ? 'Profit' : 'Loss'}:
+                </span>
+                <span className={`text-sm font-bold ${isProfit ? 'text-green-600' : 'text-red-600'}`}>
+                  {isProfit ? '+' : ''}${Math.abs(profitLoss).toLocaleString()} 
+                  ({profitLossPercentage > 0 ? '+' : ''}{profitLossPercentage.toFixed(2)}%)
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+      }
+      return null;
+    };
+
+    return (
+      <div className="w-full bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 shadow-lg border border-gray-200/50 backdrop-blur-sm">
+        {/* Header with enhanced styling */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="space-y-2">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <FiBarChart className="text-blue-600" size={20} />
+              </div>
+              <h4 className="text-xl font-bold text-gray-900">Portfolio Performance</h4>
+            </div>
+            <div className="flex items-center space-x-4 text-sm text-gray-600">
+              <span className="flex items-center space-x-1">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>{data.length} updates</span>
+              </span>
+              <span>•</span>
+              <span>Invested: <span className="font-semibold text-gray-900">${currentTotalInvested.toLocaleString()}</span></span>
+              <span>•</span>
+              <span>Current: <span className="font-semibold text-gray-900">${data[data.length - 1]?.value.toLocaleString()}</span></span>
+            </div>
+            <p className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full inline-block">
+              📅 {new Date(data[0]?.updatedAt).toLocaleDateString()} → {new Date(data[data.length - 1]?.updatedAt).toLocaleDateString()}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Range: ${minValue.toLocaleString()} - ${maxValue.toLocaleString()}
+            </p>
+          </div>
+          
+          {/* Performance indicator */}
+          <div className={`flex items-center space-x-3 px-4 py-3 rounded-xl ${
+            isPositive 
+              ? 'bg-green-50 border border-green-200' 
+              : 'bg-red-50 border border-red-200'
+          }`}>
+            <div className={`p-2 rounded-lg ${
+              isPositive ? 'bg-green-100' : 'bg-red-100'
+            }`}>
+              {isPositive ? (
+                <FiTrendingUp className="text-green-600" size={20} />
+              ) : (
+                <FiTrendingUp className="text-red-600" size={20} style={{ transform: 'rotate(180deg)' }} />
+              )}
+            </div>
+            <div className="text-right">
+              <p className={`text-sm font-medium ${isPositive ? 'text-green-700' : 'text-red-700'}`}>
+                {isPositive ? 'Profit' : 'Loss'}
+              </p>
+              <p className={`text-lg font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                {Math.abs(((data[data.length - 1]?.value - currentTotalInvested) / currentTotalInvested) * 100).toFixed(1)}%
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Chart container with enhanced styling */}
+        <div className="bg-white rounded-xl p-4 shadow-inner border border-gray-100">
+          <div className="h-96 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart
+                data={chartData}
+                margin={{
+                  top: 20,
+                  right: 30,
+                  left: 20,
+                  bottom: 50,
+                }}
+              >
+                <defs>
+                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                    <stop 
+                      offset="0%" 
+                      stopColor={isPositive ? "#10b981" : "#ef4444"} 
+                      stopOpacity={0.4}
+                    />
+                    <stop 
+                      offset="50%" 
+                      stopColor={isPositive ? "#10b981" : "#ef4444"} 
+                      stopOpacity={0.2}
+                    />
+                    <stop 
+                      offset="100%" 
+                      stopColor={isPositive ? "#10b981" : "#ef4444"} 
+                      stopOpacity={0.05}
+                    />
+                  </linearGradient>
+                  
+                  {/* Investment baseline gradient */}
+                  <linearGradient id="baseline" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#6366f1" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#6366f1" stopOpacity={0.1} />
+                  </linearGradient>
+                </defs>
+                
+                <CartesianGrid 
+                  strokeDasharray="2 4" 
+                  stroke="#e5e7eb" 
+                  strokeOpacity={0.3}
+                  vertical={false}
+                  horizontalPoints={[yAxisMin, currentTotalInvested, yAxisMax]}
+                />
+                
+                <XAxis 
+                  dataKey="timeShort"
+                  stroke="#6b7280"
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={false}
+                  interval="preserveStartEnd"
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                  tick={{ fill: '#6b7280', fontSize: 11 }}
+                />
+                
+                <YAxis 
+                  stroke="#6b7280"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => {
+                    if (value >= 1000) {
+                      return `$${(value / 1000).toFixed(1)}k`;
+                    }
+                    return `$${value}`;
+                  }}
+                  domain={[yAxisMin, yAxisMax]}
+                  tick={{ fill: '#6b7280', fontSize: 12 }}
+                  ticks={[yAxisMin, currentTotalInvested, yAxisMax]}
+                />
+                
+                <Tooltip 
+                  content={<CustomTooltip />}
+                  cursor={{ 
+                    stroke: isPositive ? '#10b981' : '#ef4444', 
+                    strokeWidth: 2, 
+                    strokeDasharray: '5 5',
+                    strokeOpacity: 0.6
+                  }}
+                  allowEscapeViewBox={{ x: false, y: false }}
+                  position={{ x: 'auto', y: 'auto' }}
+                  filterNull={false}
+                />
+                
+                {/* Investment baseline line */}
+                <Line
+                  type="monotone"
+                  dataKey={() => currentTotalInvested}
+                  stroke="#6366f1"
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  strokeOpacity={0.8}
+                  dot={false}
+                  activeDot={false}
+                  connectNulls={false}
+                />
+                
+                {/* Main portfolio value area */}
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke={isPositive ? "#10b981" : "#ef4444"}
+                  strokeWidth={4}
+                  fill="url(#colorValue)"
+                  dot={{ 
+                    fill: isPositive ? "#10b981" : "#ef4444", 
+                    stroke: "#fff", 
+                    strokeWidth: 3, 
+                    r: 5,
+                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                  }}
+                  activeDot={{ 
+                    r: 8, 
+                    stroke: isPositive ? "#10b981" : "#ef4444", 
+                    strokeWidth: 3,
+                    fill: "#fff",
+                    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))'
+                  }}
+                  animationDuration={2000}
+                  animationEasing="ease-out"
+                  connectNulls={false}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        
+        {/* Enhanced stats cards */}
+        <div className="mt-6 grid grid-cols-3 gap-4">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 text-center border border-blue-200">
+            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <FiDollarSign className="text-white" size={16} />
+            </div>
+            <p className="text-xs font-medium text-blue-700 mb-1">Total Invested</p>
+            <p className="text-lg font-bold text-blue-900">
+              ${currentTotalInvested.toLocaleString()}
+            </p>
+          </div>
+          
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 text-center border border-gray-200">
+            <div className="w-8 h-8 bg-gray-500 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <FiTrendingUp className="text-white" size={16} />
+            </div>
+            <p className="text-xs font-medium text-gray-700 mb-1">Current Value</p>
+            <p className="text-lg font-bold text-gray-900">
+              ${data[data.length - 1]?.value.toLocaleString()}
+            </p>
+          </div>
+          
+          <div className={`rounded-xl p-4 text-center border ${
+            isPositive 
+              ? 'bg-gradient-to-br from-green-50 to-green-100 border-green-200' 
+              : 'bg-gradient-to-br from-red-50 to-red-100 border-red-200'
+          }`}>
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-2 ${
+              isPositive ? 'bg-green-500' : 'bg-red-500'
+            }`}>
+              {isPositive ? (
+                <FiTrendingUp className="text-white" size={16} />
+              ) : (
+                <FiTrendingUp className="text-white" size={16} style={{ transform: 'rotate(180deg)' }} />
+              )}
+            </div>
+            <p className={`text-xs font-medium mb-1 ${isPositive ? 'text-green-700' : 'text-red-700'}`}>
+              {isPositive ? 'Profit' : 'Loss'}
+            </p>
+            <p className={`text-lg font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+              {isPositive ? '+' : ''}${(data[data.length - 1]?.value - currentTotalInvested).toLocaleString()}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const getPortfolioSummary = async () => {
     try {
       const response = await axios.get(`${VITE_APP_API_URL}/api/auth/portfolio`, {
@@ -89,6 +431,11 @@ const Dashboard = () => {
       if (response.data && response.data.portfolio) {
         const portfolioData = response.data.portfolio;
         setPortfolio(portfolioData);
+        
+        // Set price history data
+        if (portfolioData.priceHistory && portfolioData.priceHistory.length > 0) {
+          setPriceHistory(portfolioData.priceHistory);
+        }
         
         // Update stats with real portfolio data
         setStats({
@@ -227,7 +574,105 @@ const Dashboard = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Recent Investments */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 space-y-6">
+              {/* Price History Chart */}
+              {priceHistory.length > 0 && (
+                <Card className="animate-slide-up">
+                  <PriceHistoryChart data={priceHistory} />
+                </Card>
+              )}
+
+              {/* Admin Price History Updates */}
+              {priceHistory.length > 0 && (
+                <Card className="animate-slide-up">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Price History Updates</h3>
+                      <p className="text-sm text-gray-600">
+                        Recent portfolio value updates by admin
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <FiActivity className="text-blue-500" size={20} />
+                      <span className="text-sm font-medium text-gray-700">
+                        {priceHistory.length} updates
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {priceHistory
+                      .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+                      .map((update, index) => {
+                        const isLatest = index === 0;
+                        const previousValue = index < priceHistory.length - 1 
+                          ? priceHistory[index + 1]?.value 
+                          : null;
+                        const change = previousValue ? update.value - previousValue : 0;
+                        const changePercentage = previousValue ? ((change / previousValue) * 100) : 0;
+
+                        return (
+                          <div 
+                            key={update._id}
+                            className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 ${
+                              isLatest 
+                                ? 'bg-blue-50 border-blue-200 shadow-sm' 
+                                : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                            }`}
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className={`w-2 h-2 rounded-full ${
+                                isLatest ? 'bg-blue-500' : 'bg-gray-400'
+                              }`} />
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">
+                                  ${update.value.toLocaleString()}
+                                </p>
+                                <p className="text-xs text-gray-600">
+                                  {new Date(update.updatedAt).toLocaleDateString()} at{' '}
+                                  {new Date(update.updatedAt).toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            <div className="text-right">
+                              {change !== 0 && (
+                                <p className={`text-sm font-medium ${
+                                  change > 0 ? 'text-green-600' : 'text-red-600'
+                                }`}>
+                                  {change > 0 ? '+' : ''}${change.toLocaleString()}
+                                </p>
+                              )}
+                              {changePercentage !== 0 && (
+                                <p className={`text-xs ${
+                                  changePercentage > 0 ? 'text-green-600' : 'text-red-600'
+                                }`}>
+                                  {changePercentage > 0 ? '+' : ''}{changePercentage.toFixed(2)}%
+                                </p>
+                              )}
+                              {isLatest && (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  Latest
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+
+                  {priceHistory.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      <FiActivity className="mx-auto text-gray-300 mb-2" size={32} />
+                      <p className="text-sm">No price history updates available</p>
+                    </div>
+                  )}
+                </Card>
+              )}
+
               <Card className="animate-slide-up">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold text-gray-900">
