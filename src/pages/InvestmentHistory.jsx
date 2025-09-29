@@ -122,11 +122,11 @@ const InvestmentHistory = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'completed':
+      case 'approved':
         return 'bg-green-100 text-green-800 border-green-200';
       case 'pending':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'failed':
+      case 'rejected':
         return 'bg-red-100 text-red-800 border-red-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -135,11 +135,11 @@ const InvestmentHistory = () => {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'completed':
+      case 'approved':
         return <FiCheckCircle className="text-green-600" />;
       case 'pending':
         return <FiAlertCircle className="text-yellow-600" />;
-      case 'failed':
+      case 'rejected':
         return <FiXCircle className="text-red-600" />;
       default:
         return <FiClock className="text-gray-600" />;
@@ -172,7 +172,7 @@ const InvestmentHistory = () => {
 
   const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
   const pendingInvestments = investments.filter(inv => inv.status === 'pending').length;
-  const completedInvestments = investments.filter(inv => inv.status === 'completed').length;
+  const completedInvestments = investments.filter(inv => inv.status === 'approved').length;
 
 
   const getInvestments = async()=>{
@@ -305,7 +305,7 @@ const InvestmentHistory = () => {
               <div className="flex items-center space-x-2">
                 <span className="text-sm font-medium text-gray-700">Status:</span>
                 <div className="flex space-x-2">
-                  {['all', 'pending', 'completed', 'failed'].map((status) => (
+                  {['all', 'pending', 'approved', 'rejected'].map((status) => (
                     <button
                       key={status}
                       onClick={() => handleStatusFilter(status)}
