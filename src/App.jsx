@@ -12,6 +12,7 @@ import Dashboard from './pages/Dashboard';
 import InvestmentForm from './pages/InvestmentForm';
 import InvestmentSuccess from './pages/InvestmentSuccess';
 import InvestmentHistory from './pages/InvestmentHistory';
+import Withdrawal from './pages/Withdrawal';
 import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
 
@@ -112,6 +113,11 @@ function App() {
               <Route path="/investment-history" element={
                 <ProtectedRoute requireVerification={true}>
                   <InvestmentHistory />
+                </ProtectedRoute>
+              } />
+              <Route path="/withdrawal" element={
+                <ProtectedRoute requireVerification={true}>
+                  <Withdrawal />
                 </ProtectedRoute>
               } />
             </Routes>

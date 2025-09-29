@@ -9,7 +9,8 @@ import {
   FiEye,
   FiAlertCircle,
   FiCheckCircle,
-  FiClock
+  FiClock,
+  FiDollarSign
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { dummyInvestments } from '../utils/dummyData';
@@ -194,14 +195,24 @@ const Dashboard = () => {
                   <h2 className="text-xl font-semibold text-gray-900">
                     Your Investments
                   </h2>
-                  <Button 
-                    variant="outline" 
-                    size="small"
-                    onClick={() => navigate('/invest')}
-                    icon={<FiPlus />}
-                  >
-                    New Investment
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="small"
+                      onClick={() => navigate('/invest')}
+                      icon={<FiPlus />}
+                    >
+                      New Investment
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="small"
+                      onClick={() => navigate('/withdrawal')}
+                      icon={<FiDollarSign />}
+                    >
+                      Withdraw
+                    </Button>
+                  </div>
                 </div>
 
                 {userInvestments.length > 0 ? (
@@ -251,9 +262,17 @@ const Dashboard = () => {
                     <p className="text-gray-600 mb-4">
                       Start your investment journey today!
                     </p>
-                    <Button onClick={() => navigate('/invest')}>
-                      Make Your First Investment
-                    </Button>
+                    <div className="flex space-x-2 justify-center">
+                      <Button onClick={() => navigate('/invest')}>
+                        Make Your First Investment
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => navigate('/withdrawal')}
+                      >
+                        Withdraw Funds
+                      </Button>
+                    </div>
                   </div>
                 )}
               </Card>
@@ -274,6 +293,14 @@ const Dashboard = () => {
                     icon={<FiPlus />}
                   >
                     New Investment
+                  </Button>
+                  <Button 
+                    fullWidth 
+                    variant="outline"
+                    onClick={() => navigate('/withdrawal')}
+                    icon={<FiDollarSign />}
+                  >
+                    Withdraw Funds
                   </Button>
                   <Button 
                     fullWidth 
