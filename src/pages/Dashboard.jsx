@@ -17,35 +17,29 @@ import { dummyInvestments } from '../utils/dummyData';
 import { INVESTMENT_STATUS, USER_VERIFICATION_STATUS } from '../utils/constants';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
+import axios from 'axios';
+import { VITE_APP_API_URL } from '../utils/constants';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [userInvestments, setUserInvestments] = useState([]);
+  const [portfolio, setPortfolio] = useState(null);
   const [stats, setStats] = useState({
     totalInvested: 0,
     currentValue: 0,
     totalReturns: 0,
+    totalReturnsPercentage: 0,
     activeInvestments: 0
   });
 
   useEffect(() => {
-    // Filter investments for current user
-    const investments = dummyInvestments.filter(inv => inv.userId === user?.id);
-    setUserInvestments(investments);
-
-    // Calculate stats
-    const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
-    const currentValue = investments.reduce((sum, inv) => sum + inv.currentValue, 0);
-    const activeInvestments = investments.filter(inv => inv.status === INVESTMENT_STATUS.ACTIVE).length;
-
-    setStats({
-      totalInvested,
-      currentValue,
-      totalReturns: currentValue - totalInvested,
-      activeInvestments
-    });
-  }, [user]);
+    // Only use dummy data if no portfolio data is available
+    if (!portfolio) {
+      const investments = dummyInvestments.filter(inv => inv.userId === user?.id);
+      setUserInvestments(investments);
+    }
+  }, [user, portfolio]);
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -83,8 +77,52 @@ const Dashboard = () => {
 
   const calculateReturnsPercentage = () => {
     if (stats.totalInvested === 0) return 0;
-    return ((stats.totalReturns / stats.totalInvested) * 100).toFixed(2);
+    return stats.totalReturnsPercentage.toFixed(2);
   };
+
+  const getPortfolioSummary = async () => {
+    try {
+      const response = await axios.get(`${VITE_APP_API_URL}/api/auth/portfolio`, {
+        withCredentials: true
+      });
+      
+      if (response.data && response.data.portfolio) {
+        const portfolioData = response.data.portfolio;
+        setPortfolio(portfolioData);
+        
+        // Update stats with real portfolio data
+        setStats({
+          totalInvested: portfolioData.totalInvested || 0,
+          currentValue: portfolioData.currentValue || 0,
+          totalReturns: portfolioData.totalReturns || 0,
+          totalReturnsPercentage: portfolioData.totalReturnsPercentage || 0,
+          activeInvestments: 1 // Assuming at least one active investment if portfolio exists
+        });
+      }
+    } catch (err) {
+      console.log("Error fetching portfolio:", err);
+      // Fallback to dummy data if API fails
+      const investments = dummyInvestments.filter(inv => inv.userId === user?.id);
+      setUserInvestments(investments);
+
+      const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
+      const currentValue = investments.reduce((sum, inv) => sum + inv.currentValue, 0);
+      const activeInvestments = investments.filter(inv => inv.status === INVESTMENT_STATUS.ACTIVE).length;
+
+      setStats({
+        totalInvested,
+        currentValue,
+        totalReturns: currentValue - totalInvested,
+        totalReturnsPercentage: totalInvested > 0 ? ((currentValue - totalInvested) / totalInvested) * 100 : 0,
+        activeInvestments
+      });
+    }
+  };
+
+  useEffect(() => {
+    getPortfolioSummary();
+  }, []);
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -215,7 +253,40 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                {userInvestments.length > 0 ? (
+                {portfolio ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex-shrink-0">
+                          <FiActivity className="text-green-500" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-gray-900">
+                            Investment Portfolio
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            Invested: {formatCurrency(portfolio.totalInvested)}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Created: {new Date(portfolio.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="text-right">
+                        <p className="font-semibold text-gray-900">
+                          {formatCurrency(portfolio.currentValue)}
+                        </p>
+                        <p className={`text-sm ${portfolio.totalReturns >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {portfolio.totalReturns >= 0 ? '+' : ''}{formatCurrency(portfolio.totalReturns)}
+                        </p>
+                        <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full text-green-600 bg-green-100">
+                          Active
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : userInvestments.length > 0 ? (
                   <div className="space-y-4">
                     {userInvestments.map((investment, index) => (
                       <div 
@@ -335,7 +406,24 @@ const Dashboard = () => {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Investment Breakdown
                 </h3>
-                {userInvestments.length > 0 ? (
+                {portfolio ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900">Investment Portfolio</p>
+                        <p className="text-sm text-gray-600">100% of portfolio</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium text-gray-900">
+                          {formatCurrency(portfolio.currentValue)}
+                        </p>
+                        <p className={`text-sm ${portfolio.totalReturns >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {portfolio.totalReturns >= 0 ? '+' : ''}{formatCurrency(portfolio.totalReturns)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : userInvestments.length > 0 ? (
                   <div className="space-y-3">
                     {userInvestments.reduce((acc, inv) => {
                       const existing = acc.find(item => item.planName === inv.planName);

@@ -29,7 +29,7 @@ const InvestmentForm = () => {
   const [selectedMembership, setSelectedMembership] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [selectedTrader, setSelectedTrader] = useState(null);
-  const [currentStep, setCurrentStep] = useState('membership'); // 'membership', 'trader', 'form'
+  const [currentStep, setCurrentStep] = useState('membership'); 
   const [plans, setPlans] = useState([]);
   const [traders, setTraders] = useState([]);
   const [isLoadingTraders, setIsLoadingTraders] = useState(false);

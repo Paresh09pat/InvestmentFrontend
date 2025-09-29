@@ -169,9 +169,9 @@ const AdminProfile = () => {
       confirmPassword: ''
     });
     
-    // Fetch fresh profile data from API on page load
+
     fetchAdminProfile();
-  }, []); // Empty dependency array since we only want this to run once
+  }, []); 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
