@@ -65,7 +65,6 @@ const Features = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
-      
       {/* Background Elements */}
       <motion.div 
         className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl"

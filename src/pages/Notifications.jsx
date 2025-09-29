@@ -236,7 +236,6 @@ const Notifications = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* <Navbar /> */}
       {loading && (
         <div className="min-h-screen flex items-center justify-center">
           <LoadingSpinner size="lg" />

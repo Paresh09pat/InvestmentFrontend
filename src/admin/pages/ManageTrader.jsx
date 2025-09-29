@@ -126,6 +126,25 @@ const ManageTrader = () => {
     }
   }, [debouncedSearchTerm, selectedTier]);
 
+  const deleteTrader = async(trader)=>{
+   
+    try{
+      const res = await axios.delete(`${VITE_APP_API_URL}/api/admin/trader/${trader._id}`);
+      if(res.data.success){
+        setTraders(traders.filter(t => t._id !== trader._id));
+        setSelectedTrader(null);
+        setIsViewModalOpen(false);
+        setIsEditModalOpen(false);
+        setError(null);
+        getTraders();
+      }
+    }
+    catch(err){
+      console.error('Error deleting trader:', err);
+      setError('Failed to delete trader');
+    }
+  }
+
   useEffect(() => {
     getTraders();
   }, [getTraders]);
@@ -150,7 +169,7 @@ const ManageTrader = () => {
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <button 
-            onClick={() => navigate('/admin/manage-trader/card-management')}
+            onClick={() => navigate('/admin/card  ')}
             className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 flex items-center justify-center space-x-2 cursor-pointer text-sm lg:text-base"
           >
             <FiCreditCard className="h-4 w-4" />
@@ -358,7 +377,7 @@ const ManageTrader = () => {
                             <FiEdit className="h-4 w-4 mr-1" />
                             Edit
                           </button>
-                          <button className="flex-1 py-2 px-3 text-red-600 hover:text-red-900 text-xs lg:text-sm font-medium cursor-pointer border border-red-200 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center">
+                          <button className="flex-1 py-2 px-3 text-red-600 hover:text-red-900 text-xs lg:text-sm font-medium cursor-pointer border border-red-200 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center" onClick={()=>deleteTrader(trader)}>
                             <FiTrash2 className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
                             Delete
                           </button>
@@ -469,7 +488,7 @@ const ManageTrader = () => {
                             <FiEdit className="h-4 w-4 mr-1" />
                             Edit
                           </button>
-                          <button className="flex-1 py-2 px-3 text-red-600 hover:text-red-900 text-xs lg:text-sm font-medium cursor-pointer border border-red-200 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center">
+                          <button className="flex-1 py-2 px-3 text-red-600 hover:text-red-900 text-xs lg:text-sm font-medium cursor-pointer border border-red-200 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center" onClick={()=>deleteTrader(trader)}>
                             <FiTrash2 className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
                             Delete
                           </button>
@@ -498,7 +517,6 @@ const ManageTrader = () => {
         onClose={handleCloseEditModal}
         trader={selectedTrader}
         getTraders={getTraders}
-
       />
     </motion.div>
   );

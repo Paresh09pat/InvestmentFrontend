@@ -36,6 +36,8 @@ import AdminProfile from './admin/pages/AdminProfile';
 import ManageTrader from './admin/pages/ManageTrader';
 import AddTrader from './admin/pages/AddTrader';
 import CardManagement from './admin/pages/CardManagement';
+import AdminNotifications from './admin/pages/AdminNotifications';
+import AdminTransactionHistory from './admin/pages/AdminTransactionHistory';
 // import AdminSettings from './admin/pages/AdminSettings';
 
 // Components
@@ -66,8 +68,11 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Navbar - Show on all pages except admin */}
-      {!location.pathname.startsWith('/admin') && <Navbar />}
+      {/* Navbar - Show on all pages except admin, login, and signup */}
+      {!location.pathname.startsWith('/admin') && 
+       location.pathname !== '/login' && 
+       location.pathname !== '/signup' && 
+       <Navbar />}
       
       <Routes>
         {/* Public Routes */}
@@ -125,9 +130,12 @@ function App() {
           <Route path="users" element={<UserManagement />} />
           <Route path="investments" element={<InvestmentManagement />} />
           <Route path="documents" element={<DocumentVerification />} />
-          <Route path="manage-trader/add-trader" element={<AddTrader />} />
           <Route path="manage-trader" element={<ManageTrader />} />
+          <Route path="manage-trader/add-trader" element={<AddTrader />} />
+          <Route path="notifications" element={<AdminNotifications />} />
+          <Route path="transactions" element={<AdminTransactionHistory />} />
           <Route path="profile" element={<AdminProfile />} />
+          <Route path="card" element={<CardManagement />} />
           {/* <Route path="settings" element={<AdminSettings />} /> */}
           <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
         </Route>
@@ -136,8 +144,11 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
-      {/* Footer - Show on all pages except admin */}
-      {!location.pathname.startsWith('/admin') && <Footer />}
+      {/* Footer - Show on all pages except admin, login, and signup */}
+      {!location.pathname.startsWith('/admin') && 
+       location.pathname !== '/login' && 
+       location.pathname !== '/signup' && 
+       <Footer />}
 
       {/* Toast Container */}
       <ToastContainer
