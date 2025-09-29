@@ -84,11 +84,7 @@ const Navbar = () => {
       className={`
       fixed w-full z-50 transition-all duration-500 ease-in-out
       ${isVisible ? 'translate-y-0' : '-translate-y-full'}
-      ${
-        scrolled
-          ? "bg-white/20 backdrop-blur-xl shadow-2xl border-b border-white/20"
-          : "bg-white/10 backdrop-blur-lg shadow-lg border-b border-white/10"
-      }
+      bg-white shadow-lg border-b border-gray-200
     `}
     >
       <div className="max-w-4xl md:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -113,8 +109,8 @@ const Navbar = () => {
                     to={link.path}
                     className={`flex items-center space-x-1 transition-all duration-200 font-medium px-3 py-2 rounded-lg ${
                       isActiveLink(link.path)
-                        ? "text-blue-600 bg-white/30 backdrop-blur-sm"
-                        : "text-gray-700 hover:text-blue-600 hover:bg-white/20 backdrop-blur-sm"
+                        ? "text-blue-600 bg-blue-50"
+                        : "text-gray-700 hover:text-blue-600 hover:bg-gray-100"
                     }`}
                   >
                     <link.icon size={18} />
@@ -131,7 +127,7 @@ const Navbar = () => {
                 <div className="relative">
                   <button
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-all duration-200 cursor-pointer"
+                    className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-all duration-200 cursor-pointer"
                   >
                     {user?.profilePicture?.cloudinaryUrl ? (
                       <img
@@ -152,7 +148,7 @@ const Navbar = () => {
                   </button>
 
                   {isProfileOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white/90 backdrop-blur-xl rounded-lg shadow-xl py-2 animate-fade-in border border-white/20">
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 animate-fade-in border border-gray-200">
                       <Link
                         to="/profile"
                         className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
@@ -176,7 +172,7 @@ const Navbar = () => {
                 <div className="flex items-center space-x-4">
                 <Link
                   to="/login"
-                  className="font-medium text-gray-700 hover:text-blue-600 transition-all duration-200 px-3 py-2 rounded-lg hover:bg-white/20 backdrop-blur-sm"
+                  className="font-medium text-gray-700 hover:text-blue-600 transition-all duration-200 px-3 py-2 rounded-lg hover:bg-gray-100"
                 >
                   Login
                 </Link>
@@ -191,7 +187,7 @@ const Navbar = () => {
           <div className="md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 text-gray-700 hover:text-blue-600 transition-all duration-200 cursor-pointer bg-white/20 backdrop-blur-lg rounded-lg border border-white/20 shadow-lg"
+              className="p-2 text-gray-700 hover:text-blue-600 transition-all duration-200 cursor-pointer bg-gray-100 hover:bg-gray-200 rounded-lg"
             >
               {isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
             </button>

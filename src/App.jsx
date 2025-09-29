@@ -40,6 +40,7 @@ import CardManagement from './admin/pages/CardManagement';
 import AdminNotifications from './admin/pages/AdminNotifications';
 import AdminTransactionHistory from './admin/pages/AdminTransactionHistory';
 import TransactionRequestDetails from './admin/pages/TransactionRequestDetails';
+import PortfolioManagement from './admin/pages/PortfolioManagement';
 // import AdminSettings from './admin/pages/AdminSettings';
 
 // Components
@@ -136,6 +137,7 @@ function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="investments" element={<InvestmentManagement />} />
+          <Route path="portfolio" element={<PortfolioManagement />} />
           <Route path="documents" element={<DocumentVerification />} />
           <Route path="manage-trader" element={<ManageTrader />} />
           <Route path="manage-trader/add-trader" element={<AddTrader />} />

@@ -6,8 +6,6 @@ import {
   FiTrendingUp,
   FiSearch,
   FiFilter,
-  FiEdit,
-  FiTrash2,
   FiCheck,
   FiX,
   FiEye,
@@ -137,21 +135,6 @@ const InvestmentManagement = () => {
     }
   };
 
-  const handleDeleteInvestment = async (investmentId) => {
-    if (window.confirm("Are you sure you want to delete this investment?")) {
-      setLoading(true);
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setInvestments((prev) =>
-          prev.filter((investment) => investment.id !== investmentId)
-        );
-      } catch (err) {
-        console.error("Failed to delete investment:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
 
   const viewInvestmentDetails = (investment) => {
     navigate(`/admin/transaction-request/${investment._id}`);
@@ -243,24 +226,18 @@ const InvestmentManagement = () => {
       key: "actions",
       title: "Actions",
       render: (_, investment) => (
-        <div className="flex space-x-2">
-          <button
-            onClick={() => viewInvestmentDetails(investment)}
-            className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer"
-            title="View Details"
-          >
-            <FiEye size={16} />
-          </button>
-
-          <button
-            onClick={() => handleDeleteInvestment(investment._id)}
-            className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors cursor-pointer"
-            title="Delete Request"
-            disabled={loading}
-          >
-            <FiTrash2 size={16} />
-          </button>
-        </div>
+        <button
+          onClick={() => viewInvestmentDetails(investment)}
+          className="w-full cursor-pointer flex items-center justify-around py-2 border-2 border-blue-500 rounded-lg hover:bg-blue-50 transition-colors"
+          title="View Details"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="  rounded-full flex items-center justify-center">
+              <FiEye className="text-blue-600" size={16} />
+            </div>
+            <span className="text-blue-600 font-medium">View</span>
+          </div>
+        </button>
       ),
     },
   ];
