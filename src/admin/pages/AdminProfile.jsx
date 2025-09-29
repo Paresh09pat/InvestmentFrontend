@@ -1,12 +1,12 @@
 // AdminProfile page
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  FiUser, 
-  FiMail, 
-  FiShield, 
-  FiEdit, 
-  FiSave, 
+import {
+  FiUser,
+  FiMail,
+  FiShield,
+  FiEdit,
+  FiSave,
   FiX,
   FiCalendar,
   FiActivity,
@@ -28,6 +28,9 @@ import { useAuth } from '../../context/AuthContext';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import Input from '../../components/forms/Input';
+import axios from 'axios';
+import { VITE_APP_API_URL } from '../../utils/constants';
+import { toast } from 'react-toastify';
 
 const AdminProfile = () => {
   const { adminLogin, isAdmin } = useAuth();
@@ -56,11 +59,12 @@ const AdminProfile = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  
+
   // Ad Scanner state
   const [qrImage, setQrImage] = useState(null);
   const [selectedQrFile, setSelectedQrFile] = useState(null);
   const [showUpload, setShowUpload] = useState(false);
+  const [uploadFile, setUploadFile] = useState(null);
 
   // Redirect if not admin
   useEffect(() => {
@@ -101,7 +105,7 @@ const AdminProfile = () => {
         console.error('Error parsing admin user data:', error);
       }
     }
-    
+
     // Fallback data if no admin user found
     return {
       name: 'Admin User',
@@ -115,6 +119,44 @@ const AdminProfile = () => {
     };
   };
 
+  // Function to fetch admin profile from API
+  const fetchAdminProfile = async () => {
+    try {
+      const response = await axios.get(`${VITE_APP_API_URL}/api/admin/profile`, {
+        withCredentials: true
+      });
+
+      if (response.data && response.data.user) {
+        const userData = response.data.user;
+        const updatedAdminData = {
+          name: userData.name || 'Admin User',
+          email: userData.email || 'admin@gmail.com',
+          role: 'Super Admin',
+          lastLogin: new Date().toLocaleDateString(),
+          permissions: ['User Management', 'Investment Management', 'Document Verification', 'System Settings'],
+          joinDate: '2024-01-01',
+          totalActions: 1247,
+          status: 'Active',
+          profilePicture: userData.profilePicture
+        };
+
+        setAdminData(updatedAdminData);
+        setFormData(prev => ({
+          ...prev,
+          name: userData.name || prev.name,
+          email: userData.email || prev.email
+        }));
+
+        // Update localStorage
+        localStorage.setItem('admin_user', JSON.stringify(userData));
+
+        return userData;
+      }
+    } catch (error) {
+      console.error('Error fetching admin profile:', error);
+    }
+  };
+
   // Move getAdminData call inside useEffect to prevent infinite loop
   useEffect(() => {
     const data = getAdminData();
@@ -126,6 +168,9 @@ const AdminProfile = () => {
       newPassword: '',
       confirmPassword: ''
     });
+    
+    // Fetch fresh profile data from API on page load
+    fetchAdminProfile();
   }, []); // Empty dependency array since we only want this to run once
 
   const handleChange = (e) => {
@@ -134,7 +179,7 @@ const AdminProfile = () => {
       ...prev,
       [name]: value
     }));
-    
+
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -168,7 +213,7 @@ const AdminProfile = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     const newErrors = validateForm();
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -176,12 +221,27 @@ const AdminProfile = () => {
 
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      // Prepare data for password change
+      const updateData = {
+        currentPassword: formData.currentPassword,
+        newPassword: formData.newPassword
+      };
+
+      // Call API to update password
+      const response = await axios.put(`${VITE_APP_API_URL}/api/admin/update`, updateData, {
+        withCredentials: true
+      });
+
+      console.log("Password update response:", response);
+
+      // Refetch profile data after successful password change
+      await fetchAdminProfile();
+
       setSuccessMessage('Profile updated successfully!');
       setIsEditing(false);
-      
+
+      toast.success('Profile updated successfully!');
+
       // Clear form
       setFormData(prev => ({
         ...prev,
@@ -189,9 +249,10 @@ const AdminProfile = () => {
         newPassword: '',
         confirmPassword: ''
       }));
-      
+
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
+      console.error('Error updating profile:', error);
       setErrors({ general: 'Failed to update profile. Please try again.' });
     } finally {
       setLoading(false);
@@ -214,6 +275,7 @@ const AdminProfile = () => {
   const handleQrUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setUploadFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
         setSelectedQrFile({
@@ -223,22 +285,36 @@ const AdminProfile = () => {
       };
       reader.readAsDataURL(file);
     }
+
+
   };
 
   const saveQrCode = async () => {
-    if (!selectedQrFile) return;
-    
+    if (!uploadFile) return;
+
+    const file = uploadFile
+    const formData = new FormData();
+    formData.append("picture", file);
     setLoading(true);
+    console.log("selted", file)
     try {
-      // Simulate backend API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Save QR code
-      setQrImage(selectedQrFile.preview);
-      setSelectedQrFile(null);
-      setShowUpload(false);
+      const res = await axios.put(`${VITE_APP_API_URL}/api/admin/update`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        withCredentials: true
+      })
+
+      console.log("res", res)
+
+      // Refetch profile data after successful QR save
+      await fetchAdminProfile();
+
       setSuccessMessage('QR Code saved successfully!');
-      
+      setShowUpload(false);
+      setSelectedQrFile(null);
+      setUploadFile(null);
+
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Error saving QR code:', error);
@@ -248,22 +324,6 @@ const AdminProfile = () => {
     }
   };
 
-  const removeQrImage = async () => {
-    setLoading(true);
-    try {
-      // Simulate backend API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setQrImage(null);
-      setSuccessMessage('QR Code removed successfully!');
-      
-      setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (error) {
-      console.error('Error removing QR code:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -272,7 +332,7 @@ const AdminProfile = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Profile</h1>
           <p className="text-gray-600">Manage your administrative account settings and preferences</p>
-          
+
           {/* Admin Email Info */}
           <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-center space-x-2">
@@ -459,7 +519,7 @@ const AdminProfile = () => {
             <Card className="animate-slide-up">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900">Ad Scanner</h2>
-                {!qrImage && (
+                {!adminData.profilePicture?.cloudinaryUrl && (
                   <Button
                     variant="primary"
                     size="small"
@@ -475,7 +535,7 @@ const AdminProfile = () => {
               {showUpload && (
                 <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Upload QR Code Image</h3>
-                  
+
                   <div className="mb-4">
                     <input
                       type="file"
@@ -532,16 +592,16 @@ const AdminProfile = () => {
               )}
 
               {/* Current QR Code Display */}
-              {qrImage && (
+              {adminData.profilePicture?.cloudinaryUrl && (
                 <div className="text-center">
                   <div className="inline-block p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
                     <img
-                      src={qrImage}
+                      src={adminData.profilePicture.cloudinaryUrl}
                       alt="Current QR Code"
                       className="w-48 h-48 mx-auto object-contain"
                     />
                   </div>
-                  
+
                   <div className="mt-4 flex justify-center space-x-3">
                     <Button
                       variant="outline"
@@ -551,20 +611,13 @@ const AdminProfile = () => {
                     >
                       Upload New QR
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="small"
-                      onClick={removeQrImage}
-                      icon={<FiTrash2 />}
-                    >
-                      Remove QR Code
-                    </Button>
+f 
                   </div>
                 </div>
               )}
 
               {/* Empty State */}
-              {!qrImage && !showUpload && (
+              {!adminData.profilePicture?.cloudinaryUrl && !showUpload && (
                 <div className="text-center py-12 text-gray-500">
                   <FiGrid size={64} className="mx-auto mb-4 text-gray-300" />
                   <p className="text-lg font-medium mb-2">No QR Code Uploaded</p>
@@ -579,10 +632,20 @@ const AdminProfile = () => {
             {/* Admin Info Card */}
             <Card className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
               <div className="text-center mb-6">
-                <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white text-3xl font-bold">
-                    {adminData.name.charAt(0)}
-                  </span>
+                <div className="w-24 h-24 mx-auto mb-4">
+                  {adminData.profilePicture?.cloudinaryUrl ? (
+                    <img
+                      src={adminData.profilePicture.cloudinaryUrl}
+                      alt="Admin QR Code"
+                      className="w-24 h-24 rounded-lg object-contain border-2 border-gray-200 shadow-sm"
+                    />
+                  ) : (
+                    <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+                      <span className="text-white text-3xl font-bold">
+                        {adminData.name.charAt(0)}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900">{adminData.name}</h3>
                 <p className="text-gray-600">{adminData.email}</p>
@@ -629,14 +692,14 @@ const AdminProfile = () => {
             <Card className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
               <div className="space-y-3">
-                                 <Button
-                   variant="outline"
-                   fullWidth
-                   onClick={() => window.location.href = '/admin/users'}
-                   icon={<FiUsers />}
-                 >
-                   Manage Users
-                 </Button>
+                <Button
+                  variant="outline"
+                  fullWidth
+                  onClick={() => window.location.href = '/admin/users'}
+                  icon={<FiUsers />}
+                >
+                  Manage Users
+                </Button>
                 <Button
                   variant="outline"
                   fullWidth
