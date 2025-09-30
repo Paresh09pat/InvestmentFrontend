@@ -9,6 +9,8 @@ import {
 } from "react-icons/fi";
 import Card from "../../components/common/Card";
 import { generateDummyAdminNotifications } from "../../utils/adminNotificationDummyData";
+import axios from "axios";
+import { VITE_APP_API_URL } from "../../utils/constants";
 
 const AdminNotifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -16,9 +18,14 @@ const AdminNotifications = () => {
 
   // Load notifications on component mount
   useEffect(() => {
+const fetchNotifications = async () => {
+  const response = await axios.get(`${VITE_APP_API_URL}/api/admin/notifications`, { withCredentials: true });
+  setNotifications(response.data.notifications);
+};
+
+
     setLoading(true);
-    const dummyNotifications = generateDummyAdminNotifications();
-    setNotifications(dummyNotifications);
+    fetchNotifications();
     setLoading(false);
   }, []);
 

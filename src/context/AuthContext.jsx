@@ -13,6 +13,25 @@ export const AuthProvider = ({ children }) => {
   // Configure axios to send cookies with requests
   useEffect(() => {
     axios.defaults.withCredentials = true;
+    
+    // Check for stored admin data first
+    const storedAdmin = localStorage.getItem('admin_user');
+    const isStoredAdmin = localStorage.getItem('is_admin');
+    
+    if (storedAdmin && isStoredAdmin === 'true') {
+      try {
+        const adminData = JSON.parse(storedAdmin);
+        setUser(adminData);
+        setIsAdmin(true);
+        setNotificationCount(0);
+        console.log("Restored admin session from localStorage");
+      } catch (error) {
+        console.error("Error parsing stored admin data:", error);
+        localStorage.removeItem('admin_user');
+        localStorage.removeItem('is_admin');
+      }
+    }
+    
     checkAuthStatus();
   }, []);
 
@@ -28,7 +47,8 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Auth check error:", error);
-      clearAuthState();
+      // Don't clear auth state immediately on error - let the specific auth check handle it
+      // This prevents unnecessary logouts on network issues
     } finally {
       setLoading(false);
     }
@@ -60,7 +80,31 @@ export const AuthProvider = ({ children }) => {
       setUser(adminData);
       setIsAdmin(true);
       setNotificationCount(0); // Admin doesn't have user notifications
-    } catch {
+      
+      // Store admin data in localStorage for persistence
+      localStorage.setItem('admin_user', JSON.stringify(adminData));
+      localStorage.setItem('is_admin', 'true');
+    } catch (error) {
+      console.error("Admin auth check failed:", error);
+      
+      // Check if we have stored admin data as fallback
+      const storedAdmin = localStorage.getItem('admin_user');
+      const isStoredAdmin = localStorage.getItem('is_admin');
+      
+      if (storedAdmin && isStoredAdmin === 'true') {
+        try {
+          const adminData = JSON.parse(storedAdmin);
+          setUser(adminData);
+          setIsAdmin(true);
+          setNotificationCount(0);
+          console.log("Using stored admin data as fallback");
+          return;
+        } catch (parseError) {
+          console.error("Error parsing stored admin data:", parseError);
+        }
+      }
+      
+      // Only clear auth state if no stored data is available
       clearAuthState();
     }
   };
@@ -69,6 +113,10 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setIsAdmin(false);
     setNotificationCount(0);
+    
+    // Clear stored admin data
+    localStorage.removeItem('admin_user');
+    localStorage.removeItem('is_admin');
   };
 
   const login = async (email, password) => {
@@ -123,6 +171,10 @@ export const AuthProvider = ({ children }) => {
       setIsAdmin(true);
       setNotificationCount(0);
 
+      // Store admin data in localStorage for persistence
+      localStorage.setItem('admin_user', JSON.stringify(adminUser));
+      localStorage.setItem('is_admin', 'true');
+
       return adminUser;
     } catch (error) {
       console.error("Admin login error:", error);
@@ -166,6 +218,10 @@ export const AuthProvider = ({ children }) => {
       setIsAdmin(false);
       setUser(null);
       setNotificationCount(0);
+      
+      // Clear stored admin data
+      localStorage.removeItem('admin_user');
+      localStorage.removeItem('is_admin');
     }
   };
 

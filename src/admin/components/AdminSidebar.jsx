@@ -11,22 +11,26 @@ import {
   FiUser,
   FiUserCheck,
   FiBell,
-  FiDollarSign
+  FiDollarSign,
+  FiPieChart
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/common/Button';
-import AdminNotificationBell from './AdminNotificationBell';
 
 const AdminSidebar = ({ isCollapsed, onToggle }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
   const isMobile = window.innerWidth < 768;
+  
+  // Mock notification count - replace with actual data from context/API
+  const notificationCount = 3;
 
   const navItems = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: FiHome },
     { name: 'User Management', path: '/admin/users', icon: FiUsers },
     { name: 'Investments', path: '/admin/investments', icon: FiTrendingUp },
+    { name: 'Portfolio Management', path: '/admin/portfolio', icon: FiPieChart },
     { name: 'Documents', path: '/admin/documents', icon: FiFileText },
     { name: 'Manage Trader', path: '/admin/manage-trader', icon: FiUserCheck },
     { name: 'Transactions', path: '/admin/transactions', icon: FiDollarSign },
@@ -79,9 +83,6 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            {/* Notification Bell */}
-            <AdminNotificationBell />
-            
             {/* Mobile Close Button - Only show on mobile */}
             {isMobile && (
               <button
@@ -105,17 +106,25 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
               to={item.path}
               onClick={handleNavClick}
               className={`
-                flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 group
+                flex items-center space-x-3 px-3 py-3 rounded-lg transition-all duration-200 group relative
                 ${isActive(item.path)
                   ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-blue-600'
                 }
               `}
             >
-              <item.icon 
-                size={20} 
-                className="flex-shrink-0"
-              />
+              <div className="relative">
+                <item.icon 
+                  size={20} 
+                  className="flex-shrink-0"
+                />
+                {/* Notification count badge for Notifications item */}
+                {item.name === 'Notifications' && notificationCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                    {notificationCount > 99 ? '99+' : notificationCount}
+                  </span>
+                )}
+              </div>
               <span className="font-medium truncate">{item.name}</span>
             </Link>
           ))}

@@ -12,6 +12,7 @@ import Dashboard from './pages/Dashboard';
 import InvestmentForm from './pages/InvestmentForm';
 import InvestmentSuccess from './pages/InvestmentSuccess';
 import InvestmentHistory from './pages/InvestmentHistory';
+import Withdrawal from './pages/Withdrawal';
 import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
 
@@ -38,6 +39,8 @@ import AddTrader from './admin/pages/AddTrader';
 import CardManagement from './admin/pages/CardManagement';
 import AdminNotifications from './admin/pages/AdminNotifications';
 import AdminTransactionHistory from './admin/pages/AdminTransactionHistory';
+import TransactionRequestDetails from './admin/pages/TransactionRequestDetails';
+import PortfolioManagement from './admin/pages/PortfolioManagement';
 // import AdminSettings from './admin/pages/AdminSettings';
 
 // Components
@@ -114,6 +117,11 @@ function App() {
                   <InvestmentHistory />
                 </ProtectedRoute>
               } />
+              <Route path="/withdrawal" element={
+                <ProtectedRoute requireVerification={true}>
+                  <Withdrawal />
+                </ProtectedRoute>
+              } />
             </Routes>
           </ProtectedRoute>
         } />
@@ -129,11 +137,13 @@ function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="users" element={<UserManagement />} />
           <Route path="investments" element={<InvestmentManagement />} />
+          <Route path="portfolio" element={<PortfolioManagement />} />
           <Route path="documents" element={<DocumentVerification />} />
           <Route path="manage-trader" element={<ManageTrader />} />
           <Route path="manage-trader/add-trader" element={<AddTrader />} />
           <Route path="notifications" element={<AdminNotifications />} />
           <Route path="transactions" element={<AdminTransactionHistory />} />
+          <Route path="transaction-request/:id" element={<TransactionRequestDetails />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="card" element={<CardManagement />} />
           {/* <Route path="settings" element={<AdminSettings />} /> */}
