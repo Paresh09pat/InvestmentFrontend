@@ -17,6 +17,9 @@ import {
   FiAlertCircle,
   FiMail,
   FiEye,
+  FiEdit3,
+  FiSave,
+  FiLoader,
 } from "react-icons/fi";
 import { INVESTMENT_STATUS, VITE_APP_API_URL } from "../../utils/constants";
 import Card from "../../components/common/Card";
@@ -34,6 +37,9 @@ const TransactionRequestDetails = () => {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [isEditingStatus, setIsEditingStatus] = useState(false);
+  const [newStatus, setNewStatus] = useState('');
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
   // API function to fetch transaction request by ID
   const fetchTransactionRequestById = async (transactionId) => {
@@ -132,6 +138,65 @@ const TransactionRequestDetails = () => {
     setActionLoading(false);
   };
 
+  // Handle status update
+  const handleStatusUpdate = async () => {
+    if (newStatus === transactionRequest.status) {
+      setIsEditingStatus(false);
+      return;
+    }
+
+    setIsUpdatingStatus(true);
+    setError(null);
+
+    const success = await updateTransactionRequest({
+      status: newStatus,
+    });
+
+    if (success) {
+      setIsEditingStatus(false);
+      setSuccessMessage('Transaction status updated successfully');
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(""), 3000);
+    }
+
+    setIsUpdatingStatus(false);
+  };
+
+  // Cancel status editing
+  const handleCancelStatusEdit = () => {
+    setNewStatus(transactionRequest.status);
+    setIsEditingStatus(false);
+  };
+
+  // Get available status options based on current status
+  const getAvailableStatusOptions = (currentStatus) => {
+    const allStatuses = [
+      { value: INVESTMENT_STATUS.PENDING, label: 'Pending', description: 'Transaction is awaiting processing' },
+      { value: INVESTMENT_STATUS.APPROVED, label: 'Approved', description: 'Transaction has been approved' },
+      { value: 'processing', label: 'Processing', description: 'Transaction is currently being processed' },
+      { value: INVESTMENT_STATUS.ACTIVE, label: 'Active', description: 'Transaction is active' },
+      { value: INVESTMENT_STATUS.COMPLETED, label: 'Completed', description: 'Transaction has been completed' },
+      { value: INVESTMENT_STATUS.REJECTED, label: 'Rejected', description: 'Transaction has been rejected' },
+      { value: INVESTMENT_STATUS.CANCELLED, label: 'Cancelled', description: 'Transaction has been cancelled' }
+    ];
+
+    // Define status flow logic
+    const statusFlow = {
+      [INVESTMENT_STATUS.PENDING]: [INVESTMENT_STATUS.APPROVED, 'processing', INVESTMENT_STATUS.REJECTED, INVESTMENT_STATUS.CANCELLED],
+      [INVESTMENT_STATUS.APPROVED]: ['processing', INVESTMENT_STATUS.ACTIVE, INVESTMENT_STATUS.CANCELLED],
+      'processing': [INVESTMENT_STATUS.ACTIVE, INVESTMENT_STATUS.COMPLETED, INVESTMENT_STATUS.REJECTED],
+      [INVESTMENT_STATUS.ACTIVE]: [INVESTMENT_STATUS.COMPLETED, INVESTMENT_STATUS.CANCELLED],
+      [INVESTMENT_STATUS.COMPLETED]: [], // No further changes allowed
+      [INVESTMENT_STATUS.REJECTED]: [INVESTMENT_STATUS.PENDING], // Can be reopened
+      [INVESTMENT_STATUS.CANCELLED]: [INVESTMENT_STATUS.PENDING] // Can be reopened
+    };
+
+    const allowedStatuses = statusFlow[currentStatus] || [];
+    return allStatuses.filter(status => 
+      allowedStatuses.includes(status.value) || status.value === currentStatus
+    );
+  };
+
   const getUserName = (userData) => {
     if (typeof userData === "object" && userData?.name) {
       return userData.name;
@@ -167,6 +232,14 @@ const TransactionRequestDetails = () => {
       </span>
     );
   };
+
+  // Reset editing state when transaction request changes
+  useEffect(() => {
+    if (transactionRequest) {
+      setNewStatus(transactionRequest.status);
+      setIsEditingStatus(false);
+    }
+  }, [transactionRequest]);
 
   useEffect(() => {
     if (id) {
@@ -415,32 +488,97 @@ const TransactionRequestDetails = () => {
             <Card className="animate-fade-in">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900">Status</h2>
-                <div className="p-2 bg-orange-100 rounded-lg">
-                  <FiActivity className="text-orange-600" size={20} />
+                <div className="flex items-center space-x-2">
+                  <div className="p-2 bg-orange-100 rounded-lg">
+                    <FiActivity className="text-orange-600" size={20} />
+                  </div>
+                  {!isEditingStatus && (
+                    <button
+                      onClick={() => setIsEditingStatus(true)}
+                      className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="Edit Status"
+                    >
+                      <FiEdit3 className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
               </div>
 
-              <div className="text-center mb-6">
-                {getStatusBadge(transactionRequest.status)}
-              </div>
-
-              {/* Show rejection reason if transaction was rejected */}
-              {transactionRequest.status === INVESTMENT_STATUS.REJECTED &&
-                transactionRequest.rejectionReason && (
-                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <div className="flex items-start space-x-3">
-                      <FiAlertCircle className="text-red-600 mt-0.5 flex-shrink-0" size={16} />
-                      <div>
-                        <h4 className="text-sm font-medium text-red-800">
-                          Rejection Reason:
-                        </h4>
-                        <p className="text-sm text-red-700 mt-1">
-                          {transactionRequest.rejectionReason}
-                        </p>
-                      </div>
-                    </div>
+              {isEditingStatus ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Update Status
+                    </label>
+                    <select
+                      value={newStatus}
+                      onChange={(e) => setNewStatus(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      disabled={isUpdatingStatus}
+                    >
+                      {getAvailableStatusOptions(transactionRequest.status).map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {getAvailableStatusOptions(transactionRequest.status).find(opt => opt.value === newStatus)?.description}
+                    </p>
                   </div>
-                )}
+                  
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={handleStatusUpdate}
+                      disabled={isUpdatingStatus || newStatus === transactionRequest.status}
+                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+                    >
+                      {isUpdatingStatus ? (
+                        <>
+                          <FiLoader className="h-4 w-4 animate-spin" />
+                          <span>Updating...</span>
+                        </>
+                      ) : (
+                        <>
+                          <FiSave className="h-4 w-4" />
+                          <span>Save</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={handleCancelStatusEdit}
+                      disabled={isUpdatingStatus}
+                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="text-center mb-6">
+                    {getStatusBadge(transactionRequest.status)}
+                  </div>
+
+                  {/* Show rejection reason if transaction was rejected */}
+                  {transactionRequest.status === INVESTMENT_STATUS.REJECTED &&
+                    transactionRequest.rejectionReason && (
+                      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div className="flex items-start space-x-3">
+                          <FiAlertCircle className="text-red-600 mt-0.5 flex-shrink-0" size={16} />
+                          <div>
+                            <h4 className="text-sm font-medium text-red-800">
+                              Rejection Reason:
+                            </h4>
+                            <p className="text-sm text-red-700 mt-1">
+                              {transactionRequest.rejectionReason}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                </>
+              )}
             </Card>
 
 

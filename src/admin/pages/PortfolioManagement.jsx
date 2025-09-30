@@ -323,7 +323,7 @@ const PortfolioManagement = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Total P&L</p>
                 <p className={`text-2xl font-bold ${getProfitLossColor(totalProfitLoss)}`}>
-                  {formatCurrency(totalProfitLoss)}
+                  {totalProfitLoss >= 0 ? '+' : ''}{formatCurrency(totalProfitLoss)}
                 </p>
               </div>
               <div className="bg-purple-100 p-3 rounded-full">
@@ -465,10 +465,10 @@ const PortfolioManagement = () => {
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                         <div className={`text-sm font-medium ${getProfitLossColor(portfolio.profitLoss)}`}>
-                          {formatCurrency(portfolio.profitLoss)}
+                          {portfolio.profitLoss >= 0 ? '+' : ''}{formatCurrency(portfolio.profitLoss)}
                         </div>
                         <div className={`text-xs sm:text-sm ${getProfitLossColor(portfolio.profitLoss)}`}>
-                          {portfolio.profitLossPercentage > 0 ? '+' : ''}{portfolio.profitLossPercentage}%
+                          {portfolio.profitLossPercentage >= 0 ? '+' : ''}{portfolio.profitLossPercentage}%
                         </div>
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
@@ -566,7 +566,7 @@ const PortfolioManagement = () => {
                     </span>
                   </div>
                   <p className={`text-2xl font-bold ${selectedPortfolio.profitLoss >= 0 ? 'text-green-900' : 'text-red-900'}`}>
-                    {formatCurrency(selectedPortfolio.profitLoss)}
+                    {selectedPortfolio.profitLoss >= 0 ? '+' : ''}{formatCurrency(selectedPortfolio.profitLoss)}
                   </p>
                 </div>
               </div>
@@ -584,7 +584,7 @@ const PortfolioManagement = () => {
                       <div className="text-right">
                         <p className="font-medium text-gray-900">{formatCurrency(investment.amount)}</p>
                         <p className={`text-sm ${investment.profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {formatCurrency(investment.profitLoss)}
+                          {investment.profitLoss >= 0 ? '+' : ''}{formatCurrency(investment.profitLoss)}
                         </p>
                       </div>
                     </div>

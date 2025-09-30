@@ -13,7 +13,7 @@ import {
   FiDollarSign,
   FiBarChart
 } from 'react-icons/fi';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart, ComposedChart } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart, ComposedChart, ScatterChart, Scatter } from 'recharts';
 import { useAuth } from '../context/AuthContext';
 import { dummyInvestments } from '../utils/dummyData';
 import { INVESTMENT_STATUS, USER_VERIFICATION_STATUS } from '../utils/constants';
@@ -39,8 +39,8 @@ const Dashboard = () => {
   useEffect(() => {
     // Only use dummy data if no portfolio data is available
     if (!portfolio) {
-      const investments = dummyInvestments.filter(inv => inv.userId === user?.id);
-      setUserInvestments(investments);
+    const investments = dummyInvestments.filter(inv => inv.userId === user?.id);
+    setUserInvestments(investments);
     }
   }, [user, portfolio]);
 
@@ -111,48 +111,41 @@ const Dashboard = () => {
         profitLoss: point.value - currentTotalInvested,
         profitLossPercentage: ((point.value - currentTotalInvested) / currentTotalInvested) * 100,
         timestamp: date.getTime(),
-        originalData: point // Keep reference to original API data
+        originalData: point, // Keep reference to original API data
+        // Add unique identifier for tooltip matching
+        id: point._id || index
       };
     }).sort((a, b) => a.timestamp - b.timestamp);
+
+    // Debug logging to verify chart data
+    console.log('Chart Data Debug:', chartData);
+    console.log('Original API Data:', data);
+    console.log('Chart Data Values:', chartData.map(item => ({ value: item.value, time: item.timeShort })));
 
 
     const maxValue = Math.max(...data.map(d => d.value));
     const minValue = Math.min(...data.map(d => d.value));
     const range = maxValue - minValue;
-    const isPositive = data[data.length - 1]?.value > currentTotalInvested;
+     const isPositive = stats.totalReturns >= 0;
     
     // Calculate proper Y-axis domain
     const yAxisMin = Math.min(minValue, currentTotalInvested) * 0.95;
     const yAxisMax = Math.max(maxValue, currentTotalInvested) * 1.05;
 
-    // Custom tooltip component
+    // Custom tooltip component for ScatterChart
     const CustomTooltip = ({ active, payload, label }) => {
       if (active && payload && payload.length) {
-        // Find the area chart payload (portfolio value)
-        const areaPayload = payload.find(p => p.dataKey === 'value');
-        if (!areaPayload) return null;
+        const data = payload[0].payload;
+        const value = payload[0].value;
         
-        const data = areaPayload.payload;
-        // Use the actual value from the chart data (which comes from priceHistory API)
-        const portfolioValue = data.value;
-        
-        // Debug logging to see what data we're getting
-        console.log('Tooltip Debug:', {
-          payload: payload,
-          areaPayload: areaPayload,
-          data: data,
-          portfolioValue: portfolioValue,
-          chartData: chartData
-        });
-        
-        const profitLoss = portfolioValue - currentTotalInvested;
-        const profitLossPercentage = (profitLoss / currentTotalInvested) * 100;
-        const isProfit = profitLoss > 0;
+        console.log('ScatterChart Tooltip - Data:', data);
+        console.log('ScatterChart Tooltip - Value:', value);
+        console.log('ScatterChart Tooltip - Original Data:', data.originalData);
         
         return (
           <div className="bg-white p-4 border border-gray-200 rounded-xl shadow-xl">
             <div className="flex items-center space-x-2 mb-2">
-              <div className={`w-3 h-3 rounded-full ${isProfit ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
               <p className="text-sm font-semibold text-gray-900">{data.timeShort}</p>
             </div>
             <div className="space-y-1">
@@ -162,22 +155,7 @@ const Dashboard = () => {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Portfolio Value:</span>
                 <span className="text-sm font-bold text-gray-900">
-                  ${portfolioValue.toLocaleString()}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Invested:</span>
-                <span className="text-sm font-medium text-gray-700">
-                  ${currentTotalInvested.toLocaleString()}
-                </span>
-              </div>
-              <div className="flex justify-between items-center pt-1 border-t border-gray-100">
-                <span className="text-sm font-medium text-gray-700">
-                  {isProfit ? 'Profit' : 'Loss'}:
-                </span>
-                <span className={`text-sm font-bold ${isProfit ? 'text-green-600' : 'text-red-600'}`}>
-                  {isProfit ? '+' : ''}${Math.abs(profitLoss).toLocaleString()} 
-                  ({profitLossPercentage > 0 ? '+' : ''}{profitLossPercentage.toFixed(2)}%)
+                  ${data.originalData.value.toLocaleString()}
                 </span>
               </div>
             </div>
@@ -206,7 +184,7 @@ const Dashboard = () => {
               <span>•</span>
               <span>Invested: <span className="font-semibold text-gray-900">${currentTotalInvested.toLocaleString()}</span></span>
               <span>•</span>
-              <span>Current: <span className="font-semibold text-gray-900">${data[data.length - 1]?.value.toLocaleString()}</span></span>
+               <span>Current: <span className="font-semibold text-gray-900">${stats.currentValue.toLocaleString()}</span></span>
             </div>
             <p className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full inline-block">
               📅 {new Date(data[0]?.updatedAt).toLocaleDateString()} → {new Date(data[data.length - 1]?.updatedAt).toLocaleDateString()}
@@ -235,9 +213,9 @@ const Dashboard = () => {
               <p className={`text-sm font-medium ${isPositive ? 'text-green-700' : 'text-red-700'}`}>
                 {isPositive ? 'Profit' : 'Loss'}
               </p>
-              <p className={`text-lg font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                {Math.abs(((data[data.length - 1]?.value - currentTotalInvested) / currentTotalInvested) * 100).toFixed(1)}%
-              </p>
+               <p className={`text-lg font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                 {Math.abs(stats.totalReturnsPercentage).toFixed(1)}%
+               </p>
             </div>
           </div>
         </div>
@@ -246,7 +224,7 @@ const Dashboard = () => {
         <div className="bg-white rounded-xl p-4 shadow-inner border border-gray-100">
           <div className="h-96 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart
+              <ScatterChart
                 data={chartData}
                 margin={{
                   top: 20,
@@ -255,47 +233,19 @@ const Dashboard = () => {
                   bottom: 50,
                 }}
               >
-                <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop 
-                      offset="0%" 
-                      stopColor={isPositive ? "#10b981" : "#ef4444"} 
-                      stopOpacity={0.4}
-                    />
-                    <stop 
-                      offset="50%" 
-                      stopColor={isPositive ? "#10b981" : "#ef4444"} 
-                      stopOpacity={0.2}
-                    />
-                    <stop 
-                      offset="100%" 
-                      stopColor={isPositive ? "#10b981" : "#ef4444"} 
-                      stopOpacity={0.05}
-                    />
-                  </linearGradient>
-                  
-                  {/* Investment baseline gradient */}
-                  <linearGradient id="baseline" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#6366f1" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#6366f1" stopOpacity={0.1} />
-                  </linearGradient>
-                </defs>
-                
                 <CartesianGrid 
                   strokeDasharray="2 4" 
                   stroke="#e5e7eb" 
                   strokeOpacity={0.3}
-                  vertical={false}
-                  horizontalPoints={[yAxisMin, currentTotalInvested, yAxisMax]}
                 />
                 
                 <XAxis 
+                  type="category"
                   dataKey="timeShort"
                   stroke="#6b7280"
                   fontSize={11}
                   tickLine={false}
                   axisLine={false}
-                  interval="preserveStartEnd"
                   angle={-45}
                   textAnchor="end"
                   height={60}
@@ -303,6 +253,8 @@ const Dashboard = () => {
                 />
                 
                 <YAxis 
+                  type="number"
+                  dataKey="value"
                   stroke="#6b7280"
                   fontSize={12}
                   tickLine={false}
@@ -315,7 +267,6 @@ const Dashboard = () => {
                   }}
                   domain={[yAxisMin, yAxisMax]}
                   tick={{ fill: '#6b7280', fontSize: 12 }}
-                  ticks={[yAxisMin, currentTotalInvested, yAxisMax]}
                 />
                 
                 <Tooltip 
@@ -326,50 +277,28 @@ const Dashboard = () => {
                     strokeDasharray: '5 5',
                     strokeOpacity: 0.6
                   }}
-                  allowEscapeViewBox={{ x: false, y: false }}
-                  position={{ x: 'auto', y: 'auto' }}
-                  filterNull={false}
                 />
                 
-                {/* Investment baseline line */}
-                <Line
-                  type="monotone"
-                  dataKey={() => currentTotalInvested}
-                  stroke="#6366f1"
-                  strokeWidth={2}
-                  strokeDasharray="5 5"
-                  strokeOpacity={0.8}
-                  dot={false}
-                  activeDot={false}
-                  connectNulls={false}
-                />
-                
-                {/* Main portfolio value area */}
-                <Area
-                  type="monotone"
-                  dataKey="value"
-                  stroke={isPositive ? "#10b981" : "#ef4444"}
-                  strokeWidth={4}
-                  fill="url(#colorValue)"
-                  dot={{ 
-                    fill: isPositive ? "#10b981" : "#ef4444", 
-                    stroke: "#fff", 
-                    strokeWidth: 3, 
-                    r: 5,
-                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
-                  }}
-                  activeDot={{ 
-                    r: 8, 
-                    stroke: isPositive ? "#10b981" : "#ef4444", 
-                    strokeWidth: 3,
-                    fill: "#fff",
-                    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))'
-                  }}
-                  animationDuration={2000}
-                  animationEasing="ease-out"
-                  connectNulls={false}
-                />
-              </ComposedChart>
+                 {/* Portfolio value line */}
+                 <Line
+                   type="monotone"
+                   dataKey="value"
+                   stroke={isPositive ? "#10b981" : "#ef4444"}
+                   strokeWidth={3}
+                   dot={false}
+                   activeDot={false}
+                   connectNulls={false}
+                 />
+                 
+                 {/* Portfolio value points */}
+                 <Scatter
+                   dataKey="value"
+                   fill={isPositive ? "#10b981" : "#ef4444"}
+                   r={6}
+                   stroke="#fff"
+                   strokeWidth={2}
+                 />
+              </ScatterChart>
             </ResponsiveContainer>
           </div>
         </div>
@@ -391,9 +320,9 @@ const Dashboard = () => {
               <FiTrendingUp className="text-white" size={16} />
             </div>
             <p className="text-xs font-medium text-gray-700 mb-1">Current Value</p>
-            <p className="text-lg font-bold text-gray-900">
-              ${data[data.length - 1]?.value.toLocaleString()}
-            </p>
+             <p className="text-lg font-bold text-gray-900">
+               ${stats.currentValue.toLocaleString()}
+             </p>
           </div>
           
           <div className={`rounded-xl p-4 text-center border ${
@@ -413,9 +342,9 @@ const Dashboard = () => {
             <p className={`text-xs font-medium mb-1 ${isPositive ? 'text-green-700' : 'text-red-700'}`}>
               {isPositive ? 'Profit' : 'Loss'}
             </p>
-            <p className={`text-lg font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-              {isPositive ? '+' : ''}${(data[data.length - 1]?.value - currentTotalInvested).toLocaleString()}
-            </p>
+             <p className={`text-lg font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+               {isPositive ? '+' : ''}${stats.totalReturns.toLocaleString()}
+             </p>
           </div>
         </div>
       </div>
@@ -544,11 +473,11 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Returns</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {formatCurrency(stats.totalReturns)}
+                   <p className={`text-2xl font-bold ${stats.totalReturns >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                     {stats.totalReturns >= 0 ? '+' : ''}{formatCurrency(stats.totalReturns)}
                   </p>
-                  <p className="text-sm text-green-600">
-                    +{calculateReturnsPercentage()}%
+                   <p className={`text-sm ${stats.totalReturnsPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                     {stats.totalReturnsPercentage >= 0 ? '+' : ''}{calculateReturnsPercentage()}%
                   </p>
                 </div>
                 <div className="bg-purple-100 p-3 rounded-full">
@@ -679,14 +608,14 @@ const Dashboard = () => {
                     Your Investments
                   </h2>
                   <div className="flex space-x-2">
-                    <Button 
-                      variant="outline" 
-                      size="small"
-                      onClick={() => navigate('/invest')}
-                      icon={<FiPlus />}
-                    >
-                      New Investment
-                    </Button>
+                  <Button 
+                    variant="outline" 
+                    size="small"
+                    onClick={() => navigate('/invest')}
+                    icon={<FiPlus />}
+                  >
+                    New Investment
+                  </Button>
                     <Button 
                       variant="outline" 
                       size="small"
@@ -716,8 +645,8 @@ const Dashboard = () => {
                             Created: {new Date(portfolio.createdAt).toLocaleDateString()}
                           </p>
                         </div>
-                      </div>
-                      
+                </div>
+
                       <div className="text-right">
                         <p className="font-semibold text-gray-900">
                           {formatCurrency(portfolio.currentValue)}
@@ -759,8 +688,8 @@ const Dashboard = () => {
                           <p className="font-semibold text-gray-900">
                             {formatCurrency(investment.currentValue)}
                           </p>
-                          <p className="text-sm text-green-600">
-                            +{formatCurrency(investment.currentValue - investment.amount)}
+                          <p className={`text-sm ${(investment.currentValue - investment.amount) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {(investment.currentValue - investment.amount) >= 0 ? '+' : ''}{formatCurrency(investment.currentValue - investment.amount)}
                           </p>
                           <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(investment.status)}`}>
                             {investment.status}
@@ -779,9 +708,9 @@ const Dashboard = () => {
                       Start your investment journey today!
                     </p>
                     <div className="flex space-x-2 justify-center">
-                      <Button onClick={() => navigate('/invest')}>
-                        Make Your First Investment
-                      </Button>
+                    <Button onClick={() => navigate('/invest')}>
+                      Make Your First Investment
+                    </Button>
                       <Button 
                         variant="outline"
                         onClick={() => navigate('/withdrawal')}
@@ -895,8 +824,8 @@ const Dashboard = () => {
                             <p className="font-medium text-gray-900">
                               {formatCurrency(plan.currentValue)}
                             </p>
-                            <p className="text-sm text-green-600">
-                              +{formatCurrency(plan.currentValue - plan.amount)}
+                            <p className={`text-sm ${(plan.currentValue - plan.amount) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {(plan.currentValue - plan.amount) >= 0 ? '+' : ''}{formatCurrency(plan.currentValue - plan.amount)}
                             </p>
                           </div>
                         </div>

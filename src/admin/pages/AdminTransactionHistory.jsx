@@ -22,21 +22,87 @@ import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Input from "../../components/forms/Input";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import TransactionViewModal from "../components/TransactionViewModal";
 import { toast } from "react-toastify";
-import {
-  generateDummyTransactions,
-  formatTransactionAmount,
-  formatTransactionTime,
-  getTransactionStatusColor,
-  getTransactionTypeColor,
-  getPaymentMethodIcon,
-  calculateTotalsByType,
-  filterTransactionsByUser,
-  getTransactionStats,
-  TRANSACTION_TYPES,
-  TRANSACTION_STATUS,
-  PAYMENT_METHODS,
-} from "../../utils/adminTransactionDummyData";
+// Transaction constants
+const TRANSACTION_TYPES = {
+  DEPOSIT: 'deposit',
+  WITHDRAWAL: 'withdrawal',
+  INVESTMENT: 'investment',
+  REFUND: 'refund',
+  FEE: 'fee',
+  BONUS: 'bonus',
+  DIVIDEND: 'dividend',
+};
+
+const TRANSACTION_STATUS = {
+  PENDING: 'pending',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+  CANCELLED: 'cancelled',
+  PROCESSING: 'processing',
+};
+
+const PAYMENT_METHODS = {
+  BANK_TRANSFER: 'bank_transfer',
+  CREDIT_CARD: 'credit_card',
+  PAYPAL: 'paypal',
+  CRYPTO: 'crypto',
+  WIRE_TRANSFER: 'wire_transfer',
+};
+
+// Helper functions
+const formatTransactionAmount = (amount, currency = 'USD') => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+  }).format(amount);
+};
+
+const formatTransactionTime = (dateString) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffTime = Math.abs(now - date);
+  const diffMinutes = Math.ceil(diffTime / (1000 * 60));
+
+  if (diffMinutes < 1) return 'Just now';
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  if (diffMinutes < 1440) return `${Math.floor(diffMinutes / 60)}h ago`;
+  if (diffMinutes < 10080) return `${Math.floor(diffMinutes / 1440)}d ago`;
+  return date.toLocaleDateString();
+};
+
+const getPaymentMethodIcon = (method) => {
+  const icons = {
+    [PAYMENT_METHODS.BANK_TRANSFER]: '🏦',
+    [PAYMENT_METHODS.CREDIT_CARD]: '💳',
+    [PAYMENT_METHODS.PAYPAL]: '🅿️',
+    [PAYMENT_METHODS.CRYPTO]: '₿',
+    [PAYMENT_METHODS.WIRE_TRANSFER]: '💸',
+  };
+
+  return icons[method] || '💰';
+};
+
+const calculateTotalsByType = (transactions) => {
+  const totals = {};
+  
+  transactions.forEach(transaction => {
+    if (!totals[transaction.type]) {
+      totals[transaction.type] = 0;
+    }
+    totals[transaction.type] += transaction.amount;
+  });
+
+  return totals;
+};
+
+const filterTransactionsByUser = (transactions, userId) => {
+  return transactions.filter(transaction => transaction.userId === userId);
+};
+import axios from "axios";
+import { VITE_APP_API_URL } from "../../utils/constants";
+import { useParams } from "react-router-dom";
 
 const AdminTransactionHistory = () => {
   const [transactions, setTransactions] = useState([]);
@@ -51,25 +117,30 @@ const AdminTransactionHistory = () => {
   const [showUserDetails, setShowUserDetails] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const transactionsRef = useRef(null);
-
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [showTransactionModal, setShowTransactionModal] = useState(false);
   // Load transactions
-  const loadTransactions = useCallback(async () => {
+  const loadTransactions = async () => {
     try {
       setLoading(true);
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const response = await axios.get(`${VITE_APP_API_URL}/api/admin/txn-history`, { withCredentials: true });
       
-      const dummyTransactions = generateDummyTransactions();
-      setTransactions(dummyTransactions);
-      setFilteredTransactions(dummyTransactions);
+      if (response.data && response.data.success) {
+        setTransactions(response.data.data);
+        setFilteredTransactions(response.data.data);
+        console.log("transactions", response.data.data);
+      } else {
+        console.error("Invalid response format:", response.data);
+        setTransactions([]);
+        setFilteredTransactions([]);
+      }
     } catch (error) {
       toast.error("Failed to load transactions");
       console.error("Failed to load transactions:", error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   // Filter transactions
   useEffect(() => {
@@ -78,10 +149,10 @@ const AdminTransactionHistory = () => {
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(transaction =>
-        transaction.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        transaction.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        transaction.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        transaction.description.toLowerCase().includes(searchTerm.toLowerCase())
+        (transaction.userId?.name || transaction.userName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (transaction.userId?.email || transaction.userEmail || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (transaction.txnReqId?.walletTxId || transaction.reference || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (transaction.type || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -97,7 +168,7 @@ const AdminTransactionHistory = () => {
 
     // User filter
     if (userFilter !== "all") {
-      filtered = filtered.filter(transaction => transaction.userId === userFilter);
+      filtered = filtered.filter(transaction => (transaction.userId?._id || transaction.userId) === userFilter);
     }
 
     // Date filter
@@ -131,17 +202,25 @@ const AdminTransactionHistory = () => {
 
   useEffect(() => {
     loadTransactions();
-  }, [loadTransactions]);
+  }, []);
 
   // Get unique users for filter
-  const uniqueUsers = [...new Set(transactions.map(t => ({ 
-    id: t.userId, 
-    name: t.userName, 
-    email: t.userEmail 
+  const uniqueUsers = [...new Set(transactions?.map(t => ({ 
+    id: t.userId?._id || t.userId, 
+    name: t.userId?.name || t.userName, 
+    email: t.userId?.email || t.userEmail 
   })))].sort((a, b) => a.name.localeCompare(b.name));
 
   // Get transaction statistics
-  const stats = getTransactionStats(filteredTransactions);
+  const stats = {
+    totalTransactions: filteredTransactions.length,
+    totalVolume: filteredTransactions.reduce((sum, t) => sum + t.amount, 0),
+    completedTransactions: filteredTransactions.filter(t => t.status === 'completed').length,
+    pendingTransactions: filteredTransactions.filter(t => t.status === 'pending').length,
+    failedTransactions: filteredTransactions.filter(t => t.status === 'failed').length,
+    uniqueUsers: new Set(filteredTransactions.map(t => t.userId?._id || t.userId)).size,
+  };
+  
   const totalsByType = calculateTotalsByType(filteredTransactions);
 
   // Pagination
@@ -214,6 +293,18 @@ const AdminTransactionHistory = () => {
   // Export transactions (placeholder)
   const handleExport = () => {
     toast.info("Export functionality will be implemented with backend integration");
+  };
+
+  // Handle transaction view
+  const handleViewTransaction = (transaction) => {
+    setSelectedTransaction(transaction);
+    setShowTransactionModal(true);
+  };
+
+  // Close transaction modal
+  const handleCloseTransactionModal = () => {
+    setShowTransactionModal(false);
+    setSelectedTransaction(null);
   };
 
   return (
@@ -424,7 +515,7 @@ const AdminTransactionHistory = () => {
               <p className="text-sm text-gray-600">Total Volume</p>
               <p className="font-medium">
                 {formatTransactionAmount(
-                  filterTransactionsByUser(transactions, selectedUser.id)
+                  filterTransactionsByUser(transactions.data, selectedUser.id)
                     .reduce((sum, t) => sum + t.amount, 0)
                 )}
               </p>
@@ -459,8 +550,8 @@ const AdminTransactionHistory = () => {
                   <tr key={transaction._id} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-4 px-4">
                       <div>
-                        <p className="font-medium text-gray-900">{transaction.userName}</p>
-                        <p className="text-sm text-gray-600">{transaction.userEmail}</p>
+                        <p className="font-medium text-gray-900">{transaction.userId?.name || transaction.userName}</p>
+                        <p className="text-sm text-gray-600">{transaction.userId?.email || transaction.userEmail}</p>
                       </div>
                     </td>
                     <td className="py-4 px-4">
@@ -498,9 +589,9 @@ const AdminTransactionHistory = () => {
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex items-center space-x-2">
-                        <span>{getPaymentMethodIcon(transaction.paymentMethod)}</span>
+                        <span>{getPaymentMethodIcon(transaction.txnReqId?.plan || 'wallet')}</span>
                         <span className="capitalize text-sm">
-                          {transaction.paymentMethod.replace('_', ' ')}
+                          {transaction.txnReqId?.plan || 'wallet'}
                         </span>
                       </div>
                     </td>
@@ -516,7 +607,7 @@ const AdminTransactionHistory = () => {
                     </td>
                     <td className="py-4 px-4">
                       <span className="text-sm font-mono text-gray-600">
-                        {transaction.reference}
+                        {transaction.txnReqId?.walletTxId || transaction._id}
                       </span>
                     </td>
                     <td className="py-4 px-4">
@@ -524,9 +615,7 @@ const AdminTransactionHistory = () => {
                         variant="outline"
                         size="small"
                         icon={<FiEye />}
-                        onClick={() => {
-                          toast.info("Transaction details view will be implemented");
-                        }}
+                        onClick={() => handleViewTransaction(transaction)}
                       >
                         View
                       </Button>
@@ -580,6 +669,13 @@ const AdminTransactionHistory = () => {
           </div>
         )}
       </Card>
+
+      {/* Transaction View Modal */}
+      <TransactionViewModal
+        isOpen={showTransactionModal}
+        onClose={handleCloseTransactionModal}
+        transaction={selectedTransaction}
+      />
     </div>
   );
 };
