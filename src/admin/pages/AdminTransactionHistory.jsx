@@ -320,13 +320,7 @@ const AdminTransactionHistory = () => {
           </p>
         </div>
         <div className="flex space-x-3">
-          <Button
-            variant="outline"
-            onClick={handleExport}
-            icon={<FiDownload />}
-          >
-            Export
-          </Button>
+  
           <Button
             variant="outline"
             onClick={loadTransactions}

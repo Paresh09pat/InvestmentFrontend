@@ -40,6 +40,8 @@ const TransactionRequestDetails = () => {
   const [isEditingStatus, setIsEditingStatus] = useState(false);
   const [newStatus, setNewStatus] = useState('');
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [statusUpdateReason, setStatusUpdateReason] = useState('');
+  const [showRejectionModal, setShowRejectionModal] = useState(false);
 
   // API function to fetch transaction request by ID
   const fetchTransactionRequestById = async (transactionId) => {
@@ -145,15 +147,29 @@ const TransactionRequestDetails = () => {
       return;
     }
 
+    // Check if rejection reason is required
+    if (newStatus === INVESTMENT_STATUS.REJECTED && !statusUpdateReason.trim()) {
+      setError('Rejection reason is required');
+      return;
+    }
+
     setIsUpdatingStatus(true);
     setError(null);
 
-    const success = await updateTransactionRequest({
+    const updateData = {
       status: newStatus,
-    });
+    };
+
+    // Add rejection reason if status is rejected
+    if (newStatus === INVESTMENT_STATUS.REJECTED) {
+      updateData.rejectionReason = statusUpdateReason.trim();
+    }
+
+    const success = await updateTransactionRequest(updateData);
 
     if (success) {
       setIsEditingStatus(false);
+      setStatusUpdateReason('');
       setSuccessMessage('Transaction status updated successfully');
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(""), 3000);
@@ -166,6 +182,8 @@ const TransactionRequestDetails = () => {
   const handleCancelStatusEdit = () => {
     setNewStatus(transactionRequest.status);
     setIsEditingStatus(false);
+    setStatusUpdateReason('');
+    setError(null);
   };
 
   // Get available status options based on current status
@@ -173,22 +191,14 @@ const TransactionRequestDetails = () => {
     const allStatuses = [
       { value: INVESTMENT_STATUS.PENDING, label: 'Pending', description: 'Transaction is awaiting processing' },
       { value: INVESTMENT_STATUS.APPROVED, label: 'Approved', description: 'Transaction has been approved' },
-      { value: 'processing', label: 'Processing', description: 'Transaction is currently being processed' },
-      { value: INVESTMENT_STATUS.ACTIVE, label: 'Active', description: 'Transaction is active' },
-      { value: INVESTMENT_STATUS.COMPLETED, label: 'Completed', description: 'Transaction has been completed' },
-      { value: INVESTMENT_STATUS.REJECTED, label: 'Rejected', description: 'Transaction has been rejected' },
-      { value: INVESTMENT_STATUS.CANCELLED, label: 'Cancelled', description: 'Transaction has been cancelled' }
+      { value: INVESTMENT_STATUS.REJECTED, label: 'Rejected', description: 'Transaction has been rejected' }
     ];
 
-    // Define status flow logic
+    // Define status flow logic - only allow transitions between the three main statuses
     const statusFlow = {
-      [INVESTMENT_STATUS.PENDING]: [INVESTMENT_STATUS.APPROVED, 'processing', INVESTMENT_STATUS.REJECTED, INVESTMENT_STATUS.CANCELLED],
-      [INVESTMENT_STATUS.APPROVED]: ['processing', INVESTMENT_STATUS.ACTIVE, INVESTMENT_STATUS.CANCELLED],
-      'processing': [INVESTMENT_STATUS.ACTIVE, INVESTMENT_STATUS.COMPLETED, INVESTMENT_STATUS.REJECTED],
-      [INVESTMENT_STATUS.ACTIVE]: [INVESTMENT_STATUS.COMPLETED, INVESTMENT_STATUS.CANCELLED],
-      [INVESTMENT_STATUS.COMPLETED]: [], // No further changes allowed
-      [INVESTMENT_STATUS.REJECTED]: [INVESTMENT_STATUS.PENDING], // Can be reopened
-      [INVESTMENT_STATUS.CANCELLED]: [INVESTMENT_STATUS.PENDING] // Can be reopened
+      [INVESTMENT_STATUS.PENDING]: [INVESTMENT_STATUS.APPROVED, INVESTMENT_STATUS.REJECTED],
+      [INVESTMENT_STATUS.APPROVED]: [INVESTMENT_STATUS.PENDING, INVESTMENT_STATUS.REJECTED],
+      [INVESTMENT_STATUS.REJECTED]: [INVESTMENT_STATUS.PENDING, INVESTMENT_STATUS.APPROVED]
     };
 
     const allowedStatuses = statusFlow[currentStatus] || [];
@@ -238,6 +248,7 @@ const TransactionRequestDetails = () => {
     if (transactionRequest) {
       setNewStatus(transactionRequest.status);
       setIsEditingStatus(false);
+      setStatusUpdateReason('');
     }
   }, [transactionRequest]);
 
@@ -526,11 +537,39 @@ const TransactionRequestDetails = () => {
                       {getAvailableStatusOptions(transactionRequest.status).find(opt => opt.value === newStatus)?.description}
                     </p>
                   </div>
+
+                  {/* Rejection Reason Field - Only show when status is rejected */}
+                  {newStatus === INVESTMENT_STATUS.REJECTED && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Rejection Reason *
+                      </label>
+                      <Input
+                        type="textarea"
+                        value={statusUpdateReason}
+                        onChange={(e) => setStatusUpdateReason(e.target.value)}
+                        placeholder="Please explain why this transaction is being rejected..."
+                        rows={3}
+                        className="resize-none"
+                        disabled={isUpdatingStatus}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        This reason will be visible to the user and is required for rejection.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Error Message */}
+                  {error && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-sm text-red-600">{error}</p>
+                    </div>
+                  )}
                   
                   <div className="flex space-x-2">
                     <button
                       onClick={handleStatusUpdate}
-                      disabled={isUpdatingStatus || newStatus === transactionRequest.status}
+                      disabled={isUpdatingStatus || newStatus === transactionRequest.status || (newStatus === INVESTMENT_STATUS.REJECTED && !statusUpdateReason.trim())}
                       className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
                     >
                       {isUpdatingStatus ? (
