@@ -135,13 +135,13 @@ const AdminDashboard = () => {
 
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="p-4 lg:p-6 space-y-4 lg:space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+      <div className="mb-6 lg:mb-8">
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
           Admin Dashboard
         </h1>
-        <p className="text-gray-600">
+        <p className="text-sm lg:text-base text-gray-600">
           Overview of platform performance and recent activities
         </p>
       </div>
@@ -169,19 +169,19 @@ const AdminDashboard = () => {
       {!loading && !error && (
         <>
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <Card hover className="animate-slide-up cursor-pointer group" onClick={handleViewAllStats}>
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Total Users</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalUsers}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs lg:text-sm font-medium text-gray-600">Total Users</p>
+              <p className="text-xl lg:text-2xl font-bold text-gray-900">{stats.totalUsers}</p>
               <div className="flex items-center space-x-1 mt-1">
-                <FiArrowUp className="text-green-500" size={14} />
-                <span className="text-sm text-green-600">+12% from last month</span>
+                <FiArrowUp className="text-green-500" size={12} />
+                <span className="text-xs lg:text-sm text-green-600">+12% from last month</span>
               </div>
             </div>
-            <div className="bg-blue-100 p-3 rounded-full group-hover:bg-blue-200 transition-colors">
-              <FiUsers className="text-blue-600" size={24} />
+            <div className="bg-blue-100 p-2 lg:p-3 rounded-full group-hover:bg-blue-200 transition-colors flex-shrink-0">
+              <FiUsers className="text-blue-600" size={20} />
             </div>
           </div>
         </Card>
@@ -325,6 +325,7 @@ const AdminDashboard = () => {
             </div>
           )}
         </Card>
+
       </div>
         </>
       )}

@@ -2,12 +2,17 @@
 
 import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaArrowDown, FaArrowUp, FaBitcoin, FaDollarSign, FaEthereum, FaEuroSign, FaPoundSign, FaYenSign } from 'react-icons/fa';
 import { Area, AreaChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { useAuth } from '../context/AuthContext';
+import { USER_VERIFICATION_STATUS } from '../utils/constants';
 
 const HowItWorks = () => {
   const [mounted, setMounted] = useState(false);
   const [activeTimeframe, setActiveTimeframe] = useState('1 Year');
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
 
   
   useEffect(() => {
@@ -51,6 +56,19 @@ const HowItWorks = () => {
   ];
 
   const timeframes = ['1 Year', '3 Month', '6 Month', 'Weekly'];
+
+  const handleInvestNow = () => {
+    if (!isAuthenticated) {
+      // User not logged in - navigate to signup
+      navigate('/signup');
+    } else if (user?.verificationStatus !== USER_VERIFICATION_STATUS.VERIFIED) {
+      // User logged in but not verified - navigate to profile
+      navigate('/profile');
+    } else {
+      // User logged in and verified - navigate to investment page
+      navigate('/invest');
+    }
+  };
 
   if (!mounted) return null;
 
@@ -139,15 +157,16 @@ const HowItWorks = () => {
                 transition={{ duration: 0.8, delay: 0.3 }}
                 className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4"
               >
-                <button className="bg-white cursor-pointer text-black px-6 py-3 sm:px-8 sm:py-4 rounded-full font-medium hover:bg-gray-100 transition-colors flex items-center justify-center space-x-3">
+                <button 
+                  onClick={handleInvestNow}
+                  className="bg-white cursor-pointer text-black px-6 py-3 sm:px-8 sm:py-4 rounded-full font-medium hover:bg-gray-100 transition-colors flex items-center justify-center space-x-3"
+                >
                   <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-200 rounded-full flex items-center justify-center">
                     <div className="w-2 h-2 sm:w-3 sm:h-3 bg-gray-600 rounded-full"></div>
                   </div>
                   <span className="text-base sm:text-lg">Invest Now</span>
                 </button>
-                <button className="text-white cursor-pointer border border-gray-600 px-6 py-3 sm:px-8 sm:py-4 rounded-full hover:border-gray-400 transition-colors text-base sm:text-lg">
-                  Learn More
-                </button>
+
               </motion.div>
             </div>
 

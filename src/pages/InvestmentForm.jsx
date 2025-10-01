@@ -10,23 +10,31 @@ import Input from '../components/forms/Input';
 import FileUpload from '../components/forms/FileUpload';
 import MembershipCard from '../components/MembershipCard';
 import TraderSelection from '../components/TraderSelection';
+import { toast } from 'react-toastify';
+import axios from 'axios';
+import { VITE_APP_API_URL } from '../utils/constants';
 
 const InvestmentForm = () => {
-  const { user } = useAuth();
+  const { qr } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     amount: '',
-    autoReinvest: false,
-    transactionId: '',
-    paymentScreenshot: null
+    walletTxId: '',
+    transactionImage: null
   });
 
   const [showPaymentFields, setShowPaymentFields] = useState(false);
   const [errors, setErrors] = useState({});
   const [selectedMembership, setSelectedMembership] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState(null);
   const [selectedTrader, setSelectedTrader] = useState(null);
-  const [currentStep, setCurrentStep] = useState('membership'); // 'membership', 'trader', 'form'
+  const [currentStep, setCurrentStep] = useState('membership'); 
+  const [plans, setPlans] = useState([]);
+  const [traders, setTraders] = useState([]);
+  const [isLoadingTraders, setIsLoadingTraders] = useState(false);
+  const [validationTimeout, setValidationTimeout] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -35,8 +43,32 @@ const InvestmentForm = () => {
       [name]: type === 'checkbox' ? checked : value
     }));
 
-    // Clear error when user starts typing
-    if (errors[name]) {
+    // Real-time validation for amount field with debouncing
+    if (name === 'amount' && value) {
+      // Clear existing timeout
+      if (validationTimeout) {
+        clearTimeout(validationTimeout);
+      }
+      
+      // Set new timeout for validation
+      const timeout = setTimeout(() => {
+        const amountError = validateAmount(value);
+        setErrors(prev => ({
+          ...prev,
+          [name]: amountError || ''
+        }));
+      }, 500); // 500ms delay
+      
+      setValidationTimeout(timeout);
+    } else if (name === 'walletTxId' && value) {
+      // Real-time validation for walletTxId
+      const walletTxIdError = validateWalletTxId(value);
+      setErrors(prev => ({
+        ...prev,
+        [name]: walletTxIdError || ''
+      }));
+    } else if (errors[name]) {
+      // Clear error when user starts typing other fields
       setErrors(prev => ({
         ...prev,
         [name]: ''
@@ -44,16 +76,49 @@ const InvestmentForm = () => {
     }
   };
 
-  const handleMembershipSelect = (tier) => {
+  const handleAmountBlur = (e) => {
+    const { value } = e.target;
+    if (value) {
+      const amountError = validateAmount(value);
+      setErrors(prev => ({
+        ...prev,
+        amount: amountError || ''
+      }));
+    }
+  };
+
+  const getTraders = async (tier) => {
+    console.log("tier>>", tier);
+    setIsLoadingTraders(true);
+    try {
+      const res = await axios.get(`${VITE_APP_API_URL}/api/auth/traders?search=${tier}`);
+      console.log("res>>", res.data.traders);
+      setTraders(res.data.traders);
+    }
+    catch (err) {
+      console.log(err);
+      toast.error('Failed to fetch traders');
+    }
+    finally {
+      setIsLoadingTraders(false);
+    }
+  }
+
+  const handleMembershipSelect = (tier, planData) => {
+    console.log("tier>>", tier);
+    console.log("planData>>", planData);
     setSelectedMembership(tier);
+    setSelectedPlan(planData);
     setCurrentStep('trader');
-    setSelectedTrader(null); // Reset trader selection when changing membership
-    
+    setSelectedTrader(null);
+
+    getTraders(tier);
+
     // Auto-scroll to trader selection section
     setTimeout(() => {
       const traderSection = document.getElementById('trader-selection');
       if (traderSection) {
-        traderSection.scrollIntoView({ 
+        traderSection.scrollIntoView({
           behavior: 'smooth',
           block: 'start'
         });
@@ -72,7 +137,7 @@ const InvestmentForm = () => {
       setTimeout(() => {
         const formSection = document.getElementById('investment-form');
         if (formSection) {
-          formSection.scrollIntoView({ 
+          formSection.scrollIntoView({
             behavior: 'smooth',
             block: 'start'
           });
@@ -84,6 +149,7 @@ const InvestmentForm = () => {
   const handleBackToMembership = () => {
     setCurrentStep('membership');
     setSelectedMembership(null);
+    setSelectedPlan(null);
     setSelectedTrader(null);
   };
 
@@ -93,7 +159,7 @@ const InvestmentForm = () => {
     setTimeout(() => {
       const traderSection = document.getElementById('trader-selection');
       if (traderSection) {
-        traderSection.scrollIntoView({ 
+        traderSection.scrollIntoView({
           behavior: 'smooth',
           block: 'start'
         });
@@ -102,11 +168,19 @@ const InvestmentForm = () => {
   };
 
   const handleFileUpload = (file) => {
+    // Clear previous errors
+    if (errors.transactionImage) {
+      setErrors(prev => ({
+        ...prev,
+        transactionImage: ''
+      }));
+    }
+
     // Validate file type
     if (file && !file.type.startsWith('image/')) {
       setErrors(prev => ({
         ...prev,
-        paymentScreenshot: 'Please upload an image file (JPG, PNG, GIF, etc.)'
+        transactionImage: 'Please upload an image file (JPG, PNG, GIF, etc.)'
       }));
       return;
     }
@@ -115,22 +189,21 @@ const InvestmentForm = () => {
     if (file && file.size > 5 * 1024 * 1024) {
       setErrors(prev => ({
         ...prev,
-        paymentScreenshot: 'File size must be less than 5MB'
+        transactionImage: 'File size must be less than 5MB'
       }));
       return;
     }
 
+    // Validate file dimensions (optional - for very large images)
+    if (file && file.size > 2 * 1024 * 1024) {
+      // For files larger than 2MB, show a warning but allow
+      console.warn('Large file uploaded:', file.size / 1024 / 1024, 'MB');
+    }
+
     setFormData(prev => ({
       ...prev,
-      paymentScreenshot: file
+      transactionImage: file
     }));
-
-    if (errors.paymentScreenshot) {
-      setErrors(prev => ({
-        ...prev,
-        paymentScreenshot: ''
-      }));
-    }
   };
 
   const calculateReturns = () => {
@@ -152,51 +225,155 @@ const InvestmentForm = () => {
   const validatePaymentFields = () => {
     const newErrors = {};
 
-    if (!formData.transactionId.trim()) {
-      newErrors.transactionId = 'Transaction ID is required';
+    if (!formData.walletTxId.trim()) {
+      newErrors.walletTxId = 'Transaction ID is required';
+    } else if (formData.walletTxId.trim().length < 10) {
+      newErrors.walletTxId = 'Transaction ID must be at least 10 characters';
+    } else if (!/^[a-zA-Z0-9]+$/.test(formData.walletTxId.trim())) {
+      newErrors.walletTxId = 'Transaction ID can only contain letters and numbers';
     }
 
-    if (!formData.paymentScreenshot) {
-      newErrors.paymentScreenshot = 'Payment screenshot is required';
+    if (!formData.transactionImage) {
+      newErrors.transactionImage = 'Payment screenshot is required';
     }
 
     return newErrors;
   };
 
-  const getMembershipLimits = (tier) => {
-    const limits = {
-      silver: { min: 10000, max: 50000 },
-      gold: { min: 50000, max: 200000 },
-      platinum: { min: 200000, max: 1000000 }
-    };
-    return limits[tier] || { min: 1000, max: 1000000 };
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Validate amount
+    const amountError = validateAmount(formData.amount);
+    if (amountError) {
+      newErrors.amount = amountError;
+    }
+
+    // Validate required fields
+    if (!selectedPlan) {
+      newErrors.plan = 'Please select a plan';
+    }
+
+    if (!selectedTrader) {
+      newErrors.trader = 'Please select a trader';
+    }
+
+    // If payment fields are shown, validate them too
+    if (showPaymentFields) {
+      const paymentErrors = validatePaymentFields();
+      Object.assign(newErrors, paymentErrors);
+    }
+
+    return newErrors;
   };
 
-  const validateAmount = (amount, tier) => {
-    const limits = getMembershipLimits(tier);
+  const getMembershipLimits = () => {
+    if (selectedPlan) {
+      return {
+        min: selectedPlan.minInvestment || 1000,
+        max: selectedPlan.maxInvestment || 1000000
+      };
+    }
+    // Fallback to default limits if no plan is selected
+    return { min: 1000, max: 1000000 };
+  };
+
+  const findSuitablePlan = (amount) => {
+    // Find plans that can accommodate this amount
+    const suitablePlans = plans.filter(plan =>
+      amount >= plan.minInvestment && amount <= plan.maxInvestment
+    );
+
+    if (suitablePlans.length > 0) {
+      return suitablePlans[0]; // Return the first suitable plan
+    }
+
+    // If no plan can accommodate, find the closest one
+    const sortedPlans = plans.sort((a, b) => a.minInvestment - b.minInvestment);
+
+    if (amount < sortedPlans[0].minInvestment) {
+      return sortedPlans[0]; // Suggest the lowest tier
+    }
+
+    if (amount > sortedPlans[sortedPlans.length - 1].maxInvestment) {
+      return sortedPlans[sortedPlans.length - 1]; // Suggest the highest tier
+    }
+
+    return null;
+  };
+
+  const getAllPlans = async () => {
+    try {
+      const res = await axios.get(`${VITE_APP_API_URL}/api/auth/plans`, {
+        withCredentials: true
+      });
+      setPlans(res.data.plans)
+    }
+    catch (err) {
+      console.log(err);
+      toast.error(err.message)
+    }
+  }
+
+  useEffect(() => {
+    getAllPlans()
+  }, [])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (validationTimeout) {
+        clearTimeout(validationTimeout);
+      }
+    };
+  }, [validationTimeout]);
+
+  const validateWalletTxId = (walletTxId) => {
+    if (!walletTxId.trim()) {
+      return 'Transaction ID is required';
+    } else if (walletTxId.trim().length < 10) {
+      return 'Transaction ID must be at least 10 characters';
+    } else if (!/^[a-zA-Z0-9]+$/.test(walletTxId.trim())) {
+      return 'Transaction ID can only contain letters and numbers';
+    }
+    return null;
+  };
+
+  const validateAmount = (amount) => {
+    const limits = getMembershipLimits();
     const numAmount = parseFloat(amount);
-    
+
     if (!amount || isNaN(numAmount)) {
       return 'Please enter a valid amount';
     }
-    
+
     if (numAmount < limits.min) {
-      return `Minimum investment for ${tier} tier is $${limits.min.toLocaleString()}`;
+      const suitablePlan = findSuitablePlan(numAmount);
+      if (suitablePlan) {
+        return `Minimum investment for ${selectedMembership} tier is $${limits.min.toLocaleString()}. Consider switching to ${suitablePlan.name} plan ($${suitablePlan.minInvestment.toLocaleString()} - $${suitablePlan.maxInvestment.toLocaleString()})`;
+      }
+      return `Minimum investment for ${selectedMembership} tier is $${limits.min.toLocaleString()}`;
     }
-    
+
     if (numAmount > limits.max) {
-      return `Maximum investment for ${tier} tier is $${limits.max.toLocaleString()}`;
+      const suitablePlan = findSuitablePlan(numAmount);
+      if (suitablePlan) {
+        return `Maximum investment for ${selectedMembership} tier is $${limits.max.toLocaleString()}. Consider upgrading to ${suitablePlan.name} plan ($${suitablePlan.minInvestment.toLocaleString()} - $${suitablePlan.maxInvestment.toLocaleString()})`;
+      }
+      return `Maximum investment for ${selectedMembership} tier is $${limits.max.toLocaleString()}`;
     }
-    
+
     return null;
   };
 
   const handleProceedToInvestment = (e) => {
     e.preventDefault();
-    
-    const amountError = validateAmount(formData.amount, selectedMembership);
-    if (amountError) {
-      setErrors(prev => ({ ...prev, amount: amountError }));
+
+    // Validate form before proceeding
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      toast.error('Please fix the errors before proceeding');
       return;
     }
 
@@ -206,28 +383,67 @@ const InvestmentForm = () => {
 
   const handleSubmitPayment = (e) => {
     e.preventDefault();
+    createInvestReq();
+  };
 
-    const paymentErrors = validatePaymentFields();
-    if (Object.keys(paymentErrors).length > 0) {
-      setErrors(paymentErrors);
+
+
+  const createInvestReq = async () => {
+    // Validate form before submission
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      toast.error('Please fix the errors before submitting');
       return;
     }
 
-    const returns = calculateReturns();
-    const result = {
-      ...formData,
-      ...returns,
-      membershipTier: selectedMembership,
-      selectedTrader: selectedTrader,
-      investmentDate: new Date().toISOString().split('T')[0],
-      timestamp: Date.now()
-    };
-        
-    // Store the result in localStorage
-    localStorage.setItem('investmentResult', JSON.stringify(result));
-    
-    // Navigate to success page
-    navigate('/investment-success');
+    setIsSubmitting(true);
+
+    try {
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
+      
+      // Add all form fields
+      console.log("trader",selectedTrader)
+      formDataToSend.append('amount', formData.amount);
+      formDataToSend.append('walletTxId', formData.walletTxId);
+      formDataToSend.append('type', 'deposit');
+      formDataToSend.append('plan', selectedPlan.name);
+      formDataToSend.append('trader', selectedTrader.id);
+      
+      // Add file if exists
+      if (formData.transactionImage) {
+        formDataToSend.append('transactionImage', formData.transactionImage);
+      }
+
+      const res = await axios.post(`${VITE_APP_API_URL}/api/transaction/create`, formDataToSend, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (res.data.success) {
+        toast.success('Investment request created successfully!');
+        // Store the result for success page
+        localStorage.setItem('investmentResult', JSON.stringify({
+          ...formData,
+          plan: selectedPlan,
+          trader: selectedTrader,
+          investmentDate: new Date().toISOString().split('T')[0],
+          timestamp: Date.now()
+        }));
+        navigate('/investment-success');
+      } else {
+        toast.error(res.data.message || 'Failed to create investment request');
+      }
+    } catch (err) {
+      console.error('Investment request error:', err);
+      const errorMessage = err.response?.data?.message || 'Failed to create investment request';
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const formatCurrency = (amount) => {
@@ -239,6 +455,9 @@ const InvestmentForm = () => {
   };
 
   const returns = calculateReturns();
+
+
+
 
   const renderMembershipSelection = () => (
     <div className="space-y-8">
@@ -252,7 +471,16 @@ const InvestmentForm = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <MembershipCard
+        {plans.map((plan) => (
+          <MembershipCard
+            key={plan._id}
+            tier={plan.name}
+            onSelect={handleMembershipSelect}
+            isSelected={selectedMembership === plan.name}
+            planData={plan}
+          />
+        ))}
+        {/* <MembershipCard
           tier="silver"
           onSelect={handleMembershipSelect}
           isSelected={selectedMembership === 'silver'}
@@ -266,7 +494,7 @@ const InvestmentForm = () => {
           tier="platinum"
           onSelect={handleMembershipSelect}
           isSelected={selectedMembership === 'platinum'}
-        />
+        /> */}
       </div>
 
       {/* Trader Selection Section */}
@@ -276,6 +504,8 @@ const InvestmentForm = () => {
             membershipTier={selectedMembership}
             onTraderSelect={handleTraderSelect}
             selectedTrader={selectedTrader}
+            traders={traders}
+            isLoading={isLoadingTraders}
           />
         </div>
       )}
@@ -283,8 +513,8 @@ const InvestmentForm = () => {
   );
 
   const renderInvestmentForm = () => {
-    const limits = getMembershipLimits(selectedMembership);
-    
+    const limits = getMembershipLimits();
+
     return (
       <div id="investment-form" className="space-y-6">
         {/* Header with back button */}
@@ -335,6 +565,7 @@ const InvestmentForm = () => {
                     name="amount"
                     value={formData.amount}
                     onChange={handleChange}
+                    onBlur={handleAmountBlur}
                     placeholder={`Enter amount (${limits.min.toLocaleString()} - ${limits.max.toLocaleString()})`}
                     icon="$"
                     required
@@ -345,100 +576,153 @@ const InvestmentForm = () => {
                   <p className="text-sm text-gray-500 mt-1">
                     Investment range: ${limits.min.toLocaleString()} - ${limits.max.toLocaleString()}
                   </p>
-                </div>
 
-                  {/* Auto-reinvest checkbox */}
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      id="autoReinvest"
-                      name="autoReinvest"
-                      checked={formData.autoReinvest}
-                      onChange={handleChange}
-                      disabled={showPaymentFields}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"
-                    />
-                    <label htmlFor="autoReinvest" className="text-sm text-gray-700">
-                      Auto-reinvest returns at maturity
-                    </label>
-                  </div>
-
-                  {/* Payment Verification Fields */}
-                  {showPaymentFields && (
-                    <div className="space-y-6 p-6 bg-blue-50 rounded-lg border border-blue-200">
-                      <div className="flex items-center space-x-2 mb-4">
-                        <FiCreditCard className="text-blue-600" size={20} />
-                        <h3 className="text-lg font-semibold text-blue-800">
-                          Payment Verification
-                        </h3>
-                      </div>
-
-                      {/* QR Code Scanner Placeholder */}
-                      <div className="bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 text-center">
-                        <div className="w-48 h-48 bg-gray-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                          <div className="text-center">
-                            <div className="w-32 h-32 bg-gray-200 rounded-lg mx-auto mb-2 flex items-center justify-center">
-                              <span className="text-gray-500 text-sm">QR Code Scanner</span>
-                            </div>
-                            <p className="text-xs text-gray-500">Admin will add scanner here</p>
-                          </div>
+                  {/* Plan Suggestion */}
+                  {errors.amount && (
+                    <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-start space-x-3">
+                        <div className="flex-shrink-0">
+                          <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                          </svg>
                         </div>
-                        <p className="text-sm text-gray-600">
-                          Scan the QR code to make payment
-                        </p>
-                      </div>
+                        <div className="flex-1">
+                          <h4 className="text-sm font-medium text-blue-800 mb-2">
+                            💡 Plan Suggestion
+                          </h4>
+                          <p className="text-sm text-blue-700 mb-3">
+                            {errors.amount}
+                          </p>
+                          {formData.amount && !isNaN(parseFloat(formData.amount)) && (
+                            <div className="space-y-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const suitablePlan = findSuitablePlan(parseFloat(formData.amount));
+                                  if (suitablePlan) {
+                                    handleMembershipSelect(suitablePlan.name, suitablePlan);
+                                  }
+                                }}
+                                className="inline-flex items-center px-3 py-2 border border-blue-300 shadow-sm text-sm leading-4 font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                              >
+                                <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                                Switch to Suggested Plan
+                              </button>
 
-                      {/* Transaction ID */}
-                      <Input
-                        label="Transaction ID"
-                        type="text"
-                        name="transactionId"
-                        value={formData.transactionId}
-                        onChange={handleChange}
-                        placeholder="Enter transaction ID from your payment"
-                        icon={<FiCreditCard />}
-                        error={errors.transactionId}
-                        required
-                      />
+                              {/* Quick Plan Comparison */}
+                              <div className="mt-3">
+                                <p className="text-xs text-blue-600 mb-2">Available plans for your amount:</p>
+                                <div className="space-y-1">
+                                  {plans.map(plan => {
+                                    const isSuitable = parseFloat(formData.amount) >= plan.minInvestment && parseFloat(formData.amount) <= plan.maxInvestment;
+                                    const isCurrent = plan.name === selectedMembership;
 
-                      {/* Payment Screenshot Upload */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Payment Screenshot *
-                        </label>
-                        <FileUpload
-                          onFileChange={handleFileUpload}
-                          accept="image/*"
-                          placeholder="Upload payment screenshot (JPG, PNG, etc.)"
-                          error={errors.paymentScreenshot}
-                        />
-                        {errors.paymentScreenshot && (
-                          <p className="mt-1 text-sm text-red-600">{errors.paymentScreenshot}</p>
-                        )}
-                      </div>
-
-                      {/* Payment Instructions */}
-                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                        <h4 className="font-semibold text-yellow-800 mb-2">Payment Instructions:</h4>
-                        <ul className="text-sm text-yellow-700 space-y-1">
-                          <li>• Scan the QR code to make payment</li>
-                          <li>• Save the transaction ID from your payment app</li>
-                          <li>• Take a screenshot of the payment confirmation</li>
-                          <li>• Upload both details to complete your investment</li>
-                        </ul>
+                                    return (
+                                      <div key={plan._id} className={`text-xs p-2 rounded border ${isSuitable
+                                          ? 'bg-green-50 border-green-200 text-green-800'
+                                          : isCurrent
+                                            ? 'bg-gray-50 border-gray-200 text-gray-600'
+                                            : 'bg-gray-50 border-gray-200 text-gray-500'
+                                        }`}>
+                                        <span className="font-medium">{plan.name}</span>: ${plan.minInvestment.toLocaleString()} - ${plan.maxInvestment.toLocaleString()}
+                                        {isSuitable && <span className="ml-2 text-green-600">✓ Perfect fit</span>}
+                                        {isCurrent && !isSuitable && <span className="ml-2 text-gray-500">Current plan</span>}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
+                </div>
+
+                {/* Payment Verification Fields */}
+                {showPaymentFields && (
+                  <div className="space-y-6 p-6 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <FiCreditCard className="text-blue-600" size={20} />
+                      <h3 className="text-lg font-semibold text-blue-800">
+                        Payment Verification
+                      </h3>
+                    </div>
+
+                    {/* QR Code Scanner Placeholder */}
+                    <div className="bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 text-center">
+                      <div className="w-48 h-48 bg-gray-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="w-32 h-32 bg-gray-200 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                           <img src={qr} alt="QR Code" className="w-full h-full object-cover" />
+                          </div>
+                          <p className="text-xs text-gray-500">Admin will add scanner here</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        Scan the QR code to make payment
+                      </p>
+                    </div>
+
+                    {/* Transaction ID */}
+                    <Input
+                      label="Transaction ID"
+                      type="text"
+                      name="walletTxId"
+                      value={formData.walletTxId}
+                      onChange={handleChange}
+                      placeholder="Enter transaction ID from your payment"
+                      icon={<FiCreditCard />}
+                      error={errors.walletTxId}
+                      required
+                    />
+
+                    {/* Payment Screenshot Upload */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Payment Screenshot *
+                      </label>
+                      <FileUpload
+                        onFileChange={handleFileUpload}
+                        accept="image/*"
+                        placeholder="Upload payment screenshot (JPG, PNG, etc.)"
+                        error={errors.transactionImage}
+                      />
+                      {errors.transactionImage && (
+                        <p className="mt-1 text-sm text-red-600">{errors.transactionImage}</p>
+                      )}
+                    </div>
+
+                    {/* Payment Instructions */}
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-yellow-800 mb-2">Payment Instructions:</h4>
+                      <ul className="text-sm text-yellow-700 space-y-1">
+                        <li>• Scan the QR code to make payment</li>
+                        <li>• Save the transaction ID from your payment app</li>
+                        <li>• Take a screenshot of the payment confirmation</li>
+                        <li>• Upload both details to complete your investment</li>
+                      </ul>
+                    </div>
+                  </div>
+                )}
 
                 {/* Submit Button */}
                 <Button
                   type="submit"
                   size="large"
                   fullWidth
-                  disabled={!formData.amount || validateAmount(formData.amount, selectedMembership) !== null}
+                  disabled={isSubmitting || !formData.amount || validateAmount(formData.amount) !== null}
                   icon={showPaymentFields ? <FiCreditCard /> : <FiTrendingUp />}
                 >
-                  {showPaymentFields ? 'Complete Investment' : 'Proceed to Investment'}
+                  {isSubmitting 
+                    ? 'Processing...' 
+                    : showPaymentFields 
+                      ? 'Complete Investment' 
+                      : 'Proceed to Investment'
+                  }
                 </Button>
               </form>
             </Card>
@@ -479,6 +763,9 @@ const InvestmentForm = () => {
                     </p>
                     <p className="text-sm text-blue-800 mt-1">
                       👤 <strong>Trader:</strong> {selectedTrader?.name}
+                    </p>
+                    <p className="text-sm text-blue-800 mt-1">
+                      📋 <strong>Plan:</strong> {selectedPlan?.name} (${limits.min.toLocaleString()} - ${limits.max.toLocaleString()})
                     </p>
                   </div>
 

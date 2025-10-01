@@ -1,26 +1,23 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import axios from 'axios';
-import { 
-  FiUserCheck, 
-  FiArrowLeft, 
-  FiSave, 
-  FiUpload, 
-  FiX,
-  FiMail,
-  FiPhone,
+import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import {
+  FiArrowLeft,
   FiBriefcase,
   FiDollarSign,
-  FiPercent,
   FiFileText,
-  FiImage
+  FiImage,
+  FiMail,
+  FiPercent,
+  FiPhone,
+  FiSave,
+  FiUserCheck,
+  FiX
 } from 'react-icons/fi';
+import { toast } from 'react-toastify';
 import { VITE_APP_API_URL } from '../../utils/constants';
 
-const AddTrader = () => {
-  const navigate = useNavigate();
+const TraderEditModal = ({ isOpen, onClose, trader, getTraders }) => {
   const [formData, setFormData] = useState({
     traderType: '',
     name: '',
@@ -37,6 +34,26 @@ const AddTrader = () => {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Populate form with trader data when modal opens
+  useEffect(() => {
+    if (isOpen && trader) {
+      setFormData({
+        traderType: trader.traderType || '',
+        name: trader.name || '',
+        email: trader.email || '',
+        phone: trader.phone || '',
+        minInvestment: trader.minInvestment || '',
+        maxInvestment: trader.maxInvestment || '',
+        minInterstRate: trader.minInterstRate || '',
+        maxInterstRate: trader.maxInterstRate || '',
+        description: trader.description || '',
+        experience: trader.experience || '',
+        profilePicture: null // Don't pre-populate file input
+      });
+      setErrors({});
+    }
+  }, [isOpen, trader]);
 
   const traderTypes = [
     { value: 'silver', label: 'Silver Trader', color: 'from-gray-400 to-gray-600' },
@@ -146,10 +163,10 @@ const AddTrader = () => {
       !(Array.isArray(value) && value.length === 0)
     )) {
       if (window.confirm('Are you sure you want to cancel? All form data will be lost.')) {
-        navigate('/admin/manage-trader');
+        onClose();
       }
     } else {
-      navigate('/admin/manage-trader');
+      onClose();
     }
   };
 
@@ -202,9 +219,9 @@ const AddTrader = () => {
         }
       });
 
-      // Make API call to create trader
-      const response = await axios.post(
-        `${VITE_APP_API_URL}/api/admin/trader`,
+      // Make API call to update trader
+      const response = await axios.put(
+        `${VITE_APP_API_URL}/api/admin/trader/${trader._id}`,
         submitData,
         {
           headers: {
@@ -214,16 +231,17 @@ const AddTrader = () => {
         }
       );
 
-      // Check if trader was created successfully
+      // Check if trader was updated successfully
       if (response.data.trader && response.data.message) {
         toast.success(response.data.message);
-        navigate('/admin/manage-trader');
+        getTraders(); // Refresh the traders list
+        onClose(); // Close the modal
       } else {
-        throw new Error('Failed to create trader');
+        throw new Error('Failed to update trader');
       }
       
     } catch (error) {
-      console.error('Error creating trader:', error);
+      console.error('Error updating trader:', error);
       
       if (error.response?.data?.message) {
         toast.error(`Server Error: ${error.response.data.message}`);
@@ -237,7 +255,7 @@ const AddTrader = () => {
       } else if (error.code === 'ERR_NETWORK') {
         toast.error('Network error: Cannot connect to server. Please check your connection.');
       } else {
-        toast.error(`Failed to create trader: ${error.message || 'Unknown error'}`);
+        toast.error(`Failed to update trader: ${error.message || 'Unknown error'}`);
       }
     } finally {
       setIsSubmitting(false);
@@ -245,32 +263,34 @@ const AddTrader = () => {
   };
 
 
+  if (!isOpen) return null;
+
   return (
-    <motion.div
-      className="p-6 space-y-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <motion.div
+        className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <div className="p-6 space-y-6">
       {/* Header */}
       <motion.div variants={itemVariants} className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="flex items-center space-x-3 lg:space-x-4">
-          <button
-            onClick={() => navigate('/admin/manage-trader')}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-          >
-            <FiArrowLeft className="h-5 w-5 text-gray-600" />
-          </button>
-          <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 lg:p-3 rounded-lg">
-              <FiUserCheck className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Add New Trader</h1>
-              <p className="text-sm lg:text-base text-gray-600">Create a new trader profile with all necessary details</p>
-            </div>
+        <div className="flex items-center space-x-3">
+          <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 lg:p-3 rounded-lg">
+            <FiUserCheck className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Edit Trader</h1>
+            <p className="text-sm lg:text-base text-gray-600">Update trader profile information</p>
           </div>
         </div>
+        <button
+          onClick={onClose}
+          className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+        >
+          <FiX className="h-5 w-5 text-gray-600" />
+        </button>
       </motion.div>
 
       {/* Form */}
@@ -620,20 +640,22 @@ const AddTrader = () => {
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 lg:h-5 lg:w-5 border-b-2 border-white"></div>
-                  <span>Creating Trader...</span>
+                  <span>Updating Trader...</span>
                 </>
               ) : (
                 <>
                   <FiSave className="h-4 w-4 lg:h-5 lg:w-5" />
-                  <span>Create Trader</span>
+                  <span>Update Trader</span>
                 </>
               )}
             </button>
           </div>
         </form>
       </motion.div>
-    </motion.div>
+        </div>
+      </motion.div>
+    </div>
   );
 };
 
-export default AddTrader;
+export default TraderEditModal;

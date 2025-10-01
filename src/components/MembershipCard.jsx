@@ -2,10 +2,12 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FiAward, FiStar, FiZap, FiCheck, FiArrowRight } from 'react-icons/fi';
 
-const MembershipCard = ({ tier, onSelect, isSelected = false }) => {
+const MembershipCard = ({ tier, onSelect, isSelected = false, planData }) => {  
+    const {_id,name,minInvestment,maxInvestment,features,minReturnRate,maxReturnRate} = planData
+
   const membershipData = {
     silver: {
-      name: 'Silver',
+      name: name,
       icon: FiAward,
       color: 'from-gray-500 to-gray-700',
       hoverColor: 'from-gray-600 to-gray-800',
@@ -14,12 +16,7 @@ const MembershipCard = ({ tier, onSelect, isSelected = false }) => {
       bgColor: 'bg-gray-50',
       minAmount: 10000,
       maxAmount: 50000,
-      features: [
-        'Basic trading strategies',
-        'Email support',
-        'Monthly reports',
-        'Standard risk management'
-      ],
+      features: features,
       returnRate: '8-12%',
       duration: '12 months'
     },
@@ -85,7 +82,7 @@ const MembershipCard = ({ tier, onSelect, isSelected = false }) => {
       transition={{ duration: 0.5 }}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      onClick={() => onSelect(tier)}
+      onClick={() => onSelect(tier, planData)}
       className={`
         relative flex flex-col justify-between cursor-pointer rounded-2xl p-6 border-2 transition-all duration-300
         ${isSelected 
@@ -113,23 +110,23 @@ const MembershipCard = ({ tier, onSelect, isSelected = false }) => {
         `}>
           <IconComponent className="text-white text-2xl" />
         </div>
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">{data.name}</h3>
+        <h3 className="text-2xl font-bold text-gray-900 mb-2">{name}</h3>
         <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          {data.returnRate}
+          {minReturnRate }% - {maxReturnRate}%
         </div>
         <p className="text-sm text-gray-500 mt-1">Expected returns per annum</p>
-      </div>
+      </div>  
 
       {/* Investment Range */}
       <div className="mb-6 p-4 bg-gray-50 rounded-lg">
         <h4 className="font-semibold text-gray-900 mb-2">Investment Range</h4>
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-600">Minimum</span>
-          <span className="font-semibold text-gray-900">{formatCurrency(data.minAmount)}</span>
+          <span className="font-semibold text-gray-900">{formatCurrency(minInvestment)}</span>
         </div>
         <div className="flex justify-between items-center mt-1">
           <span className="text-sm text-gray-600">Maximum</span>
-          <span className="font-semibold text-gray-900">{formatCurrency(data.maxAmount)}</span>
+          <span className="font-semibold text-gray-900">{formatCurrency(maxInvestment)}</span>
         </div>
       </div>
 
@@ -137,7 +134,7 @@ const MembershipCard = ({ tier, onSelect, isSelected = false }) => {
       <div className="mb-6">
         <h4 className="font-semibold text-gray-900 mb-3">What's Included</h4>
         <ul className="space-y-2">
-          {data.features.map((feature, index) => (
+          {features.map((feature, index) => (
             <motion.li
               key={index}
               initial={{ opacity: 0, x: -10 }}

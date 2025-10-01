@@ -393,7 +393,7 @@ const Footer = () => {
               viewport={{ once: true }}
               transition={{ delay: 0.8, duration: 0.8 }}
             >
-              © 2025 Trdexa. All rights reserved. Built with ❤️ for smart investors.
+              © 2025 Trdexa. All rights reserved.
             </motion.p>
             <motion.div
               className="flex items-center space-x-4"

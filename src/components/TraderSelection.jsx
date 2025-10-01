@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiInfo, FiStar, FiTrendingUp, FiUser, FiAward, FiCheck, FiX } from 'react-icons/fi';
 
-const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader }) => {
+const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader, traders = [], isLoading = false }) => {
   const [showTraderInfo, setShowTraderInfo] = useState(null);
 
   // Prevent body scroll when modal is open
@@ -21,242 +21,22 @@ const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader }) => 
     };
   }, [showTraderInfo]);
 
-  // Enhanced trader data with more traders per tier
-  const tradersData = {
-    silver: [
-      {
-        id: 1,
-        name: 'Rajesh Kumar',
-        profilePic: null,
-        returnRate: '10.5%',
-        experience: '3 years',
-        description: 'Specialized in conservative trading strategies with consistent returns.',
-        totalClients: 45,
-        successRate: '92%',
-        specialties: ['Forex', 'Commodities'],
-        riskLevel: 'Low-Medium',
-        rating: 4.8,
-        minInvestment: 10000,
-        maxInvestment: 50000
-      },
-      {
-        id: 2,
-        name: 'Priya Sharma',
-        profilePic: null,
-        returnRate: '11.2%',
-        experience: '4 years',
-        description: 'Expert in technical analysis and risk management for steady growth.',
-        totalClients: 38,
-        successRate: '89%',
-        specialties: ['CFD', 'Indices'],
-        riskLevel: 'Medium',
-        rating: 4.6,
-        minInvestment: 10000,
-        maxInvestment: 50000
-      },
-      {
-        id: 3,
-        name: 'Amit Patel',
-        profilePic: null,
-        returnRate: '9.8%',
-        experience: '2 years',
-        description: 'Focus on long-term investment strategies with minimal risk.',
-        totalClients: 52,
-        successRate: '94%',
-        specialties: ['Forex', 'Bonds'],
-        riskLevel: 'Low',
-        rating: 4.9,
-        minInvestment: 10000,
-        maxInvestment: 50000
-      },
-      {
-        id: 4,
-        name: 'Suresh Reddy',
-        profilePic: null,
-        returnRate: '10.8%',
-        experience: '3 years',
-        description: 'Specialized in currency trading with focus on major pairs.',
-        totalClients: 41,
-        successRate: '91%',
-        specialties: ['Forex', 'Currency'],
-        riskLevel: 'Low-Medium',
-        rating: 4.7,
-        minInvestment: 10000,
-        maxInvestment: 50000
-      },
-      {
-        id: 5,
-        name: 'Meera Joshi',
-        profilePic: null,
-        returnRate: '11.5%',
-        experience: '4 years',
-        description: 'Expert in commodity trading with emphasis on precious metals.',
-        totalClients: 35,
-        successRate: '93%',
-        specialties: ['Commodities', 'Metals'],
-        riskLevel: 'Medium',
-        rating: 4.8,
-        minInvestment: 10000,
-        maxInvestment: 50000
-      }
-    ],
-    gold: [
-      {
-        id: 6,
-        name: 'Vikram Singh',
-        profilePic: null,
-        returnRate: '15.3%',
-        experience: '6 years',
-        description: 'Senior trader with expertise in advanced market analysis and portfolio optimization.',
-        totalClients: 28,
-        successRate: '96%',
-        specialties: ['Forex', 'Crypto', 'CFD'],
-        riskLevel: 'Medium-High',
-        rating: 4.9,
-        minInvestment: 50000,
-        maxInvestment: 200000
-      },
-      {
-        id: 7,
-        name: 'Sneha Reddy',
-        profilePic: null,
-        returnRate: '14.7%',
-        experience: '5 years',
-        description: 'Specialized in cryptocurrency trading and blockchain investments.',
-        totalClients: 35,
-        successRate: '93%',
-        specialties: ['Crypto', 'DeFi'],
-        riskLevel: 'High',
-        rating: 4.7,
-        minInvestment: 50000,
-        maxInvestment: 200000
-      },
-      {
-        id: 8,
-        name: 'Arjun Mehta',
-        profilePic: null,
-        returnRate: '16.1%',
-        experience: '7 years',
-        description: 'Expert in multi-asset trading with focus on emerging markets.',
-        totalClients: 42,
-        successRate: '95%',
-        specialties: ['Forex', 'Commodities', 'Indices'],
-        riskLevel: 'Medium-High',
-        rating: 4.8,
-        minInvestment: 50000,
-        maxInvestment: 200000
-      },
-      {
-        id: 9,
-        name: 'Deepika Agarwal',
-        profilePic: null,
-        returnRate: '15.8%',
-        experience: '6 years',
-        description: 'Specialized in algorithmic trading and quantitative strategies.',
-        totalClients: 31,
-        successRate: '94%',
-        specialties: ['Algorithmic', 'Quantitative'],
-        riskLevel: 'High',
-        rating: 4.9,
-        minInvestment: 50000,
-        maxInvestment: 200000
-      },
-      {
-        id: 10,
-        name: 'Rohit Gupta',
-        profilePic: null,
-        returnRate: '14.2%',
-        experience: '5 years',
-        description: 'Expert in options trading and derivatives strategies.',
-        totalClients: 38,
-        successRate: '92%',
-        specialties: ['Options', 'Derivatives'],
-        riskLevel: 'High',
-        rating: 4.6,
-        minInvestment: 50000,
-        maxInvestment: 200000
-      }
-    ],
-    platinum: [
-      {
-        id: 11,
-        name: 'Dr. Ravi Krishnan',
-        profilePic: null,
-        returnRate: '22.4%',
-        experience: '12 years',
-        description: 'Chief Investment Officer with PhD in Finance. Expert in institutional trading.',
-        totalClients: 15,
-        successRate: '98%',
-        specialties: ['All Markets', 'Hedge Funds', 'Derivatives'],
-        riskLevel: 'High',
-        rating: 5.0,
-        minInvestment: 200000,
-        maxInvestment: 1000000
-      },
-      {
-        id: 12,
-        name: 'Anita Desai',
-        profilePic: null,
-        returnRate: '20.8%',
-        experience: '10 years',
-        description: 'Former Wall Street trader specializing in high-frequency trading strategies.',
-        totalClients: 18,
-        successRate: '97%',
-        specialties: ['Algorithmic Trading', 'Crypto', 'Forex'],
-        riskLevel: 'High',
-        rating: 4.9,
-        minInvestment: 200000,
-        maxInvestment: 1000000
-      },
-      {
-        id: 13,
-        name: 'Kiran Nair',
-        profilePic: null,
-        returnRate: '21.5%',
-        experience: '9 years',
-        description: 'Portfolio manager with expertise in alternative investments and risk arbitrage.',
-        totalClients: 12,
-        successRate: '99%',
-        specialties: ['Private Equity', 'Real Estate', 'Commodities'],
-        riskLevel: 'High',
-        rating: 5.0,
-        minInvestment: 200000,
-        maxInvestment: 1000000
-      },
-      {
-        id: 14,
-        name: 'Prof. Sanjay Verma',
-        profilePic: null,
-        returnRate: '23.1%',
-        experience: '15 years',
-        description: 'Former Goldman Sachs trader with expertise in macro trading strategies.',
-        totalClients: 8,
-        successRate: '99%',
-        specialties: ['Macro Trading', 'Global Markets'],
-        riskLevel: 'High',
-        rating: 5.0,
-        minInvestment: 200000,
-        maxInvestment: 1000000
-      },
-      {
-        id: 15,
-        name: 'Dr. Priya Iyer',
-        profilePic: null,
-        returnRate: '21.8%',
-        experience: '11 years',
-        description: 'Expert in quantitative finance and machine learning trading strategies.',
-        totalClients: 14,
-        successRate: '98%',
-        specialties: ['Quantitative', 'AI Trading', 'Machine Learning'],
-        riskLevel: 'High',
-        rating: 4.9,
-        minInvestment: 200000,
-        maxInvestment: 1000000
-      }
-    ]
-  };
-
-  const traders = tradersData[membershipTier] || [];
+  // Transform API traders data to match component format
+  const transformedTraders = traders.map(trader => ({
+    id: trader._id,
+    name: trader.name,
+    profilePic: trader.profilePicture,
+    returnRate: `${trader.minInterstRate}-${trader.maxInterstRate}%`,
+    experience: `${trader.experience} years`,
+    description: trader.description,
+    totalClients: Math.floor(Math.random() * 50) + 20, // Random for demo
+    successRate: `${Math.floor(Math.random() * 10) + 85}%`, // Random for demo
+    specialties: [trader.traderType.charAt(0).toUpperCase() + trader.traderType.slice(1)],
+    riskLevel: trader.traderType === 'silver' ? 'Low-Medium' : trader.traderType === 'gold' ? 'Medium-High' : 'High',
+    rating: 4.5 + Math.random() * 0.5, // Random rating between 4.5-5.0
+    minInvestment: trader.minInvestment,
+    maxInvestment: trader.maxInvestment
+  }));
 
   const handleTraderSelect = (trader) => {
     onTraderSelect(trader);
@@ -308,17 +88,7 @@ const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader }) => 
           </div>
           <h4 className="text-xl font-semibold text-gray-900">{trader.name}</h4>
           <p className="text-gray-600">{trader.experience} experience</p>
-          <div className="flex items-center justify-center mt-2">
-            {[...Array(5)].map((_, i) => (
-              <FiStar
-                key={i}
-                className={`h-4 w-4 ${
-                  i < Math.floor(trader.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                }`}
-              />
-            ))}
-            <span className="ml-2 text-sm text-gray-600">({trader.rating})</span>
-          </div>
+
         </div>
 
         <div className="space-y-4">
@@ -385,8 +155,16 @@ const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader }) => 
       </motion.div>
 
       {/* Traders Grid */}
+      {isLoading ? (
+        <div className="flex justify-center items-center py-16">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p className="text-gray-600">Loading traders...</p>
+          </div>
+        </div>
+      ) : transformedTraders.length > 0 ? (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
-        {traders.map((trader, index) => (
+          {transformedTraders.map((trader, index) => (
           <motion.div
             key={trader.id}
             initial={{ opacity: 0, y: 30 }}
@@ -440,18 +218,7 @@ const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader }) => 
                 </button>
               </div>
 
-              {/* Rating */}
-              <div className="flex items-center mb-3">
-                {[...Array(5)].map((_, i) => (
-                  <FiStar
-                    key={i}
-                    className={`h-4 w-4 ${
-                      i < Math.floor(trader.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                    }`}
-                  />
-                ))}
-                <span className="ml-2 text-sm text-gray-600">({trader.rating})</span>
-              </div>
+               
 
               {/* Stats */}
               <div className="grid grid-cols-2 gap-3 mb-3">
@@ -510,6 +277,15 @@ const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader }) => 
           </motion.div>
         ))}
       </div>
+      ) : (
+        <div className="flex justify-center items-center py-16">
+          <div className="text-center">
+            <FiUser className="mx-auto text-gray-400 mb-4" size={48} />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Traders Available</h3>
+            <p className="text-gray-600">No traders found for the {membershipTier} tier.</p>
+          </div>
+        </div>
+      )}
 
       {/* Continue Button */}
       {selectedTrader && (

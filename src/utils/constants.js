@@ -10,6 +10,8 @@ export const USER_ROLES = {
 
 export const INVESTMENT_STATUS = {
   PENDING: 'pending',
+  APPROVED: 'approved', 
+  REJECTED: 'rejected',
   ACTIVE: 'active',
   COMPLETED: 'completed',
   CANCELLED: 'cancelled'
