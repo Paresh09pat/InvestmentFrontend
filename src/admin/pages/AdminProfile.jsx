@@ -396,18 +396,7 @@ const AdminProfile = () => {
             Manage your administrative account settings and preferences
           </p>
 
-          {/* Admin Email Info */}
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center space-x-2">
-              <FiMail className="text-blue-600" size={20} />
-              <div>
-                <p className="text-sm font-medium text-blue-800">
-                  Admin Login Email
-                </p>
-                <p className="text-sm text-blue-700">{adminData.email}</p>
-              </div>
-            </div>
-          </div>
+        
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -570,49 +559,13 @@ const AdminProfile = () => {
               </form>
             </Card>
 
-            {/* Admin Statistics */}
-            <Card className="animate-slide-up">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                Administrative Statistics
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
-                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <FiActivity className="text-white" size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-blue-600">
-                    {adminData.totalActions}
-                  </div>
-                  <div className="text-sm text-blue-700">Total Actions</div>
-                </div>
-
-                <div className="text-center p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
-                  <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <FiCalendar className="text-white" size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-green-600">
-                    {adminData.joinDate}
-                  </div>
-                  <div className="text-sm text-green-700">Member Since</div>
-                </div>
-
-                <div className="text-center p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg">
-                  <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <FiShield className="text-white" size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-purple-600">
-                    {adminData.permissions.length}
-                  </div>
-                  <div className="text-sm text-purple-700">Permissions</div>
-                </div>
-              </div>
-            </Card>
+          
 
             {/* Ad Scanner Section */}
             <Card className="animate-slide-up">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900">
-                  Ad Scanner
+                  Add QR Code
                 </h2>
                 {!adminData.profilePicture?.cloudinaryUrl && (
                   <Button
@@ -722,7 +675,7 @@ const AdminProfile = () => {
                     >
                       Upload New QR
                     </Button>
-                    f
+                    
                   </div>
                 </div>
               )}
@@ -751,21 +704,7 @@ const AdminProfile = () => {
               style={{ animationDelay: "0.1s" }}
             >
               <div className="text-center mb-6">
-                <div className="w-24 h-24 mx-auto mb-4">
-                  {adminData.profilePicture?.cloudinaryUrl ? (
-                    <img
-                      src={adminData.profilePicture.cloudinaryUrl}
-                      alt="Admin QR Code"
-                      className="w-24 h-24 rounded-lg object-contain border-2 border-gray-200 shadow-sm"
-                    />
-                  ) : (
-                    <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                      <span className="text-white text-3xl font-bold">
-                        {adminData.name.charAt(0)}
-                      </span>
-                    </div>
-                  )}
-                </div>
+               
                 <h3 className="text-xl font-semibold text-gray-900">
                   {adminData.name}
                 </h3>

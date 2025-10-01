@@ -30,7 +30,7 @@ const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader, trade
     experience: `${trader.experience} years`,
     description: trader.description,
     totalClients: Math.floor(Math.random() * 50) + 20, // Random for demo
-    successRate: `${Math.floor(Math.random() * 10) + 85}%`, // Random for demo
+    // successRate: `${Math.floor(Math.random() * 10) + 85}%`, // Random for demo
     specialties: [trader.traderType.charAt(0).toUpperCase() + trader.traderType.slice(1)],
     riskLevel: trader.traderType === 'silver' ? 'Low-Medium' : trader.traderType === 'gold' ? 'Medium-High' : 'High',
     rating: 4.5 + Math.random() * 0.5, // Random rating between 4.5-5.0
@@ -97,10 +97,7 @@ const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader, trade
               <div className="text-2xl font-bold text-green-600">{trader.returnRate}</div>
               <div className="text-sm text-green-700">Return Rate</div>
             </div>
-            <div className="bg-blue-50 p-3 rounded-lg text-center">
-              <div className="text-2xl font-bold text-blue-600">{trader.successRate}</div>
-              <div className="text-sm text-blue-700">Success Rate</div>
-            </div>
+         
           </div>
 
           <div className="bg-gray-50 p-4 rounded-lg">
@@ -226,10 +223,7 @@ const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader, trade
                   <div className="text-lg font-bold text-green-600">{trader.returnRate}</div>
                   <div className="text-xs text-green-700">Return Rate</div>
                 </div>
-                <div className="bg-blue-50 p-2 rounded-lg text-center">
-                  <div className="text-lg font-bold text-blue-600">{trader.successRate}</div>
-                  <div className="text-xs text-blue-700">Success Rate</div>
-                </div>
+               
               </div>
 
               {/* Description */}
