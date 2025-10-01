@@ -12,11 +12,12 @@ import Card from "../../components/common/Card";
 import { VITE_APP_API_URL } from "../../utils/constants";
 import { toast } from "react-toastify";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { useAuth } from "../../context/AuthContext";
 
 const AdminNotifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const { checkAuthStatus } = useAuth();
 
 
   const getNotificationIcon = (type) => {
@@ -80,6 +81,7 @@ const AdminNotifications = () => {
         if(res.status === 200){
           setNotifications(prev => prev.map(notif => notif._id === id ? { ...notif, read: true } : notif))
           fetchNotifications()
+          checkAuthStatus()
         }
 
       }
