@@ -15,7 +15,7 @@ import axios from 'axios';
 import { VITE_APP_API_URL } from '../utils/constants';
 
 const InvestmentForm = () => {
-  const { user } = useAuth();
+  const { qr } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -657,7 +657,7 @@ const InvestmentForm = () => {
                       <div className="w-48 h-48 bg-gray-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
                         <div className="text-center">
                           <div className="w-32 h-32 bg-gray-200 rounded-lg mx-auto mb-2 flex items-center justify-center">
-                            <span className="text-gray-500 text-sm">QR Code Scanner</span>
+                           <img src={qr} alt="QR Code" className="w-full h-full object-cover" />
                           </div>
                           <p className="text-xs text-gray-500">Admin will add scanner here</p>
                         </div>

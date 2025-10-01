@@ -15,18 +15,7 @@ const AdminNotifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Load notifications on component mount
-  useEffect(() => {
-const fetchNotifications = async () => {
-  const response = await axios.get(`${VITE_APP_API_URL}/api/admin/notifications`, { withCredentials: true });
-  setNotifications(response.data.notifications);
-};
 
-
-    setLoading(true);
-    fetchNotifications();
-    setLoading(false);
-  }, []);
 
   const getNotificationIcon = (type) => {
     switch (type) {
@@ -59,6 +48,24 @@ const fetchNotifications = async () => {
   };
 
   const unreadCount = notifications.filter((notif) => !notif.read).length;
+
+  const fetchNotifications = async()=>{
+    try{
+      const res = await axios.get(`${VITE_APP_API_URL}/api/admin/notifications/admin`, { withCredentials: true })
+      setNotifications(res.data.notifications)
+    }
+    catch(err){
+      console.log("err",err)
+    }
+  }
+
+    // Load notifications on component mount
+    useEffect(() => {
+
+      setLoading(true);
+      fetchNotifications()
+      setLoading(false);
+    }, []);
 
   return (
     <div className="space-y-6">

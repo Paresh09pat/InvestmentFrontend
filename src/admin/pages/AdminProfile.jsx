@@ -247,6 +247,7 @@ const AdminProfile = () => {
     
       }
 
+ 
       // Call API to update admin profile
       const response = await axios.put(
         `${VITE_APP_API_URL}/api/admin/update`,
@@ -279,6 +280,8 @@ const AdminProfile = () => {
 
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error(error.response.data.message)
       console.error("Error updating profile:", error);
       console.error("Error response:", error.response);
       console.error("Error response data:", error.response?.data);
