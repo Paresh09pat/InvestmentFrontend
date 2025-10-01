@@ -134,7 +134,7 @@ const CardManagement = () => {
   const fetchCardData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${VITE_APP_API_URL}/api/admin/cards`);
+      const response = await axios.get(`${VITE_APP_API_URL}/api/admin/plans`);
       if (response.data && response.data.cards) {
         setCardData(response.data.cards);
       }

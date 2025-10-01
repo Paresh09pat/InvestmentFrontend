@@ -17,10 +17,12 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/common/Button';
 
+
+
 const AdminSidebar = ({ isCollapsed, onToggle }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout,adminNotifications } = useAuth();
   const isMobile = window.innerWidth < 768;
   
   // Mock notification count - replace with actual data from context/API
@@ -119,9 +121,9 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
                   className="flex-shrink-0"
                 />
                 {/* Notification count badge for Notifications item */}
-                {item.name === 'Notifications' && notificationCount > 0 && (
+                {item.name === 'Notifications' && adminNotifications > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-                    {notificationCount > 99 ? '99+' : notificationCount}
+                    {adminNotifications > 99 ? '99+' : adminNotifications}
                   </span>
                 )}
               </div>

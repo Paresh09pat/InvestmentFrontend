@@ -16,6 +16,7 @@ import { motion, useInView, useAnimation, useMotionValue, useSpring } from 'fram
 import Hero from '../components/Hero';
 import HowItWorks from '../components/HowItWorks';
 import WhyChooseUs from '../components/WhyChooseUs';
+import MembershipTiers from '../components/MembershipTiers';
 import Testimonials from '../components/Testimonials';
 import CallToAction from '../components/CallToAction';
 
@@ -188,6 +189,9 @@ const Home = () => {
 
       {/* Why Choose Us Section */}
       <WhyChooseUs />
+
+      {/* Membership Tiers Section */}
+      <MembershipTiers />
 
       {/* Testimonials */}
       <Testimonials />
