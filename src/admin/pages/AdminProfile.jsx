@@ -1,6 +1,6 @@
 // AdminProfile page
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FiUser,
   FiMail,
@@ -22,46 +22,50 @@ import {
   FiDownload,
   FiCopy,
   FiUpload,
-  FiImage
-} from 'react-icons/fi';
-import { useAuth } from '../../context/AuthContext';
-import Card from '../../components/common/Card';
-import Button from '../../components/common/Button';
-import Input from '../../components/forms/Input';
-import axios from 'axios';
-import { VITE_APP_API_URL } from '../../utils/constants';
-import { toast } from 'react-toastify';
+  FiImage,
+} from "react-icons/fi";
+import { useAuth } from "../../context/AuthContext";
+import Card from "../../components/common/Card";
+import Button from "../../components/common/Button";
+import Input from "../../components/forms/Input";
+import axios from "axios";
+import { VITE_APP_API_URL } from "../../utils/constants";
+import { toast } from "react-toastify";
 
 const AdminProfile = () => {
-  const { adminLogin, isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [adminData, setAdminData] = useState({
-    name: 'Admin User',
-    email: 'admin@gmail.com',
-    role: 'Super Admin',
+    name: "Admin User",
+    email: "admin@gmail.com",
+    role: "Super Admin",
     lastLogin: new Date().toLocaleDateString(),
-    permissions: ['User Management', 'Investment Management', 'Document Verification', 'System Settings'],
-    joinDate: '2024-01-01',
+    permissions: [
+      "User Management",
+      "Investment Management",
+      "Document Verification",
+      "System Settings",
+    ],
+    joinDate: "2024-01-01",
     totalActions: 1247,
-    status: 'Active'
+    status: "Active",
   });
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+    name: "",
+    email: "",
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
 
   // Ad Scanner state
-  const [qrImage, setQrImage] = useState(null);
   const [selectedQrFile, setSelectedQrFile] = useState(null);
   const [showUpload, setShowUpload] = useState(false);
   const [uploadFile, setUploadFile] = useState(null);
@@ -69,91 +73,97 @@ const AdminProfile = () => {
   // Redirect if not admin
   useEffect(() => {
     if (!isAdmin) {
-      navigate('/admin/login');
+      navigate("/admin/login");
     }
   }, [isAdmin, navigate]);
 
-  // Show loading if still checking admin status
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-blue-600 font-semibold">Checking admin access...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Get admin data from localStorage or context
   const getAdminData = () => {
-    const adminUser = localStorage.getItem('admin_user');
+    const adminUser = localStorage.getItem("admin_user");
     if (adminUser) {
       try {
         const parsed = JSON.parse(adminUser);
         return {
-          name: parsed.name || 'Admin User',
-          email: parsed.email || 'admin@gmail.com',
-          role: 'Super Admin',
+          name: parsed.name || "Admin User",
+          email: parsed.email || "admin@gmail.com",
+          role: "Super Admin",
           lastLogin: new Date().toLocaleDateString(),
-          permissions: ['User Management', 'Investment Management', 'Document Verification', 'System Settings'],
-          joinDate: '2024-01-01',
+          permissions: [
+            "User Management",
+            "Investment Management",
+            "Document Verification",
+            "System Settings",
+          ],
+          joinDate: "2024-01-01",
           totalActions: 1247,
-          status: 'Active'
+          status: "Active",
         };
       } catch (error) {
-        console.error('Error parsing admin user data:', error);
+        console.error("Error parsing admin user data:", error);
       }
     }
 
     // Fallback data if no admin user found
     return {
-      name: 'Admin User',
-      email: 'admin@gmail.com',
-      role: 'Super Admin',
+      name: "Admin User",
+      email: "admin@gmail.com",
+      role: "Super Admin",
       lastLogin: new Date().toLocaleDateString(),
-      permissions: ['User Management', 'Investment Management', 'Document Verification', 'System Settings'],
-      joinDate: '2024-01-01',
+      permissions: [
+        "User Management",
+        "Investment Management",
+        "Document Verification",
+        "System Settings",
+      ],
+      joinDate: "2024-01-01",
       totalActions: 1247,
-      status: 'Active'
+      status: "Active",
     };
   };
 
   // Function to fetch admin profile from API
   const fetchAdminProfile = async () => {
     try {
-      const response = await axios.get(`${VITE_APP_API_URL}/api/admin/profile`, {
-        withCredentials: true
-      });
+      const response = await axios.get(
+        `${VITE_APP_API_URL}/api/admin/profile`,
+        {
+          withCredentials: true,
+        }
+      );
 
       if (response.data && response.data.user) {
         const userData = response.data.user;
         const updatedAdminData = {
-          name: userData.name || 'Admin User',
-          email: userData.email || 'admin@gmail.com',
-          role: 'Super Admin',
+          name: userData.name || "Admin User",
+          email: userData.email || "admin@gmail.com",
+          role: "Super Admin",
           lastLogin: new Date().toLocaleDateString(),
-          permissions: ['User Management', 'Investment Management', 'Document Verification', 'System Settings'],
-          joinDate: '2024-01-01',
+          permissions: [
+            "User Management",
+            "Investment Management",
+            "Document Verification",
+            "System Settings",
+          ],
+          joinDate: "2024-01-01",
           totalActions: 1247,
-          status: 'Active',
-          profilePicture: userData.profilePicture
+          status: "Active",
+          profilePicture: userData.profilePicture,
         };
 
         setAdminData(updatedAdminData);
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           name: userData.name || prev.name,
-          email: userData.email || prev.email
+          email: userData.email || prev.email,
         }));
 
         // Update localStorage
-        localStorage.setItem('admin_user', JSON.stringify(userData));
+        localStorage.setItem("admin_user", JSON.stringify(userData));
 
         return userData;
       }
     } catch (error) {
-      console.error('Error fetching admin profile:', error);
+      console.error("Error fetching admin profile:", error);
     }
   };
 
@@ -164,26 +174,27 @@ const AdminProfile = () => {
     setFormData({
       name: data.name,
       email: data.email,
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
     });
-    
 
-    fetchAdminProfile();
-  }, []); 
+    if (isAdmin) {
+      fetchAdminProfile();
+    }
+  }, [isAdmin]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
 
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ''
+        [name]: "",
       }));
     }
   };
@@ -192,19 +203,22 @@ const AdminProfile = () => {
     const newErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = "Name is required";
     }
 
-    if (!formData.currentPassword) {
-      newErrors.currentPassword = 'Current password is required';
-    }
+    // Only validate password fields if new password is provided
+    if (formData.newPassword) {
+      if (!formData.currentPassword) {
+        newErrors.currentPassword = "Current password is required";
+      }
 
-    if (formData.newPassword && formData.newPassword.length < 6) {
-      newErrors.newPassword = 'New password must be at least 6 characters';
-    }
+      if (formData.newPassword.length < 6) {
+        newErrors.newPassword = "New password must be at least 6 characters";
+      }
 
-    if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      if (formData.newPassword !== formData.confirmPassword) {
+        newErrors.confirmPassword = "Passwords do not match";
+      }
     }
 
     return newErrors;
@@ -217,43 +231,66 @@ const AdminProfile = () => {
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
+
+      
     }
 
     setLoading(true);
     try {
-      // Prepare data for password change
-      const updateData = {
-        currentPassword: formData.currentPassword,
-        newPassword: formData.newPassword
-      };
+      // Prepare data for password update (no file upload in this case)
+      const updateData = {};
 
-      // Call API to update password
-      const response = await axios.put(`${VITE_APP_API_URL}/api/admin/update`, updateData, {
-        withCredentials: true
-      });
+      // Add password fields if new password is provided
+      if (formData.newPassword) {
+        updateData.currentPassword = formData.currentPassword.trim();
+        updateData.newPassword = formData.newPassword.trim();
+    
+      }
 
  
+      // Call API to update admin profile
+      const response = await axios.put(
+        `${VITE_APP_API_URL}/api/admin/update`,
+        updateData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
 
-      // Refetch profile data after successful password change
+      console.log("Admin update response:", response);
+
+      // Refetch profile data after successful update
       await fetchAdminProfile();
 
-      setSuccessMessage('Profile updated successfully!');
+      setSuccessMessage("Profile updated successfully!");
       setIsEditing(false);
 
-      toast.success('Profile updated successfully!');
+      toast.success("Profile updated successfully!");
 
       // Clear form
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
       }));
 
-      setTimeout(() => setSuccessMessage(''), 3000);
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
       console.error('Error updating profile:', error);
       toast.error(error.response.data.message)
+      console.error("Error updating profile:", error);
+      console.error("Error response:", error.response);
+      console.error("Error response data:", error.response?.data);
+      console.error("Error response status:", error.response?.status);
+      const errorMessage =
+        error.response?.data?.message ||
+        "Failed to update profile. Please try again.";
+      setErrors({ general: errorMessage });
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -265,9 +302,9 @@ const AdminProfile = () => {
     setFormData({
       name: adminData.name,
       email: adminData.email,
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
     });
   };
 
@@ -280,65 +317,91 @@ const AdminProfile = () => {
       reader.onload = (e) => {
         setSelectedQrFile({
           file: file,
-          preview: e.target.result
+          preview: e.target.result,
         });
       };
       reader.readAsDataURL(file);
     }
-
-
   };
 
   const saveQrCode = async () => {
     if (!uploadFile) return;
 
-    const file = uploadFile
+    const file = uploadFile;
     const formData = new FormData();
-    formData.append("picture", file);
+    formData.append("pic", file); 
     setLoading(true);
-    console.log("selted", file)
-    try {
-      const res = await axios.put(`${VITE_APP_API_URL}/api/admin/update`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        withCredentials: true
-      })
 
-      console.log("res", res)
+    try {
+      const response = await axios.put(
+        `${VITE_APP_API_URL}/api/admin/update`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        }
+      );
+
+      console.log("QR Code update response:", response);
 
       // Refetch profile data after successful QR save
       await fetchAdminProfile();
 
-      setSuccessMessage('QR Code saved successfully!');
+      setSuccessMessage("QR Code saved successfully!");
       setShowUpload(false);
       setSelectedQrFile(null);
       setUploadFile(null);
 
-      setTimeout(() => setSuccessMessage(''), 3000);
+      toast.success("QR Code saved successfully!");
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (error) {
-      console.error('Error saving QR code:', error);
-      setErrors({ qrSave: 'Failed to save QR code. Please try again.' });
+      console.error("Error saving QR code:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        "Failed to save QR code. Please try again.";
+      setErrors({ qrSave: errorMessage });
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
+  // Show loading if still checking admin status
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-blue-600 font-semibold">
+            Checking admin access...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Profile</h1>
-          <p className="text-gray-600">Manage your administrative account settings and preferences</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Admin Profile
+          </h1>
+          <p className="text-gray-600">
+            Manage your administrative account settings and preferences
+          </p>
 
           {/* Admin Email Info */}
           <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-center space-x-2">
               <FiMail className="text-blue-600" size={20} />
               <div>
-                <p className="text-sm font-medium text-blue-800">Admin Login Email</p>
+                <p className="text-sm font-medium text-blue-800">
+                  Admin Login Email
+                </p>
                 <p className="text-sm text-blue-700">{adminData.email}</p>
               </div>
             </div>
@@ -351,7 +414,9 @@ const AdminProfile = () => {
             {/* Basic Profile Card */}
             <Card className="animate-fade-in">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">Basic Information</h2>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Basic Information
+                </h2>
                 {!isEditing ? (
                   <Button
                     variant="outline"
@@ -420,13 +485,15 @@ const AdminProfile = () => {
 
                 {isEditing && (
                   <div className="border-t pt-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Change Password</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                      Change Password
+                    </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="relative">
                         <Input
                           label="Current Password"
                           name="currentPassword"
-                          type={showCurrentPassword ? 'text' : 'password'}
+                          type={showCurrentPassword ? "text" : "password"}
                           value={formData.currentPassword}
                           onChange={handleChange}
                           icon={<FiShield />}
@@ -436,9 +503,15 @@ const AdminProfile = () => {
                         <button
                           type="button"
                           className="absolute right-3 top-9 text-gray-400 hover:text-gray-600 cursor-pointer"
-                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                          onClick={() =>
+                            setShowCurrentPassword(!showCurrentPassword)
+                          }
                         >
-                          {showCurrentPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                          {showCurrentPassword ? (
+                            <FiEyeOff size={20} />
+                          ) : (
+                            <FiEye size={20} />
+                          )}
                         </button>
                       </div>
 
@@ -446,7 +519,7 @@ const AdminProfile = () => {
                         <Input
                           label="New Password"
                           name="newPassword"
-                          type={showPassword ? 'text' : 'password'}
+                          type={showPassword ? "text" : "password"}
                           value={formData.newPassword}
                           onChange={handleChange}
                           icon={<FiShield />}
@@ -457,7 +530,11 @@ const AdminProfile = () => {
                           className="absolute right-3 top-9 text-gray-400 hover:text-gray-600 cursor-pointer"
                           onClick={() => setShowPassword(!showPassword)}
                         >
-                          {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                          {showPassword ? (
+                            <FiEyeOff size={20} />
+                          ) : (
+                            <FiEye size={20} />
+                          )}
                         </button>
                       </div>
 
@@ -465,7 +542,7 @@ const AdminProfile = () => {
                         <Input
                           label="Confirm New Password"
                           name="confirmPassword"
-                          type={showConfirmPassword ? 'text' : 'password'}
+                          type={showConfirmPassword ? "text" : "password"}
                           value={formData.confirmPassword}
                           onChange={handleChange}
                           icon={<FiShield />}
@@ -474,9 +551,15 @@ const AdminProfile = () => {
                         <button
                           type="button"
                           className="absolute right-3 top-9 text-gray-400 hover:text-gray-600 cursor-pointer"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
                         >
-                          {showConfirmPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                          {showConfirmPassword ? (
+                            <FiEyeOff size={20} />
+                          ) : (
+                            <FiEye size={20} />
+                          )}
                         </button>
                       </div>
                     </div>
@@ -487,13 +570,17 @@ const AdminProfile = () => {
 
             {/* Admin Statistics */}
             <Card className="animate-slide-up">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Administrative Statistics</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                Administrative Statistics
+              </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg">
                   <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
                     <FiActivity className="text-white" size={24} />
                   </div>
-                  <div className="text-2xl font-bold text-blue-600">{adminData.totalActions}</div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {adminData.totalActions}
+                  </div>
                   <div className="text-sm text-blue-700">Total Actions</div>
                 </div>
 
@@ -501,7 +588,9 @@ const AdminProfile = () => {
                   <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
                     <FiCalendar className="text-white" size={24} />
                   </div>
-                  <div className="text-2xl font-bold text-green-600">{adminData.joinDate}</div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {adminData.joinDate}
+                  </div>
                   <div className="text-sm text-green-700">Member Since</div>
                 </div>
 
@@ -509,7 +598,9 @@ const AdminProfile = () => {
                   <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
                     <FiShield className="text-white" size={24} />
                   </div>
-                  <div className="text-2xl font-bold text-purple-600">{adminData.permissions.length}</div>
+                  <div className="text-2xl font-bold text-purple-600">
+                    {adminData.permissions.length}
+                  </div>
                   <div className="text-sm text-purple-700">Permissions</div>
                 </div>
               </div>
@@ -518,7 +609,9 @@ const AdminProfile = () => {
             {/* Ad Scanner Section */}
             <Card className="animate-slide-up">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">Ad Scanner</h2>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Ad Scanner
+                </h2>
                 {!adminData.profilePicture?.cloudinaryUrl && (
                   <Button
                     variant="primary"
@@ -534,7 +627,15 @@ const AdminProfile = () => {
               {/* Upload Form */}
               {showUpload && (
                 <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Upload QR Code Image</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">
+                    Upload QR Code Image
+                  </h3>
+
+                  {errors.qrSave && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+                      {errors.qrSave}
+                    </div>
+                  )}
 
                   <div className="mb-4">
                     <input
@@ -544,14 +645,17 @@ const AdminProfile = () => {
                       className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                     />
                     <p className="text-xs text-gray-500 mt-2">
-                      Upload a QR code image that will be shown to users in the investment section
+                      Upload a QR code image that will be shown to users in the
+                      investment section
                     </p>
                   </div>
 
                   {/* Preview Selected QR */}
                   {selectedQrFile && (
                     <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Preview:</p>
+                      <p className="text-sm font-medium text-gray-700 mb-2">
+                        Preview:
+                      </p>
                       <div className="flex items-center space-x-3">
                         <img
                           src={selectedQrFile.preview}
@@ -559,9 +663,12 @@ const AdminProfile = () => {
                           className="w-16 h-16 border border-gray-200 rounded object-contain"
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-600">File: {selectedQrFile.file.name}</p>
+                          <p className="text-sm text-gray-600">
+                            File: {selectedQrFile.file.name}
+                          </p>
                           <p className="text-xs text-gray-500">
-                            Size: {(selectedQrFile.file.size / 1024).toFixed(1)} KB
+                            Size: {(selectedQrFile.file.size / 1024).toFixed(1)}{" "}
+                            KB
                           </p>
                         </div>
                       </div>
@@ -575,6 +682,8 @@ const AdminProfile = () => {
                       onClick={() => {
                         setShowUpload(false);
                         setSelectedQrFile(null);
+                        setUploadFile(null);
+                        setErrors((prev) => ({ ...prev, qrSave: "" }));
                       }}
                     >
                       Cancel
@@ -611,7 +720,7 @@ const AdminProfile = () => {
                     >
                       Upload New QR
                     </Button>
-f 
+                    f
                   </div>
                 </div>
               )}
@@ -620,8 +729,13 @@ f
               {!adminData.profilePicture?.cloudinaryUrl && !showUpload && (
                 <div className="text-center py-12 text-gray-500">
                   <FiGrid size={64} className="mx-auto mb-4 text-gray-300" />
-                  <p className="text-lg font-medium mb-2">No QR Code Uploaded</p>
-                  <p className="text-sm">Upload a QR code image to display it to users in the investment section</p>
+                  <p className="text-lg font-medium mb-2">
+                    No QR Code Uploaded
+                  </p>
+                  <p className="text-sm">
+                    Upload a QR code image to display it to users in the
+                    investment section
+                  </p>
                 </div>
               )}
             </Card>
@@ -630,7 +744,10 @@ f
           {/* Profile Summary */}
           <div className="space-y-6">
             {/* Admin Info Card */}
-            <Card className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            <Card
+              className="animate-slide-up"
+              style={{ animationDelay: "0.1s" }}
+            >
               <div className="text-center mb-6">
                 <div className="w-24 h-24 mx-auto mb-4">
                   {adminData.profilePicture?.cloudinaryUrl ? (
@@ -647,7 +764,9 @@ f
                     </div>
                   )}
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900">{adminData.name}</h3>
+                <h3 className="text-xl font-semibold text-gray-900">
+                  {adminData.name}
+                </h3>
                 <p className="text-gray-600">{adminData.email}</p>
                 <div className="mt-2">
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
@@ -660,7 +779,9 @@ f
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Status</span>
-                  <span className="font-semibold text-green-600">{adminData.status}</span>
+                  <span className="font-semibold text-green-600">
+                    {adminData.status}
+                  </span>
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -676,8 +797,13 @@ f
             </Card>
 
             {/* Permissions Card */}
-            <Card className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Administrative Permissions</h3>
+            <Card
+              className="animate-slide-up"
+              style={{ animationDelay: "0.2s" }}
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Administrative Permissions
+              </h3>
               <div className="space-y-3">
                 {adminData.permissions.map((permission, index) => (
                   <div key={index} className="flex items-center space-x-3">
@@ -689,13 +815,18 @@ f
             </Card>
 
             {/* Quick Actions */}
-            <Card className="animate-slide-up" style={{ animationDelay: '0.3s' }}>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+            <Card
+              className="animate-slide-up"
+              style={{ animationDelay: "0.3s" }}
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Quick Actions
+              </h3>
               <div className="space-y-3">
                 <Button
                   variant="outline"
                   fullWidth
-                  onClick={() => window.location.href = '/admin/users'}
+                  onClick={() => (window.location.href = "/admin/users")}
                   icon={<FiUsers />}
                 >
                   Manage Users
@@ -703,7 +834,7 @@ f
                 <Button
                   variant="outline"
                   fullWidth
-                  onClick={() => window.location.href = '/admin/investments'}
+                  onClick={() => (window.location.href = "/admin/investments")}
                   icon={<FiActivity />}
                 >
                   View Investments
@@ -711,7 +842,7 @@ f
                 <Button
                   variant="outline"
                   fullWidth
-                  onClick={() => window.location.href = '/admin/documents'}
+                  onClick={() => (window.location.href = "/admin/documents")}
                   icon={<FiSettings />}
                 >
                   Verify Documents
