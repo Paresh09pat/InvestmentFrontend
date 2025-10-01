@@ -1,15 +1,14 @@
-import { useState, useEffect } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import {
   FiBell,
-  FiFileText,
   FiDollarSign,
-  FiUser,
+  FiFileText,
   FiShield,
   FiTrendingUp,
+  FiUser,
 } from "react-icons/fi";
 import Card from "../../components/common/Card";
-import { generateDummyAdminNotifications } from "../../utils/adminNotificationDummyData";
-import axios from "axios";
 import { VITE_APP_API_URL } from "../../utils/constants";
 
 const AdminNotifications = () => {

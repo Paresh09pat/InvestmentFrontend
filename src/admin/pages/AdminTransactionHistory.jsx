@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   FiDollarSign,
   FiTrendingUp,
@@ -26,35 +26,37 @@ import TransactionViewModal from "../components/TransactionViewModal";
 import { toast } from "react-toastify";
 // Transaction constants
 const TRANSACTION_TYPES = {
-  DEPOSIT: 'deposit',
-  WITHDRAWAL: 'withdrawal',
-  INVESTMENT: 'investment',
-  REFUND: 'refund',
-  FEE: 'fee',
-  BONUS: 'bonus',
-  DIVIDEND: 'dividend',
+  DEPOSIT: "deposit",
+  WITHDRAWAL: "withdrawal",
+  INVESTMENT: "investment",
+  REFUND: "refund",
+  FEE: "fee",
+  BONUS: "bonus",
+  DIVIDEND: "dividend",
 };
 
 const TRANSACTION_STATUS = {
-  PENDING: 'pending',
-  COMPLETED: 'completed',
-  FAILED: 'failed',
-  CANCELLED: 'cancelled',
-  PROCESSING: 'processing',
+  PENDING: "pending",
+  APPROVED: "approved",
+  REJECTED: "rejected",
+  COMPLETED: "completed",
+  FAILED: "failed",
+  CANCELLED: "cancelled",
+  PROCESSING: "processing",
 };
 
 const PAYMENT_METHODS = {
-  BANK_TRANSFER: 'bank_transfer',
-  CREDIT_CARD: 'credit_card',
-  PAYPAL: 'paypal',
-  CRYPTO: 'crypto',
-  WIRE_TRANSFER: 'wire_transfer',
+  BANK_TRANSFER: "bank_transfer",
+  CREDIT_CARD: "credit_card",
+  PAYPAL: "paypal",
+  CRYPTO: "crypto",
+  WIRE_TRANSFER: "wire_transfer",
 };
 
 // Helper functions
-const formatTransactionAmount = (amount, currency = 'USD') => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
+const formatTransactionAmount = (amount, currency = "USD") => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
     currency: currency,
   }).format(amount);
 };
@@ -65,44 +67,15 @@ const formatTransactionTime = (dateString) => {
   const diffTime = Math.abs(now - date);
   const diffMinutes = Math.ceil(diffTime / (1000 * 60));
 
-  if (diffMinutes < 1) return 'Just now';
+  if (diffMinutes < 1) return "Just now";
   if (diffMinutes < 60) return `${diffMinutes}m ago`;
   if (diffMinutes < 1440) return `${Math.floor(diffMinutes / 60)}h ago`;
   if (diffMinutes < 10080) return `${Math.floor(diffMinutes / 1440)}d ago`;
   return date.toLocaleDateString();
 };
 
-const getPaymentMethodIcon = (method) => {
-  const icons = {
-    [PAYMENT_METHODS.BANK_TRANSFER]: '🏦',
-    [PAYMENT_METHODS.CREDIT_CARD]: '💳',
-    [PAYMENT_METHODS.PAYPAL]: '🅿️',
-    [PAYMENT_METHODS.CRYPTO]: '₿',
-    [PAYMENT_METHODS.WIRE_TRANSFER]: '💸',
-  };
-
-  return icons[method] || '💰';
-};
-
-const calculateTotalsByType = (transactions) => {
-  const totals = {};
-  
-  transactions.forEach(transaction => {
-    if (!totals[transaction.type]) {
-      totals[transaction.type] = 0;
-    }
-    totals[transaction.type] += transaction.amount;
-  });
-
-  return totals;
-};
-
-const filterTransactionsByUser = (transactions, userId) => {
-  return transactions.filter(transaction => transaction.userId === userId);
-};
 import axios from "axios";
 import { VITE_APP_API_URL } from "../../utils/constants";
-import { useParams } from "react-router-dom";
 
 const AdminTransactionHistory = () => {
   const [transactions, setTransactions] = useState([]);
@@ -111,32 +84,32 @@ const AdminTransactionHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
-  const [userFilter, setUserFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [showUserDetails, setShowUserDetails] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [showTransactionModal, setShowTransactionModal] = useState(false);
-  // Load transactions
+  // Load transaction requests
   const loadTransactions = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${VITE_APP_API_URL}/api/admin/txn-history`, { withCredentials: true });
-      
+      const response = await axios.get(
+        `${VITE_APP_API_URL}/api/admin/transaction-request`,
+        { withCredentials: true }
+      );
+
       if (response.data && response.data.success) {
         setTransactions(response.data.data);
         setFilteredTransactions(response.data.data);
-        console.log("transactions", response.data.data);
+        // console.log("transaction requests", response.data.data);
       } else {
         console.error("Invalid response format:", response.data);
         setTransactions([]);
         setFilteredTransactions([]);
       }
     } catch (error) {
-      toast.error("Failed to load transactions");
-      console.error("Failed to load transactions:", error);
+      toast.error("Failed to load transaction requests");
+      console.error("Failed to load transaction requests:", error);
     } finally {
       setLoading(false);
     }
@@ -148,34 +121,42 @@ const AdminTransactionHistory = () => {
 
     // Search filter
     if (searchTerm) {
-      filtered = filtered.filter(transaction =>
-        (transaction.userId?.name || transaction.userName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (transaction.userId?.email || transaction.userEmail || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (transaction.txnReqId?.walletTxId || transaction.reference || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (transaction.type || '').toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (transaction) =>
+          (transaction.userId?.name || "")
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          (transaction.userId?.email || "")
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          (transaction.plan || "")
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          (transaction.type || "")
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
       );
     }
 
     // Status filter
     if (statusFilter !== "all") {
-      filtered = filtered.filter(transaction => transaction.status === statusFilter);
+      filtered = filtered.filter(
+        (transaction) => transaction.status === statusFilter
+      );
     }
 
     // Type filter
     if (typeFilter !== "all") {
-      filtered = filtered.filter(transaction => transaction.type === typeFilter);
-    }
-
-    // User filter
-    if (userFilter !== "all") {
-      filtered = filtered.filter(transaction => (transaction.userId?._id || transaction.userId) === userFilter);
+      filtered = filtered.filter(
+        (transaction) => transaction.type === typeFilter
+      );
     }
 
     // Date filter
     if (dateFilter !== "all") {
       const now = new Date();
       const filterDate = new Date();
-      
+
       switch (dateFilter) {
         case "today":
           filterDate.setHours(0, 0, 0, 0);
@@ -190,38 +171,37 @@ const AdminTransactionHistory = () => {
           filterDate.setFullYear(now.getFullYear() - 1);
           break;
       }
-      
-      filtered = filtered.filter(transaction => 
-        new Date(transaction.createdAt) >= filterDate
+
+      filtered = filtered.filter(
+        (transaction) => new Date(transaction.createdAt) >= filterDate
       );
     }
 
     setFilteredTransactions(filtered);
     setCurrentPage(1);
-  }, [transactions, searchTerm, statusFilter, typeFilter, userFilter, dateFilter]);
+  }, [transactions, searchTerm, statusFilter, typeFilter, dateFilter]);
 
   useEffect(() => {
     loadTransactions();
   }, []);
 
-  // Get unique users for filter
-  const uniqueUsers = [...new Set(transactions?.map(t => ({ 
-    id: t.userId?._id || t.userId, 
-    name: t.userId?.name || t.userName, 
-    email: t.userId?.email || t.userEmail 
-  })))].sort((a, b) => a.name.localeCompare(b.name));
-
-  // Get transaction statistics
+  // Get transaction request statistics
   const stats = {
-    totalTransactions: filteredTransactions.length,
-    totalVolume: filteredTransactions.reduce((sum, t) => sum + t.amount, 0),
-    completedTransactions: filteredTransactions.filter(t => t.status === 'completed').length,
-    pendingTransactions: filteredTransactions.filter(t => t.status === 'pending').length,
-    failedTransactions: filteredTransactions.filter(t => t.status === 'failed').length,
-    uniqueUsers: new Set(filteredTransactions.map(t => t.userId?._id || t.userId)).size,
+    totalRequests: filteredTransactions.length,
+    totalVolume: filteredTransactions.reduce(
+      (sum, t) => sum + (t.amount || 0),
+      0
+    ),
+    pendingRequests: filteredTransactions.filter((t) => t.status === "pending")
+      .length,
+    approvedRequests: filteredTransactions.filter(
+      (t) => t.status === "approved"
+    ).length,
+    rejectedRequests: filteredTransactions.filter(
+      (t) => t.status === "rejected"
+    ).length,
+    uniqueUsers: new Set(filteredTransactions.map((t) => t.userId?._id)).size,
   };
-  
-  const totalsByType = calculateTotalsByType(filteredTransactions);
 
   // Pagination
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
@@ -232,10 +212,14 @@ const AdminTransactionHistory = () => {
   // Get status icon
   const getStatusIcon = (status) => {
     switch (status) {
-      case TRANSACTION_STATUS.COMPLETED:
-        return <FiCheckCircle className="text-green-500" size={16} />;
       case TRANSACTION_STATUS.PENDING:
         return <FiClock className="text-yellow-500" size={16} />;
+      case TRANSACTION_STATUS.APPROVED:
+        return <FiCheckCircle className="text-green-500" size={16} />;
+      case TRANSACTION_STATUS.REJECTED:
+        return <FiXCircle className="text-red-500" size={16} />;
+      case TRANSACTION_STATUS.COMPLETED:
+        return <FiCheckCircle className="text-green-500" size={16} />;
       case TRANSACTION_STATUS.PROCESSING:
         return <FiRefreshCw className="text-blue-500" size={16} />;
       case TRANSACTION_STATUS.FAILED:
@@ -267,38 +251,25 @@ const AdminTransactionHistory = () => {
     }
   };
 
-  // Handle user selection
-  const handleUserSelect = (userId) => {
-    if (userId === "all") {
-      setSelectedUser(null);
-      setShowUserDetails(false);
-    } else {
-      const user = uniqueUsers.find(u => u.id === userId);
-      setSelectedUser(user);
-      setShowUserDetails(true);
-    }
-  };
-
   // Clear all filters
   const clearFilters = () => {
     setSearchTerm("");
     setStatusFilter("all");
     setTypeFilter("all");
-    setUserFilter("all");
     setDateFilter("all");
-    setSelectedUser(null);
-    setShowUserDetails(false);
   };
 
   // Export transactions (placeholder)
   const handleExport = () => {
-    toast.info("Export functionality will be implemented with backend integration");
+    toast.info(
+      "Export functionality will be implemented with backend integration"
+    );
   };
 
   // Handle transaction view
   const handleViewTransaction = (transaction) => {
-    setSelectedTransaction(transaction);
-    setShowTransactionModal(true);
+    // Navigate to transaction request details page
+    window.location.href = `/admin/transaction-request/${transaction._id}`;
   };
 
   // Close transaction modal
@@ -313,10 +284,10 @@ const AdminTransactionHistory = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Transaction History
+            Transaction Requests
           </h1>
           <p className="text-gray-600">
-            View and manage all platform transactions
+            View and manage all transaction requests
           </p>
         </div>
         <div className="flex space-x-3">
@@ -343,8 +314,12 @@ const AdminTransactionHistory = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Transactions</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalTransactions}</p>
+              <p className="text-sm font-medium text-gray-600">
+                Total Requests
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {stats.totalRequests}
+              </p>
             </div>
             <div className="p-3 bg-blue-100 rounded-full">
               <FiDollarSign className="text-blue-600" size={24} />
@@ -369,8 +344,10 @@ const AdminTransactionHistory = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Completed</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.completedTransactions}</p>
+              <p className="text-sm font-medium text-gray-600">Approved</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {stats.approvedRequests}
+              </p>
             </div>
             <div className="p-3 bg-green-100 rounded-full">
               <FiCheckCircle className="text-green-600" size={24} />
@@ -381,11 +358,13 @@ const AdminTransactionHistory = () => {
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Unique Users</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.uniqueUsers}</p>
+              <p className="text-sm font-medium text-gray-600">Pending</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {stats.pendingRequests}
+              </p>
             </div>
-            <div className="p-3 bg-purple-100 rounded-full">
-              <FiUser className="text-purple-600" size={24} />
+            <div className="p-3 bg-yellow-100 rounded-full">
+              <FiClock className="text-yellow-600" size={24} />
             </div>
           </div>
         </Card>
@@ -393,10 +372,10 @@ const AdminTransactionHistory = () => {
 
       {/* Filters */}
       <Card className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <Input
-              placeholder="Search transactions..."
+              placeholder="Search transaction requests..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               icon={<FiSearch />}
@@ -410,11 +389,9 @@ const AdminTransactionHistory = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Status</option>
-              <option value={TRANSACTION_STATUS.COMPLETED}>Completed</option>
               <option value={TRANSACTION_STATUS.PENDING}>Pending</option>
-              <option value={TRANSACTION_STATUS.PROCESSING}>Processing</option>
-              <option value={TRANSACTION_STATUS.FAILED}>Failed</option>
-              <option value={TRANSACTION_STATUS.CANCELLED}>Cancelled</option>
+              <option value={TRANSACTION_STATUS.APPROVED}>Approved</option>
+              <option value={TRANSACTION_STATUS.REJECTED}>Rejected</option>
             </select>
           </div>
 
@@ -427,28 +404,6 @@ const AdminTransactionHistory = () => {
               <option value="all">All Types</option>
               <option value={TRANSACTION_TYPES.DEPOSIT}>Deposits</option>
               <option value={TRANSACTION_TYPES.WITHDRAWAL}>Withdrawals</option>
-              <option value={TRANSACTION_TYPES.INVESTMENT}>Investments</option>
-              <option value={TRANSACTION_TYPES.DIVIDEND}>Dividends</option>
-              <option value={TRANSACTION_TYPES.BONUS}>Bonuses</option>
-              <option value={TRANSACTION_TYPES.FEE}>Fees</option>
-            </select>
-          </div>
-
-          <div>
-            <select
-              value={userFilter}
-              onChange={(e) => {
-                setUserFilter(e.target.value);
-                handleUserSelect(e.target.value);
-              }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">All Users</option>
-              {uniqueUsers.map(user => (
-                <option key={user.id} value={user.id}>
-                  {user.name}
-                </option>
-              ))}
             </select>
           </div>
 
@@ -469,60 +424,14 @@ const AdminTransactionHistory = () => {
 
         <div className="flex justify-between items-center mt-4">
           <div className="text-sm text-gray-600">
-            Showing {filteredTransactions.length} of {transactions.length} transactions
+            Showing {filteredTransactions.length} of {transactions.length}{" "}
+            transaction requests
           </div>
-          <Button
-            variant="outline"
-            size="small"
-            onClick={clearFilters}
-          >
+          <Button variant="outline" size="small" onClick={clearFilters}>
             Clear Filters
           </Button>
         </div>
       </Card>
-
-      {/* User Details (if selected) */}
-      {showUserDetails && selectedUser && (
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
-              User Details: {selectedUser.name}
-            </h3>
-            <Button
-              variant="outline"
-              size="small"
-              onClick={() => {
-                setShowUserDetails(false);
-                setUserFilter("all");
-                setSelectedUser(null);
-              }}
-            >
-              Close
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <p className="text-sm text-gray-600">Email</p>
-              <p className="font-medium">{selectedUser.email}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Total Transactions</p>
-              <p className="font-medium">
-                {filterTransactionsByUser(transactions, selectedUser.id).length}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Total Volume</p>
-              <p className="font-medium">
-                {formatTransactionAmount(
-                  filterTransactionsByUser(transactions.data, selectedUser.id)
-                    .reduce((sum, t) => sum + t.amount, 0)
-                )}
-              </p>
-            </div>
-          </div>
-        </Card>
-      )}
 
       {/* Transactions Table */}
       <Card className="p-6">
@@ -535,63 +444,83 @@ const AdminTransactionHistory = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">User</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Type</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Amount</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Payment Method</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Reference</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    User
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    Plan
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    Type
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    Amount
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    Status
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    Date
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                  WalletTxId
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {currentTransactions.map((transaction) => (
-                  <tr key={transaction._id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <tr
+                    key={transaction._id}
+                    className="border-b border-gray-100 hover:bg-gray-50"
+                  >
                     <td className="py-4 px-4">
                       <div>
-                        <p className="font-medium text-gray-900">{transaction.userId?.name || transaction.userName}</p>
-                        <p className="text-sm text-gray-600">{transaction.userId?.email || transaction.userEmail}</p>
+                        <p className="font-medium text-gray-900">
+                          {transaction.userId?.name || "Unknown User"}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {transaction.userId?.email || "N/A"}
+                        </p>
                       </div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                        {transaction.plan || "N/A"}
+                      </span>
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex items-center space-x-2">
                         {getTypeIcon(transaction.type)}
-                        <span className="capitalize">{transaction.type}</span>
+                        <span className="capitalize">
+                          {transaction.type || "N/A"}
+                        </span>
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <span className={`font-semibold ${
-                        transaction.type === TRANSACTION_TYPES.DEPOSIT || 
-                        transaction.type === TRANSACTION_TYPES.DIVIDEND ||
-                        transaction.type === TRANSACTION_TYPES.BONUS
-                          ? 'text-green-600' 
-                          : 'text-red-600'
-                      }`}>
-                        {transaction.type === TRANSACTION_TYPES.WITHDRAWAL || 
-                         transaction.type === TRANSACTION_TYPES.FEE ? '-' : '+'}
-                        {formatTransactionAmount(transaction.amount)}
+                      <span className="font-semibold text-green-600">
+                        {formatTransactionAmount(transaction.amount || 0)}
                       </span>
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex items-center space-x-2">
                         {getStatusIcon(transaction.status)}
-                        <span className={`capitalize text-sm font-medium ${
-                          transaction.status === TRANSACTION_STATUS.COMPLETED ? 'text-green-600' :
-                          transaction.status === TRANSACTION_STATUS.PENDING ? 'text-yellow-600' :
-                          transaction.status === TRANSACTION_STATUS.PROCESSING ? 'text-blue-600' :
-                          transaction.status === TRANSACTION_STATUS.FAILED ? 'text-red-600' :
-                          'text-gray-600'
-                        }`}>
+                        <span
+                          className={`capitalize text-sm font-medium ${
+                            transaction.status === TRANSACTION_STATUS.PENDING
+                              ? "text-yellow-600"
+                              : transaction.status ===
+                                TRANSACTION_STATUS.APPROVED
+                              ? "text-green-600"
+                              : transaction.status ===
+                                TRANSACTION_STATUS.REJECTED
+                              ? "text-red-600"
+                              : "text-gray-600"
+                          }`}
+                        >
                           {transaction.status}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center space-x-2">
-                        <span>{getPaymentMethodIcon(transaction.txnReqId?.plan || 'wallet')}</span>
-                        <span className="capitalize text-sm">
-                          {transaction.txnReqId?.plan || 'wallet'}
                         </span>
                       </div>
                     </td>
@@ -607,7 +536,7 @@ const AdminTransactionHistory = () => {
                     </td>
                     <td className="py-4 px-4">
                       <span className="text-sm font-mono text-gray-600">
-                        {transaction.txnReqId?.walletTxId || transaction._id}
+                        {transaction.walletTxId || transaction._id}
                       </span>
                     </td>
                     <td className="py-4 px-4">
@@ -629,12 +558,15 @@ const AdminTransactionHistory = () => {
           <div className="text-center py-12">
             <FiDollarSign className="mx-auto text-gray-400 mb-4" size={48} />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No transactions found
+              No transaction requests found
             </h3>
             <p className="text-gray-600">
-              {searchTerm || statusFilter !== "all" || typeFilter !== "all" || userFilter !== "all" || dateFilter !== "all"
+              {searchTerm ||
+              statusFilter !== "all" ||
+              typeFilter !== "all" ||
+              dateFilter !== "all"
                 ? "Try adjusting your search or filter criteria."
-                : "No transactions have been recorded yet."}
+                : "No transaction requests have been recorded yet."}
             </p>
           </div>
         )}
@@ -643,13 +575,15 @@ const AdminTransactionHistory = () => {
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-6">
             <div className="text-sm text-gray-600">
-              Showing {startIndex + 1} to {Math.min(endIndex, filteredTransactions.length)} of {filteredTransactions.length} transactions
+              Showing {startIndex + 1} to{" "}
+              {Math.min(endIndex, filteredTransactions.length)} of{" "}
+              {filteredTransactions.length} transaction requests
             </div>
             <div className="flex space-x-2">
               <Button
                 variant="outline"
                 size="small"
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
               >
                 Previous
@@ -660,7 +594,9 @@ const AdminTransactionHistory = () => {
               <Button
                 variant="outline"
                 size="small"
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                }
                 disabled={currentPage === totalPages}
               >
                 Next
@@ -681,4 +617,3 @@ const AdminTransactionHistory = () => {
 };
 
 export default AdminTransactionHistory;
-
