@@ -329,7 +329,7 @@ const AdminProfile = () => {
 
     const file = uploadFile;
     const formData = new FormData();
-    formData.append("pic", file); 
+    formData.append("picture", file); 
     setLoading(true);
 
     try {
@@ -381,6 +381,8 @@ const AdminProfile = () => {
       </div>
     );
   }
+
+  
 
   return (
     <div className="min-h-screen bg-gray-50">

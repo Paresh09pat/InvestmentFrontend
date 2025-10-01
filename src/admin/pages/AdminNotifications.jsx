@@ -10,6 +10,8 @@ import {
 } from "react-icons/fi";
 import Card from "../../components/common/Card";
 import { VITE_APP_API_URL } from "../../utils/constants";
+import { toast } from "react-toastify";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const AdminNotifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -50,25 +52,48 @@ const AdminNotifications = () => {
   const unreadCount = notifications.filter((notif) => !notif.read).length;
 
   const fetchNotifications = async()=>{
+    setLoading(true)
     try{
       const res = await axios.get(`${VITE_APP_API_URL}/api/admin/notifications/admin`, { withCredentials: true })
       setNotifications(res.data.notifications)
+
     }
     catch(err){
       console.log("err",err)
+    }
+    finally{
+      setLoading(false)
     }
   }
 
     // Load notifications on component mount
     useEffect(() => {
 
-      setLoading(true);
       fetchNotifications()
-      setLoading(false);
     }, []);
+
+    const handleReadNotification =async(id)=>{
+      setLoading(true)
+      try{
+        const res = await axios.put(`${VITE_APP_API_URL}/api/admin/notifications/admin/${id}`, { withCredentials: true })
+
+        if(res.status === 200){
+          setNotifications(prev => prev.map(notif => notif._id === id ? { ...notif, read: true } : notif))
+          fetchNotifications()
+        }
+
+      }
+      catch(err){
+        console.log(err)
+        toast.error("Failed to mark notification as read")
+      }finally{
+        setLoading(false)
+      }
+    }
 
   return (
     <div className="space-y-6">
+    {loading && <LoadingSpinner/>}
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -97,6 +122,7 @@ const AdminNotifications = () => {
               className={`p-6 hover:shadow-md transition-all duration-200 ${
                 !notification.read ? "bg-blue-50 border-l-4 border-l-blue-500" : "bg-white"
               }`}
+              onClick={() => !notification.read && handleReadNotification(notification._id)}
             >
               <div className="flex items-start space-x-4">
                 <div className="flex-shrink-0 mt-1">

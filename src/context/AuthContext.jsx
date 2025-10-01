@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [notificationCount, setNotificationCount] = useState(0);
   const [qr,setQr] = useState(null)
+  const [adminNotifications,setAdminNotifications] = useState(0)
 
   // Configure axios to send cookies with requests
   useEffect(() => {
@@ -77,11 +78,12 @@ export const AuthProvider = ({ children }) => {
       const userResponse = await axios.get(
         `${VITE_APP_API_URL}/api/auth/profile`
       );
-      const { user: userData, notifications } = userResponse.data;
+      const { user: userData, notifications,adminQR } = userResponse.data;
 
       setUser(userData);
       setIsAdmin(false);
-      setQr(userData.profilePicture.cloudinaryUrl)
+      console.log("userData")
+      setQr(adminQR)
       setNotificationCount(notifications || 0);
     } catch (error) {
       // If user auth fails with 401, clear auth state
@@ -105,7 +107,7 @@ export const AuthProvider = ({ children }) => {
 
       setUser(adminData);
       setIsAdmin(true);
-      setNotificationCount(0); // Admin doesn't have user notifications
+      setAdminNotifications(adminData.notifications); // Admin doesn't have user notifications
       
       // Store admin data in localStorage for persistence
       localStorage.setItem('admin_user', JSON.stringify(adminData));
@@ -122,7 +124,7 @@ export const AuthProvider = ({ children }) => {
           const adminData = JSON.parse(storedAdmin);
           setUser(adminData);
           setIsAdmin(true);
-          setNotificationCount(0);
+          setAdminNotifications(0);
           console.log("Using stored admin data as fallback");
           return;
         } catch (parseError) {
@@ -195,7 +197,7 @@ export const AuthProvider = ({ children }) => {
       const { user: adminUser } = response.data;
       setUser(adminUser);
       setIsAdmin(true);
-      setNotificationCount(0);
+      setAdminNotifications(0);
 
       // Store admin data in localStorage for persistence
       localStorage.setItem('admin_user', JSON.stringify(adminUser));
@@ -243,7 +245,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setIsAdmin(false);
       setUser(null);
-      setNotificationCount(0);
+      setAdminNotifications(0);
       
       // Clear stored admin data
       localStorage.removeItem('admin_user');
@@ -283,6 +285,7 @@ export const AuthProvider = ({ children }) => {
     isAdmin,
     loading,
     notificationCount,
+    adminNotifications,
     isAuthenticated: !!user,
     qr,
     login,
