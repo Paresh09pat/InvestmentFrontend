@@ -232,7 +232,7 @@ const AdminProfile = () => {
         withCredentials: true
       });
 
-      console.log("Password update response:", response);
+ 
 
       // Refetch profile data after successful password change
       await fetchAdminProfile();
@@ -253,7 +253,7 @@ const AdminProfile = () => {
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('Error updating profile:', error);
-      setErrors({ general: 'Failed to update profile. Please try again.' });
+      toast.error(error.response.data.message)
     } finally {
       setLoading(false);
     }

@@ -9,10 +9,23 @@ export const AuthProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [qr,setQr] = useState(null)
 
   // Configure axios to send cookies with requests
   useEffect(() => {
     axios.defaults.withCredentials = true;
+    
+    // Add response interceptor to handle 401 errors globally
+    const responseInterceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          console.log("401 error detected, logging out user");
+          clearAuthState();
+        }
+        return Promise.reject(error);
+      }
+    );
     
     // Check for stored admin data first
     const storedAdmin = localStorage.getItem('admin_user');
@@ -33,6 +46,11 @@ export const AuthProvider = ({ children }) => {
     }
     
     checkAuthStatus();
+    
+    // Cleanup interceptor on unmount
+    return () => {
+      axios.interceptors.response.eject(responseInterceptor);
+    };
   }, []);
 
   const checkAuthStatus = async () => {
@@ -63,9 +81,17 @@ export const AuthProvider = ({ children }) => {
 
       setUser(userData);
       setIsAdmin(false);
+      setQr(userData.profilePicture.cloudinaryUrl)
       setNotificationCount(notifications || 0);
-    } catch {
-      // If user auth fails, try admin auth
+    } catch (error) {
+      // If user auth fails with 401, clear auth state
+      if (error.response?.status === 401) {
+        console.log("User auth failed with 401, clearing auth state");
+        clearAuthState();
+        return;
+      }
+      
+      // For other errors, try admin auth as fallback
       await checkAdminAuth();
     }
   };
@@ -258,6 +284,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     notificationCount,
     isAuthenticated: !!user,
+    qr,
     login,
     signup,
     logout,
