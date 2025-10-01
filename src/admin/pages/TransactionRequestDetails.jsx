@@ -27,7 +27,7 @@ import Button from "../../components/common/Button";
 import Modal from "../../components/common/Modal";
 import Input from "../../components/forms/Input";
 
-const TransactionRequestDetails = () => {
+ const TransactionRequestDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [transactionRequest, setTransactionRequest] = useState(null);
@@ -135,6 +135,9 @@ const TransactionRequestDetails = () => {
     // Check if changing to rejected status and no rejection reason provided
     if (newStatus === INVESTMENT_STATUS.REJECTED && !statusRejectionReason.trim()) {
       setError("Please provide a rejection reason");
+    // Check if rejection reason is required
+    if (newStatus === INVESTMENT_STATUS.REJECTED && !statusUpdateReason.trim()) {
+      setError('Rejection reason is required');
       return;
     }
 
@@ -148,6 +151,9 @@ const TransactionRequestDetails = () => {
     // Include rejection reason if status is being changed to rejected
     if (newStatus === INVESTMENT_STATUS.REJECTED) {
       updateData.rejectionReason = statusRejectionReason.trim();
+    // Add rejection reason if status is rejected
+    if (newStatus === INVESTMENT_STATUS.REJECTED) {
+      updateData.rejectionReason = statusUpdateReason.trim();
     }
 
     const success = await updateTransactionRequest(updateData);
@@ -156,6 +162,7 @@ const TransactionRequestDetails = () => {
       setIsEditingStatus(false);
       setShowRejectionReasonInput(false);
       setStatusRejectionReason('');
+      setStatusUpdateReason('');
       setSuccessMessage('Transaction status updated successfully');
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(""), 3000);
@@ -178,6 +185,7 @@ const TransactionRequestDetails = () => {
     setNewStatus(selectedStatus);
     setShowRejectionReasonInput(selectedStatus === INVESTMENT_STATUS.REJECTED);
     setStatusRejectionReason('');
+    setStatusUpdateReason('');
     setError(null);
   };
 
@@ -194,8 +202,8 @@ const TransactionRequestDetails = () => {
       [INVESTMENT_STATUS.PENDING]: [INVESTMENT_STATUS.APPROVED, INVESTMENT_STATUS.REJECTED],
       [INVESTMENT_STATUS.APPROVED]: [INVESTMENT_STATUS.PENDING, INVESTMENT_STATUS.REJECTED], // Can be changed back to pending or rejected
       [INVESTMENT_STATUS.REJECTED]: [INVESTMENT_STATUS.PENDING, INVESTMENT_STATUS.APPROVED] // Can be reopened to pending or approved
-    };
-
+ 
+    }
     const allowedStatuses = statusFlow[currentStatus] || [];
     return allStatuses.filter(status => 
       allowedStatuses.includes(status.value) || status.value === currentStatus
@@ -242,6 +250,7 @@ const TransactionRequestDetails = () => {
       setIsEditingStatus(false);
       setShowRejectionReasonInput(false);
       setStatusRejectionReason('');
+      setStatusUpdateReason('');
     }
   }, [transactionRequest]);
 
@@ -758,6 +767,9 @@ const TransactionRequestDetails = () => {
       </Modal>
     </div>
   );
-};
+
+  }
+}
+}
 
 export default TransactionRequestDetails;
