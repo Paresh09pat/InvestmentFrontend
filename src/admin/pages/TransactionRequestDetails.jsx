@@ -132,11 +132,8 @@ import Input from "../../components/forms/Input";
       return;
     }
 
-    // Check if changing to rejected status and no rejection reason provided
-    if (newStatus === INVESTMENT_STATUS.REJECTED && !statusRejectionReason.trim()) {
-      setError("Please provide a rejection reason");
     // Check if rejection reason is required
-    if (newStatus === INVESTMENT_STATUS.REJECTED && !statusUpdateReason.trim()) {
+    if (newStatus === INVESTMENT_STATUS.REJECTED && !statusRejectionReason.trim()) {
       setError('Rejection reason is required');
       return;
     }
@@ -148,12 +145,9 @@ import Input from "../../components/forms/Input";
       status: newStatus,
     };
 
-    // Include rejection reason if status is being changed to rejected
-    if (newStatus === INVESTMENT_STATUS.REJECTED) {
-      updateData.rejectionReason = statusRejectionReason.trim();
     // Add rejection reason if status is rejected
     if (newStatus === INVESTMENT_STATUS.REJECTED) {
-      updateData.rejectionReason = statusUpdateReason.trim();
+      updateData.rejectionReason = statusRejectionReason.trim();
     }
 
     const success = await updateTransactionRequest(updateData);
@@ -162,7 +156,6 @@ import Input from "../../components/forms/Input";
       setIsEditingStatus(false);
       setShowRejectionReasonInput(false);
       setStatusRejectionReason('');
-      setStatusUpdateReason('');
       setSuccessMessage('Transaction status updated successfully');
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(""), 3000);
@@ -185,7 +178,6 @@ import Input from "../../components/forms/Input";
     setNewStatus(selectedStatus);
     setShowRejectionReasonInput(selectedStatus === INVESTMENT_STATUS.REJECTED);
     setStatusRejectionReason('');
-    setStatusUpdateReason('');
     setError(null);
   };
 
@@ -250,7 +242,6 @@ import Input from "../../components/forms/Input";
       setIsEditingStatus(false);
       setShowRejectionReasonInput(false);
       setStatusRejectionReason('');
-      setStatusUpdateReason('');
     }
   }, [transactionRequest]);
 
@@ -767,9 +758,6 @@ import Input from "../../components/forms/Input";
       </Modal>
     </div>
   );
-
-  }
-}
-}
+};
 
 export default TransactionRequestDetails;

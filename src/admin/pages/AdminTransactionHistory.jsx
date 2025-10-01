@@ -259,12 +259,6 @@ const AdminTransactionHistory = () => {
     setDateFilter("all");
   };
 
-  // Export transactions (placeholder)
-  const handleExport = () => {
-    toast.info(
-      "Export functionality will be implemented with backend integration"
-    );
-  };
 
   // Handle transaction view
   const handleViewTransaction = (transaction) => {
