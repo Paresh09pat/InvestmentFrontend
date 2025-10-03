@@ -19,21 +19,50 @@ const HowItWorks = () => {
     setMounted(true);
   }, []);
 
-  // Enhanced portfolio data with more realistic values
-  const portfolioData = [
-    { month: 'Jan', value: 42000, stocks: 29400, crypto: 12600 },
-    { month: 'Feb', value: 43500, stocks: 30450, crypto: 13050 },
-    { month: 'Mar', value: 41000, stocks: 28700, crypto: 12300 },
-    { month: 'Apr', value: 44000, stocks: 30800, crypto: 13200 },
-    { month: 'May', value: 42500, stocks: 29750, crypto: 12750 },
-    { month: 'Jun', value: 44553, stocks: 31187, crypto: 13366 },
-    { month: 'Jul', value: 43800, stocks: 30660, crypto: 13140 },
-    { month: 'Aug', value: 42200, stocks: 29540, crypto: 12660 },
-    { month: 'Sep', value: 44100, stocks: 30870, crypto: 13230 },
-    { month: 'Oct', value: 45200, stocks: 31640, crypto: 13560 },
-    { month: 'Nov', value: 44800, stocks: 31360, crypto: 13440 },
-    { month: 'Dec', value: 44553, stocks: 31187, crypto: 13366 }
-  ];
+  // Portfolio data for different timeframes with upward trend
+  const getPortfolioData = (timeframe) => {
+    const baseData = {
+      '1 Year': [
+        { month: 'Jan', value: 35000, stocks: 24500, crypto: 10500 },
+        { month: 'Feb', value: 36500, stocks: 25550, crypto: 10950 },
+        { month: 'Mar', value: 38000, stocks: 26600, crypto: 11400 },
+        { month: 'Apr', value: 39500, stocks: 27650, crypto: 11850 },
+        { month: 'May', value: 41000, stocks: 28700, crypto: 12300 },
+        { month: 'Jun', value: 42500, stocks: 29750, crypto: 12750 },
+        { month: 'Jul', value: 44000, stocks: 30800, crypto: 13200 },
+        { month: 'Aug', value: 45500, stocks: 31850, crypto: 13650 },
+        { month: 'Sep', value: 47000, stocks: 32900, crypto: 14100 },
+        { month: 'Oct', value: 48500, stocks: 33950, crypto: 14550 },
+        { month: 'Nov', value: 50000, stocks: 35000, crypto: 15000 },
+        { month: 'Dec', value: 51500, stocks: 36050, crypto: 15450 }
+      ],
+      '6 Month': [
+        { month: 'Jul', value: 42000, stocks: 29400, crypto: 12600 },
+        { month: 'Aug', value: 43500, stocks: 30450, crypto: 13050 },
+        { month: 'Sep', value: 45000, stocks: 31500, crypto: 13500 },
+        { month: 'Oct', value: 46500, stocks: 32550, crypto: 13950 },
+        { month: 'Nov', value: 48000, stocks: 33600, crypto: 14400 },
+        { month: 'Dec', value: 49500, stocks: 34650, crypto: 14850 }
+      ],
+      '3 Month': [
+        { month: 'Oct', value: 45000, stocks: 31500, crypto: 13500 },
+        { month: 'Nov', value: 47000, stocks: 32900, crypto: 14100 },
+        { month: 'Dec', value: 49000, stocks: 34300, crypto: 14700 }
+      ],
+      'Weekly': [
+        { day: 'Mon', value: 48000, stocks: 33600, crypto: 14400 },
+        { day: 'Tue', value: 48500, stocks: 33950, crypto: 14550 },
+        { day: 'Wed', value: 49000, stocks: 34300, crypto: 14700 },
+        { day: 'Thu', value: 49500, stocks: 34650, crypto: 14850 },
+        { day: 'Fri', value: 50000, stocks: 35000, crypto: 15000 },
+        { day: 'Sat', value: 50500, stocks: 35350, crypto: 15150 },
+        { day: 'Sun', value: 51000, stocks: 35700, crypto: 15300 }
+      ]
+    };
+    return baseData[timeframe] || baseData['1 Year'];
+  };
+
+  const portfolioData = getPortfolioData(activeTimeframe);
 
   const pieData = [
     { name: 'Stocks', value: 35, color: '#3B82F6', amount: 15594 }, // Blue from Hero
@@ -55,7 +84,7 @@ const HowItWorks = () => {
     { icon: FaEuroSign, color: '#84CC16', size: 24, delay: 3.5, position: { left: '95%', top: '30%' } },
   ];
 
-  const timeframes = ['1 Year', '3 Month', '6 Month', 'Weekly'];
+  const timeframes = ['1 Year', '6 Month', '3 Month', 'Weekly'];
 
   const handleInvestNow = () => {
     if (!isAuthenticated) {
@@ -229,7 +258,9 @@ const HowItWorks = () => {
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
                         <div className="text-gray-400 text-xs sm:text-sm">Portfolio Amount</div>
-                        <div className="text-white text-lg sm:text-xl md:text-2xl font-semibold">$44,553.00</div>
+                        <div className="text-white text-lg sm:text-xl md:text-2xl font-semibold">
+                          ${portfolioData[portfolioData.length - 1]?.value.toLocaleString() || '51,000'}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -242,7 +273,9 @@ const HowItWorks = () => {
               <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700/50 h-full">
                 <div className="text-white mb-3 sm:mb-4">
                   <div className="text-gray-400 text-xs sm:text-sm mb-1">Portfolio Amount</div>
-                  <div className="text-xl sm:text-2xl md:text-3xl font-light">$44,553.00</div>
+                  <div className="text-xl sm:text-2xl md:text-3xl font-light">
+                    ${portfolioData[portfolioData.length - 1]?.value.toLocaleString() || '51,000'}
+                  </div>
                 </div>
 
                 {/* Timeframe Selectors */}
@@ -291,7 +324,7 @@ const HowItWorks = () => {
                         </linearGradient>
                       </defs>
                       <XAxis 
-                        dataKey="month" 
+                        dataKey={activeTimeframe === 'Weekly' ? 'day' : 'month'} 
                         axisLine={false}
                         tickLine={false}
                         tick={{ fill: '#9CA3AF', fontSize: 10 }}
@@ -335,17 +368,27 @@ const HowItWorks = () => {
                 {/* Price Points */}
                 <div className="space-y-1 sm:space-y-2 mt-3 sm:mt-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-white font-medium text-sm sm:text-base">$54,342</span>
+                    <span className="text-white font-medium text-sm sm:text-base">
+                      ${portfolioData[portfolioData.length - 1]?.stocks.toLocaleString() || '36,050'}
+                    </span>
                     <span className="text-green-400 flex items-center space-x-1">
                       <FaArrowUp size={10} />
-                      <span className="text-xs sm:text-sm">+$4,293 5.34%</span>
+                      <span className="text-xs sm:text-sm">
+                        +${((portfolioData[portfolioData.length - 1]?.stocks || 36050) - (portfolioData[0]?.stocks || 24500)).toLocaleString()} 
+                        {((((portfolioData[portfolioData.length - 1]?.stocks || 36050) - (portfolioData[0]?.stocks || 24500)) / (portfolioData[0]?.stocks || 24500)) * 100).toFixed(1)}%
+                      </span>
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-white font-medium text-sm sm:text-base">$5,342</span>
-                    <span className="text-red-400 flex items-center space-x-1">
-                      <FaArrowDown size={10} />
-                      <span className="text-xs sm:text-sm">-$293 -2%</span>
+                    <span className="text-white font-medium text-sm sm:text-base">
+                      ${portfolioData[portfolioData.length - 1]?.crypto.toLocaleString() || '15,450'}
+                    </span>
+                    <span className="text-green-400 flex items-center space-x-1">
+                      <FaArrowUp size={10} />
+                      <span className="text-xs sm:text-sm">
+                        +${((portfolioData[portfolioData.length - 1]?.crypto || 15450) - (portfolioData[0]?.crypto || 10500)).toLocaleString()} 
+                        {((((portfolioData[portfolioData.length - 1]?.crypto || 15450) - (portfolioData[0]?.crypto || 10500)) / (portfolioData[0]?.crypto || 10500)) * 100).toFixed(1)}%
+                      </span>
                     </span>
                   </div>
                 </div>

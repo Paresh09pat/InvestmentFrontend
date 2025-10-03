@@ -55,6 +55,7 @@ import Input from "../../components/forms/Input";
 
       if (response.data.success) {
         setTransactionRequest(response.data.data);
+        console.log(response.data.data);
       } else {
         setError(
           response.data.message || "Failed to fetch transaction request details"
@@ -496,7 +497,7 @@ import Input from "../../components/forms/Input";
                   <div className="p-2 bg-orange-100 rounded-lg">
                     <FiActivity className="text-orange-600" size={20} />
                   </div>
-                  {!isEditingStatus && (
+                  { transactionRequest.status === INVESTMENT_STATUS.PENDING && (
                     <button
                       onClick={() => setIsEditingStatus(true)}
                       className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
