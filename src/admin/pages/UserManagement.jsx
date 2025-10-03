@@ -1,9 +1,9 @@
 // UserManagement page
 import { useState, useEffect } from 'react';
-import { 
-  FiUsers, 
-  FiSearch, 
-  FiFilter, 
+import {
+  FiUsers,
+  FiSearch,
+  FiFilter,
   FiEdit,
   FiTrash2,
   FiCheck,
@@ -21,6 +21,7 @@ import Button from '../../components/common/Button';
 import Table from '../../components/common/Table';
 import Input from '../../components/forms/Input';
 import Modal from '../../components/common/Modal';
+import Pagination from '../../components/common/Pagination';
 import axios from 'axios';
 
 const UserManagement = () => {
@@ -34,20 +35,25 @@ const UserManagement = () => {
   const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [currentDocument, setCurrentDocument] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
   // Fetch users from API
   useEffect(() => {
     fetchUsers();
-  }, [statusFilter]);
+  }, [statusFilter, currentPage]);
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `${VITE_APP_API_URL}/api/documents/admin/users?status=${statusFilter}`,
+        `${VITE_APP_API_URL}/api/documents/admin/users?status=${statusFilter}&page=${currentPage}`,
         { withCredentials: true }
       );
       setUsers(response.data.users);
+      setTotalPages(response.data.totalPages);
+      setTotalItems(response.data.total);
     } catch (error) {
       console.error('Failed to fetch users:', error);
       setError('Failed to fetch users');
@@ -57,11 +63,11 @@ const UserManagement = () => {
   };
 
   const filteredUsers = users.filter(user => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || 
+
+    const matchesStatus = statusFilter === 'all' ||
       user.verificationStatus === statusFilter;
 
     return matchesSearch && matchesStatus;
@@ -80,19 +86,19 @@ const UserManagement = () => {
         },
         { withCredentials: true }
       );
-      
+
       // Update the user in the list
-      setUsers(prev => prev.map(user => 
-        user._id === userId 
+      setUsers(prev => prev.map(user =>
+        user._id === userId
           ? response.data.user
           : user
       ));
-      
+
       // Update selected user if it's the same user
       if (selectedUser && selectedUser._id === userId) {
         setSelectedUser(response.data.user);
       }
-      
+
       setRejectionReason('');
       setShowDocumentModal(false);
     } catch (error) {
@@ -121,34 +127,34 @@ const UserManagement = () => {
           `${VITE_APP_API_URL}/api/auth/admin/delete-user/${userId}`,
           { withCredentials: true }
         );
-        
+
         // Remove user from the list
         setUsers(prev => prev.filter(user => user._id !== userId));
-        
+
         // Close user modal if the deleted user was selected
         if (selectedUser && selectedUser._id === userId) {
           setShowUserModal(false);
           setSelectedUser(null);
         }
-        
+
         toast.success('User deleted successfully!', {
           position: "top-right",
           autoClose: 3000,
         });
-        
+
       } catch (error) {
         console.error('Failed to delete user:', error);
-        
+
         let errorMessage = 'Failed to delete user';
         if (error.response?.data?.message) {
           errorMessage = error.response.data.message;
         }
-        
+
         toast.error(errorMessage, {
           position: "top-right",
           autoClose: 5000,
         });
-        
+
         setError(errorMessage);
       } finally {
         setLoading(false);
@@ -176,7 +182,7 @@ const UserManagement = () => {
       [USER_VERIFICATION_STATUS.REJECTED]: 'bg-red-100 text-red-800',
       [USER_VERIFICATION_STATUS.UNVERIFIED]: 'bg-gray-100 text-gray-800'
     };
-    
+
     return (
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[status] || 'bg-gray-100 text-gray-800'}`}>
         {status}
@@ -207,8 +213,8 @@ const UserManagement = () => {
         <span className="text-sm text-gray-600">{value}</span>
       )
     },
-    { 
-      key: 'createdAt', 
+    {
+      key: 'createdAt',
       title: 'Join Date',
       render: (value) => new Date(value).toLocaleDateString()
     },
@@ -238,23 +244,21 @@ const UserManagement = () => {
         <div className="space-y-1">
           <div className="flex items-center space-x-2">
             <span className="text-xs">Aadhaar:</span>
-            <span className={`text-xs px-1 py-0.5 rounded ${
-              user.documents?.aadhaar?.status === 'verified' ? 'bg-green-100 text-green-800' :
-              user.documents?.aadhaar?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-              user.documents?.aadhaar?.status === 'rejected' ? 'bg-red-100 text-red-800' :
-              'bg-gray-100 text-gray-800'
-            }`}>
+            <span className={`text-xs px-1 py-0.5 rounded ${user.documents?.aadhaar?.status === 'verified' ? 'bg-green-100 text-green-800' :
+                user.documents?.aadhaar?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                  user.documents?.aadhaar?.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                    'bg-gray-100 text-gray-800'
+              }`}>
               {user.documents?.aadhaar?.status || 'Not uploaded'}
             </span>
           </div>
           <div className="flex items-center space-x-2">
             <span className="text-xs">PAN:</span>
-            <span className={`text-xs px-1 py-0.5 rounded ${
-              user.documents?.pan?.status === 'verified' ? 'bg-green-100 text-green-800' :
-              user.documents?.pan?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-              user.documents?.pan?.status === 'rejected' ? 'bg-red-100 text-red-800' :
-              'bg-gray-100 text-gray-800'
-            }`}>
+            <span className={`text-xs px-1 py-0.5 rounded ${user.documents?.pan?.status === 'verified' ? 'bg-green-100 text-green-800' :
+                user.documents?.pan?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                  user.documents?.pan?.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                    'bg-gray-100 text-gray-800'
+              }`}>
               {user.documents?.pan?.status || 'Not uploaded'}
             </span>
           </div>
@@ -273,7 +277,7 @@ const UserManagement = () => {
           >
             <FiEye size={16} />
           </button>
-          
+
           {/* Document verification actions */}
           {(user.documents?.aadhaar?.fileName || user.documents?.aadhaar?.cloudinaryUrl) && user.documents?.aadhaar?.status === 'pending' && (
             <>
@@ -302,7 +306,7 @@ const UserManagement = () => {
               </button>
             </>
           )}
-          
+
           {(user.documents?.pan?.fileName || user.documents?.pan?.cloudinaryUrl) && user.documents?.pan?.status === 'pending' && (
             <>
               <button
@@ -330,7 +334,7 @@ const UserManagement = () => {
               </button>
             </>
           )}
-          
+
           {/* Delete user button */}
           <button
             onClick={() => handleDeleteUser(user._id)}
@@ -357,7 +361,7 @@ const UserManagement = () => {
             Manage user accounts and verification status
           </p>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <div className="bg-blue-100 p-3 rounded-full">
             <FiUsers className="text-blue-600" size={24} />
@@ -376,15 +380,21 @@ const UserManagement = () => {
             <Input
               placeholder="Search users by name or email..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1); // Reset to first page when searching
+              }}
               icon={<FiSearch />}
             />
           </div>
-          
+
           <div className="flex space-x-2">
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setCurrentPage(1); // Reset to first page when changing filter
+              }}
               className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Status</option>
@@ -393,7 +403,7 @@ const UserManagement = () => {
               <option value={USER_VERIFICATION_STATUS.UNVERIFIED}>Unverified</option>
               <option value={USER_VERIFICATION_STATUS.REJECTED}>Rejected</option>
             </select>
-            
+
             <Button variant="outline" icon={<FiFilter />}>
               More Filters
             </Button>
@@ -408,14 +418,26 @@ const UserManagement = () => {
             Users ({filteredUsers.length})
           </h2>
         </div>
-        
+
         <Table
           columns={columns}
           data={filteredUsers}
           hover
           striped
         />
+
+        {/* Pagination */}
+
       </Card>
+      <div className="mt-4">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          itemsPerPage={10}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
+      </div>
 
       {/* User Details Modal */}
       <Modal
@@ -505,18 +527,17 @@ const UserManagement = () => {
             {/* Document verification section */}
             <div className="pt-4 border-t">
               <h4 className="font-medium text-gray-900 mb-4">Document Verification</h4>
-              
+
               {/* Aadhaar Card */}
               <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-medium text-gray-700">Aadhaar Card</span>
                   <div className="flex items-center space-x-2">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      selectedUser.documents?.aadhaar?.status === 'verified' ? 'bg-green-100 text-green-800' :
-                      selectedUser.documents?.aadhaar?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      selectedUser.documents?.aadhaar?.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${selectedUser.documents?.aadhaar?.status === 'verified' ? 'bg-green-100 text-green-800' :
+                        selectedUser.documents?.aadhaar?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          selectedUser.documents?.aadhaar?.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                            'bg-gray-100 text-gray-800'
+                      }`}>
                       {selectedUser.documents?.aadhaar?.status || 'Not uploaded'}
                     </span>
                     {(selectedUser.documents?.aadhaar?.fileName || selectedUser.documents?.aadhaar?.cloudinaryUrl) && (
@@ -563,12 +584,11 @@ const UserManagement = () => {
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-medium text-gray-700">PAN Card</span>
                   <div className="flex items-center space-x-2">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      selectedUser.documents?.pan?.status === 'verified' ? 'bg-green-100 text-green-800' :
-                      selectedUser.documents?.pan?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      selectedUser.documents?.pan?.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${selectedUser.documents?.pan?.status === 'verified' ? 'bg-green-100 text-green-800' :
+                        selectedUser.documents?.pan?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          selectedUser.documents?.pan?.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                            'bg-gray-100 text-gray-800'
+                      }`}>
                       {selectedUser.documents?.pan?.status || 'Not uploaded'}
                     </span>
                     {(selectedUser.documents?.pan?.fileName || selectedUser.documents?.pan?.cloudinaryUrl) && (
@@ -590,12 +610,12 @@ const UserManagement = () => {
                 )}
                 {selectedUser.documents?.pan?.status === 'pending' && (
                   <div className="flex space-x-2 mt-2">
-                <Button
-                  variant="success"
+                    <Button
+                      variant="success"
                       size="small"
                       onClick={() => openDocumentModal(selectedUser, 'pan', 'verify')}
-                  icon={<FiCheck />}
-                >
+                      icon={<FiCheck />}
+                    >
                       Approve
                     </Button>
                     <Button
@@ -605,7 +625,7 @@ const UserManagement = () => {
                       icon={<FiX />}
                     >
                       Reject
-                </Button>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -658,7 +678,7 @@ const UserManagement = () => {
               </div>
               <p className="text-sm text-blue-800">
                 You are about to {currentDocument.action} the {currentDocument.documentType.toUpperCase()} document for this user.
-                {currentDocument.action === 'verify' 
+                {currentDocument.action === 'verify'
                   ? ' This will mark the document as verified and may update the user\'s overall verification status.'
                   : ' Please provide a reason for rejection.'
                 }
