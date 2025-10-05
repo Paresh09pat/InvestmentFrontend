@@ -513,7 +513,6 @@ const InvestmentHistory = () => {
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">User</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Amount</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Plan</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Trader</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Type</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
@@ -552,22 +551,7 @@ const InvestmentHistory = () => {
                               : transaction.txnReqId?.plan?.charAt(0).toUpperCase() + transaction.txnReqId?.plan?.slice(1)}
                           </span>
                         </td>
-                        <td className="py-4 px-4">
-                          <div>
-                            {activeTab === 'requests' ? (
-                              transaction.trader && transaction.trader.length > 0 ? (
-                                <>
-                                  <span className="font-medium text-gray-900">{transaction.trader[0]?.name}</span>
-                                  <div className="text-xs text-gray-500">{transaction.trader[0]?.traderType}</div>
-                                </>
-                              ) : (
-                                <span className="text-gray-500">No trader assigned</span>
-                              )
-                            ) : (
-                              <span className="text-gray-500">N/A</span>
-                            )}
-                          </div>
-                        </td>
+                  
                         <td className="py-4 px-4">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             {activeTab === 'requests' 
@@ -585,23 +569,14 @@ const InvestmentHistory = () => {
                           <span className="text-gray-600">{formatDate(transaction.createdAt)}</span>
                         </td>
                         <td className="py-4 px-4">
-                          <div className="flex space-x-2">
+                          <div className="flex justify-center border-2 border-blue-500 cursor-pointer rounded-lg">
                             <button
                               onClick={() => activeTab === 'requests' ? handleViewRequestDetails(transaction) : handleViewDetails(transaction)}
-                              className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                              className="p-1 text-blue-600 flex items-center justify-center gap-2 hover:text-blue-800 cursor-pointer rounded-lg transition-colors"
                               title="View Details"
                             >
-                              <FiEye size={16} />
+                              <FiEye size={16} /> View
                             </button>
-                            {activeTab === 'history' && (
-                              <button
-                                onClick={() => openIndividualDownload(transaction)}
-                                className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
-                                title="Download Statement"
-                              >
-                                <FiDownload size={16} />
-                              </button>
-                            )}
                           </div>
                         </td>
                       </tr>
