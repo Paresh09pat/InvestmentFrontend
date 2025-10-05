@@ -24,22 +24,34 @@ import Pagination from '../components/common/Pagination';
 import { INVESTMENT_STATUS, VITE_APP_API_URL } from '../utils/constants';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import DownloadStatementModal from '../components/modals/DownloadStatementModal';
 
 const InvestmentHistory = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // Active tab state
+  const [activeTab, setActiveTab] = useState('requests');
+  
   // Investment history data from API
   const [investments, setInvestments] = useState([]);
+
+  // Transaction requests data from API
+  const [txnRequests, setTxnRequests] = useState([]);
 
   const [filteredInvestments, setFilteredInvestments] = useState(investments);
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('date');
+  const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
   const [selectedInvestment, setSelectedInvestment] = useState(null);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [showRequestDetails, setShowRequestDetails] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [selectedDownloadTransaction, setSelectedDownloadTransaction] = useState(null);
+  const [bulkDownloadMode, setBulkDownloadMode] = useState(false);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -68,7 +80,7 @@ const InvestmentHistory = () => {
           aValue = a.plan;
           bValue = b.plan;
           break;
-        case 'date':
+        case 'created_at':
         default:
           aValue = new Date(a.createdAt);
           bValue = new Date(b.createdAt);
@@ -115,9 +127,37 @@ const InvestmentHistory = () => {
     setShowDetails(true);
   };
 
+  const handleViewRequestDetails = (request) => {
+    setSelectedRequest(request);
+    setShowRequestDetails(true);
+  };
+
   const closeDetails = () => {
     setShowDetails(false);
     setSelectedInvestment(null);
+  };
+
+  // Download functionality handlers
+  const closeDownloadModal = () => {
+    setShowDownloadModal(false);
+    setSelectedDownloadTransaction(null);
+    setBulkDownloadMode(false);
+  };
+
+  const openIndividualDownload = (transaction) => {
+    setSelectedDownloadTransaction(transaction);
+    setBulkDownloadMode(false);
+    setShowDownloadModal(true);
+  };
+
+  const openBulkDownload = () => {
+    setSelectedDownloadTransaction(null);
+    setBulkDownloadMode(true);
+    setShowDownloadModal(true);
+  };
+
+  const handleDownloadSuccess = () => {
+    toast.success('Statement downloaded successfully');
   };
 
   const getStatusColor = (status) => {
@@ -189,7 +229,7 @@ const InvestmentHistory = () => {
       queryParams.append('page', pagination.currentPage);
       queryParams.append('limit', pagination.itemsPerPage);
       
-      const response = await axios.get(`${VITE_APP_API_URL}/api/transaction?${queryParams.toString()}`, { withCredentials: true });
+      const response = await axios.get(`${VITE_APP_API_URL}/api/transaction/history?${queryParams.toString()}`, { withCredentials: true });
       
       if(response.data.success) {
         setInvestments(response.data.data);
@@ -208,9 +248,59 @@ const InvestmentHistory = () => {
     }
   }
 
+  const getTxnRequests = async()=>{
+    try{
+      setLoading(true);
+      
+      // Build query parameters
+      const queryParams = new URLSearchParams();
+      
+      if (statusFilter !== 'all') queryParams.append('status', statusFilter);
+      if (typeFilter !== 'all') queryParams.append('type', typeFilter);
+      if (sortBy) queryParams.append('sortBy', sortBy);
+      if (sortOrder) queryParams.append('sortOrder', sortOrder);
+      queryParams.append('page', pagination.currentPage);
+      queryParams.append('limit', pagination.itemsPerPage);
+      
+      const res = await axios.get(`${VITE_APP_API_URL}/api/transaction/requests?${queryParams.toString()}`, { withCredentials: true });
+      if(res.data.success){
+        setTxnRequests(res.data.data);
+        setFilteredInvestments(res.data.data);
+        if(res.data.pagination) {
+          setPagination(res.data.pagination);
+        }
+      }
+    }
+    catch(err){
+      console.log(err);
+      toast.error("Failed to fetch transaction requests");
+    }
+    finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(()=>{
-    getInvestments();
-  }, [statusFilter, typeFilter, sortBy, sortOrder, pagination.currentPage, pagination.itemsPerPage])
+    if (activeTab === 'history') {
+      getInvestments();
+    } else {
+      getTxnRequests();
+    }
+  }, [statusFilter, typeFilter, sortBy, sortOrder, pagination.currentPage, pagination.itemsPerPage, activeTab])
+
+  const getCurrentData = () => {
+    return activeTab === 'requests' ? txnRequests : investments;
+  };
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (tab === 'history') {
+      setFilteredInvestments(investments);
+    } else {
+      setFilteredInvestments(txnRequests);
+    }
+    setPagination(prev => ({ ...prev, currentPage: 1 }));
+  };
 
 
   return (
@@ -222,10 +312,13 @@ const InvestmentHistory = () => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  Investment History
+                  {activeTab === 'requests' ? 'Transaction Requests' : 'Investment History'}
                 </h1>
                 <p className="text-gray-600">
-                  Track all your investments and their performance
+                  {activeTab === 'requests' 
+                    ? 'Monitor your transaction requests and their statuses'
+                    : 'Track all your investments and their performance'
+                  }
                 </p>
               </div>
               <div className="mt-4 sm:mt-0 flex space-x-3">
@@ -238,6 +331,13 @@ const InvestmentHistory = () => {
                 </Button>
                 <Button
                   variant="outline"
+                  onClick={openBulkDownload}
+                  icon={<FiDownload />}
+                >
+                  Download All
+                </Button>
+                <Button
+                  variant="outline"
                   onClick={() => window.location.reload()}
                   icon={<FiRefreshCw />}
                 >
@@ -245,6 +345,30 @@ const InvestmentHistory = () => {
                 </Button>
               </div>
             </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex space-x-6 mb-6 border-b border-gray-200">
+            <button
+              onClick={() => handleTabChange('requests')}
+              className={`pb-2 text-sm font-medium transition-colors ${
+                activeTab === 'requests'
+                  ? 'text-blue-600 outline-none border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Transaction Requests
+            </button>
+            <button
+              onClick={() => handleTabChange('history')}
+              className={`pb-2 text-sm font-medium transition-colors ${
+                activeTab === 'history'
+                  ? 'text-blue-600 outline-none border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Investment History
+            </button>
           </div>
 
           {/* Stats Cards */}
@@ -256,7 +380,11 @@ const InvestmentHistory = () => {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Invested</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalInvested)}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {activeTab === 'requests' 
+                      ? formatCurrency(txnRequests.reduce((sum, req) => sum + req.amount, 0))
+                      : formatCurrency(totalInvested)}
+                  </p>
                 </div>
               </div>
             </Card>
@@ -267,8 +395,14 @@ const InvestmentHistory = () => {
                   <FiCheckCircle className="text-green-600" size={24} />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Completed</p>
-                  <p className="text-2xl font-bold text-gray-900">{completedInvestments}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    {activeTab === 'requests' ? 'Approved' : 'Completed'}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {activeTab === 'requests' 
+                      ? txnRequests.filter(req => req.status === 'approved').length
+                      : completedInvestments}
+                  </p>
                 </div>
               </div>
             </Card>
@@ -280,7 +414,11 @@ const InvestmentHistory = () => {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Pending</p>
-                  <p className="text-2xl font-bold text-gray-900">{pendingInvestments}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {activeTab === 'requests' 
+                      ? txnRequests.filter(req => req.status === 'pending').length
+                      : pendingInvestments}
+                  </p>
                 </div>
               </div>
             </Card>
@@ -291,8 +429,10 @@ const InvestmentHistory = () => {
                   <FiCalendar className="text-orange-600" size={24} />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Investments</p>
-                  <p className="text-2xl font-bold text-gray-900">{investments.length}</p>
+                  <p className="text-sm font-medium text-gray-600">Total</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {activeTab === 'requests' ? txnRequests.length : investments.length}
+                  </p>
                 </div>
               </div>
             </Card>
@@ -349,7 +489,7 @@ const InvestmentHistory = () => {
                   onChange={(e) => handleSort(e.target.value)}
                   className="px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="date">Date</option>
+                  <option value="created_at">Date</option>
                   <option value="amount">Amount</option>
                   <option value="plan">Plan</option>
                 </select>
@@ -373,7 +513,6 @@ const InvestmentHistory = () => {
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">User</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Amount</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Plan</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Trader</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Type</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
                     <th className="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
@@ -407,24 +546,17 @@ const InvestmentHistory = () => {
                         </td>
                         <td className="py-4 px-4">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {transaction.plan?.charAt(0).toUpperCase() + transaction.plan?.slice(1)}
+                            {activeTab === 'requests' 
+                              ? transaction.plan?.charAt(0).toUpperCase() + transaction.plan?.slice(1)
+                              : transaction.txnReqId?.plan?.charAt(0).toUpperCase() + transaction.txnReqId?.plan?.slice(1)}
                           </span>
                         </td>
-                        <td className="py-4 px-4">
-                          <div>
-                            {transaction.trader && transaction.trader.length > 0 ? (
-                              <>
-                                <span className="font-medium text-gray-900">{transaction.trader[0]?.name}</span>
-                                <div className="text-xs text-gray-500">{transaction.trader[0]?.traderType}</div>
-                              </>
-                            ) : (
-                              <span className="text-gray-500">No trader assigned</span>
-                            )}
-                          </div>
-                        </td>
+                  
                         <td className="py-4 px-4">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            {transaction.type?.charAt(0).toUpperCase() + transaction.type?.slice(1)}
+                            {activeTab === 'requests' 
+                              ? transaction.type?.charAt(0).toUpperCase() + transaction.type?.slice(1)
+                              : transaction.txnReqId?.type?.charAt(0).toUpperCase() + transaction.txnReqId?.type?.slice(1)}
                           </span>
                         </td>
                         <td className="py-4 px-4">
@@ -437,19 +569,13 @@ const InvestmentHistory = () => {
                           <span className="text-gray-600">{formatDate(transaction.createdAt)}</span>
                         </td>
                         <td className="py-4 px-4">
-                          <div className="flex space-x-2">
+                          <div className="flex justify-center border-2 border-blue-500 cursor-pointer rounded-lg">
                             <button
-                              onClick={() => handleViewDetails(transaction)}
-                              className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                              onClick={() => activeTab === 'requests' ? handleViewRequestDetails(transaction) : handleViewDetails(transaction)}
+                              className="p-1 text-blue-600 flex items-center justify-center gap-2 hover:text-blue-800 cursor-pointer rounded-lg transition-colors"
                               title="View Details"
                             >
-                              <FiEye size={16} />
-                            </button>
-                            <button
-                              className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
-                              title="Download Statement"
-                            >
-                              <FiDownload size={16} />
+                              <FiEye size={16} /> View
                             </button>
                           </div>
                         </td>
@@ -514,13 +640,17 @@ const InvestmentHistory = () => {
                       <div className="flex justify-between">
                         <span className="text-gray-600">Plan:</span>
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                          {selectedInvestment.plan?.charAt(0).toUpperCase() + selectedInvestment.plan?.slice(1)}
+                          {activeTab === 'requests' 
+                            ? selectedInvestment.plan?.charAt(0).toUpperCase() + selectedInvestment.plan?.slice(1)
+                            : selectedInvestment.txnReqId?.plan?.charAt(0).toUpperCase() + selectedInvestment.txnReqId?.plan?.slice(1)}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Type:</span>
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          {selectedInvestment.type?.charAt(0).toUpperCase() + selectedInvestment.type?.slice(1)}
+                          {activeTab === 'requests' 
+                            ? selectedInvestment.type?.charAt(0).toUpperCase() + selectedInvestment.type?.slice(1)
+                            : selectedInvestment.txnReqId?.type?.charAt(0).toUpperCase() + selectedInvestment.txnReqId?.type?.slice(1)}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -557,36 +687,41 @@ const InvestmentHistory = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Trader Information</h3>
-                    <div className="space-y-3">
-                      {selectedInvestment.trader && selectedInvestment.trader.length > 0 ? (
-                        <>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Trader Name:</span>
-                            <span className="font-semibold">{selectedInvestment.trader[0]?.name}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Trader Type:</span>
-                            <span className="text-sm">{selectedInvestment.trader[0]?.traderType}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Trader Email:</span>
-                            <span className="text-sm">{selectedInvestment.trader[0]?.email}</span>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-gray-500 text-center py-4">No trader assigned</div>
-                      )}
+                  {activeTab === 'requests' && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Trader Information</h3>
+                      <div className="space-y-3">
+                        {selectedInvestment.trader && selectedInvestment.trader.length > 0 ? (
+                          <>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Trader Name:</span>
+                              <span className="font-semibold">{selectedInvestment.trader[0]?.name}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Trader Type:</span>
+                              <span className="text-sm">{selectedInvestment.trader[0]?.traderType}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-600">Trader Email:</span>
+                              <span className="text-sm">{selectedInvestment.trader[0]?.email}</span>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="text-gray-500 text-center py-4">No trader assigned</div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">Payment Details</h3>
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Wallet TX ID:</span>
-                        <span className="font-mono text-sm">{selectedInvestment.walletTxId}</span>
+                        <span className="text-sm font-mono">{activeTab === 'requests' 
+                          ? selectedInvestment.walletTxId 
+                          : selectedInvestment.txnReqId?.walletTxId}
+                        </span>
                       </div>
                       {selectedInvestment.walletAddress && (
                         <div className="flex justify-between">
@@ -594,25 +729,27 @@ const InvestmentHistory = () => {
                           <span className="font-mono text-sm">{selectedInvestment.walletAddress}</span>
                         </div>
                       )}
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Transaction Image:</span>
-                        {selectedInvestment.transactionImage ? (
-                          <a 
-                            href={selectedInvestment.transactionImage} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 cursor-pointer"
-                          >
-                            View Image
-                          </a>
-                        ) : (
-                          <span className="text-gray-500">No image</span>
-                        )}
-                      </div>
+                      {activeTab === 'requests' && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Transaction Image:</span>
+                          {selectedInvestment.transactionImage ? (
+                            <a 
+                              href={selectedInvestment.transactionImage} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 cursor-pointer"
+                            >
+                              View Image
+                            </a>
+                          ) : (
+                            <span className="text-gray-500">No image</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {selectedInvestment.rejectionReason && (
+                  {activeTab === 'requests' && selectedInvestment.rejectionReason && (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                       <h4 className="font-semibold text-red-800 mb-2">Rejection Reason</h4>
                       <p className="text-red-700 text-sm">{selectedInvestment.rejectionReason}</p>
@@ -625,7 +762,10 @@ const InvestmentHistory = () => {
                 <Button variant="outline" onClick={closeDetails}>
                   Close
                 </Button>
-                <Button icon={<FiDownload />}>
+                <Button 
+                  icon={<FiDownload />}
+                  onClick={() => openIndividualDownload(selectedInvestment)}
+                >
                   Download Statement
                 </Button>
               </div>
@@ -633,10 +773,141 @@ const InvestmentHistory = () => {
           </div>
         </div>
       )}
+
+      {/* Transaction Request Details Modal */}
+      {showRequestDetails && selectedRequest && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto scrollbar-hide">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Transaction Request #{selectedRequest._id?.slice(-8)}
+                </h2>
+                <button
+                  onClick={() => setShowRequestDetails(false)}
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <FiXCircle size={20} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Transaction Information</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Amount:</span>
+                        <span className="font-semibold">{formatCurrency(selectedRequest.amount)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Plan:</span>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {selectedRequest.plan?.charAt(0).toUpperCase() + selectedRequest.plan?.slice(1)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Type:</span>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-400 text-green-800">
+                          {selectedRequest.type?.charAt(0).toUpperCase() + selectedRequest.type?.slice(1)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Status:</span>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(selectedRequest.status)}`}>
+                          {getStatusIcon(selectedRequest.status)}
+                          <span className="ml-1">{selectedRequest.status?.charAt(0).toUpperCase() + selectedRequest.status?.slice(1)}</span>
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Created Date:</span>
+                        <span>{formatDate(selectedRequest.createdAt)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">User Information</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Email:</span>
+                        <span className="text-sm">{selectedRequest.userId?.email}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Wallet Transaction ID:</span>
+                        <span className="text-sm font-mono">{selectedRequest.walletTxId}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Transaction Image:</span>
+                        {selectedRequest.transactionImage ? (
+                          <a 
+                            href={selectedRequest.transactionImage} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 cursor-pointer"
+                          >
+                            View Image
+                          </a>
+                        ) : (
+                          <span className="text-gray-500">No image</span>
+                        )}
+                      </div>
+                      {selectedRequest.rejectionReason && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                          <h4 className="font-semibold text-red-800 mb-2">Rejection Reason</h4>
+                          <p className="text-red-700 text-sm">{selectedRequest.rejectionReason}</p>
+                        </div>
+                      )}
+                    </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Trader Information</h3>
+                    <div className="space-y-3">
+                      {selectedRequest.trader && selectedRequest.trader.length > 0 ? (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Trader Email:</span>
+                            <span className="text-sm">{selectedRequest.trader[0]?.email}</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-gray-500 text-center py-4">No trader assigned</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end mt-6">
+                  <Button variant="outline" onClick={() => setShowRequestDetails(false)}>
+                    Close
+                  </Button>
+                </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Download Statement Modal */}
+      <DownloadStatementModal
+        isOpen={showDownloadModal}
+        onClose={closeDownloadModal}
+        transactions={bulkDownloadMode ? filteredInvestments : []}
+        selectedTransaction={bulkDownloadMode ? null : selectedDownloadTransaction}
+        filters={{
+          status: statusFilter,
+          type: typeFilter,
+          sortBy,
+          sortOrder
+        }}
+        onSuccess={handleDownloadSuccess}
+      />
     </div>
   );
 };
 
 export default InvestmentHistory;
+
 
 

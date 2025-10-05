@@ -1,11 +1,11 @@
 // Home page
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {
+import { 
   FiAward,
-  FiShield,
+  FiShield, 
   FiTarget,
-  FiTrendingUp,
+  FiTrendingUp, 
   FiUsers,
   FiZap
 } from 'react-icons/fi';
@@ -32,14 +32,14 @@ const Home = () => {
   useEffect(() => {
     // Add smooth scrolling to the document
     document.documentElement.style.scrollBehavior = 'smooth';
-
+    
     // Track scroll position for scroll-to-top button
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 300);
     };
 
     window.addEventListener('scroll', handleScroll);
-
+    
     return () => {
       document.documentElement.style.scrollBehavior = 'auto';
       window.removeEventListener('scroll', handleScroll);
@@ -61,8 +61,8 @@ const Home = () => {
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
-      y: 0,
-      opacity: 1,
+          y: 0,
+          opacity: 1,
       transition: {
         type: "spring",
         stiffness: 100,
@@ -75,7 +75,7 @@ const Home = () => {
     hidden: { scale: 0.8, opacity: 0 },
     visible: {
       scale: 1,
-      opacity: 1,
+          opacity: 1,
       transition: {
         type: "spring",
         stiffness: 100,
@@ -143,7 +143,7 @@ const Home = () => {
 
 
   return (
-    <motion.div
+    <motion.div 
       className="min-h-screen overflow-clip"
       style={{
         scrollBehavior: 'smooth'
@@ -152,19 +152,19 @@ const Home = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-
+      
       {/* Floating Navigation Dots - Desktop Only */}
-
-
+   
+      
       {/* Scroll to Top Button */}
       <motion.button
         className="fixed bottom-8 right-8 w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full shadow-lg z-40 flex items-center justify-center text-white"
         initial={{ scale: 0, opacity: 0 }}
-        animate={{
+        animate={{ 
           scale: showScrollTop ? 1 : 0,
           opacity: showScrollTop ? 1 : 0
         }}
-        whileHover={{
+        whileHover={{ 
           scale: 1.1,
           rotate: 360,
           transition: { type: "spring", stiffness: 300 }
@@ -180,9 +180,9 @@ const Home = () => {
           ↑
         </motion.div>
       </motion.button>
-
+      
       {/* Hero Section */}
-      <Hero />
+     <Hero />
 
       {/* How It Works Section */}
       <HowItWorks />
