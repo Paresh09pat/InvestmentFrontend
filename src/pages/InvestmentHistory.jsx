@@ -8,14 +8,16 @@ import {
   FiFilter, 
   FiSearch, 
   FiEye, 
-  FiDownload,
   FiClock,
   FiCheckCircle,
   FiXCircle,
   FiAlertCircle,
   FiArrowUp,
   FiArrowDown,
-  FiRefreshCw
+  FiRefreshCw,
+  FiUser,
+  FiUserCheck,
+  FiCreditCard
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import Card from '../components/common/Card';
@@ -24,7 +26,6 @@ import Pagination from '../components/common/Pagination';
 import { INVESTMENT_STATUS, VITE_APP_API_URL } from '../utils/constants';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import DownloadStatementModal from '../components/modals/DownloadStatementModal';
 
 const InvestmentHistory = () => {
   const { user } = useAuth();
@@ -49,9 +50,6 @@ const InvestmentHistory = () => {
   const [showRequestDetails, setShowRequestDetails] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showDownloadModal, setShowDownloadModal] = useState(false);
-  const [selectedDownloadTransaction, setSelectedDownloadTransaction] = useState(null);
-  const [bulkDownloadMode, setBulkDownloadMode] = useState(false);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -137,28 +135,6 @@ const InvestmentHistory = () => {
     setSelectedInvestment(null);
   };
 
-  // Download functionality handlers
-  const closeDownloadModal = () => {
-    setShowDownloadModal(false);
-    setSelectedDownloadTransaction(null);
-    setBulkDownloadMode(false);
-  };
-
-  const openIndividualDownload = (transaction) => {
-    setSelectedDownloadTransaction(transaction);
-    setBulkDownloadMode(false);
-    setShowDownloadModal(true);
-  };
-
-  const openBulkDownload = () => {
-    setSelectedDownloadTransaction(null);
-    setBulkDownloadMode(true);
-    setShowDownloadModal(true);
-  };
-
-  const handleDownloadSuccess = () => {
-    toast.success('Statement downloaded successfully');
-  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -331,13 +307,6 @@ const InvestmentHistory = () => {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={openBulkDownload}
-                  icon={<FiDownload />}
-                >
-                  Download All
-                </Button>
-                <Button
-                  variant="outline"
                   onClick={() => window.location.reload()}
                   icon={<FiRefreshCw />}
                 >
@@ -449,7 +418,7 @@ const InvestmentHistory = () => {
                     <button
                       key={status}
                       onClick={() => handleStatusFilter(status)}
-                      className={`px-3 py-1 text-sm rounded-full border transition-colors ${
+                      className={`px-3 cursor-pointer py-1 text-sm rounded-full border transition-colors ${
                         statusFilter === status
                           ? 'bg-blue-100 text-blue-800 border-blue-300'
                           : 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200'
@@ -469,7 +438,7 @@ const InvestmentHistory = () => {
                     <button
                       key={type}
                       onClick={() => handleTypeFilter(type)}
-                      className={`px-3 py-1 text-sm rounded-full border transition-colors ${
+                      className={`px-3 py-1 cursor-pointer text-sm rounded-full border transition-colors ${
                         typeFilter === type
                           ? 'bg-green-100 text-green-800 border-green-300'
                           : 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200'
@@ -487,7 +456,7 @@ const InvestmentHistory = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => handleSort(e.target.value)}
-                  className="px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-3 py-1 text-sm border cursor-pointer border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="created_at">Date</option>
                   <option value="amount">Amount</option>
@@ -613,160 +582,214 @@ const InvestmentHistory = () => {
 
       {/* Investment Details Modal */}
       {showDetails && selectedInvestment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto scrollbar-hide">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Transaction Details #{selectedInvestment._id?.slice(-8)}
-                </h2>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[95vh] overflow-hidden shadow-2xl border border-gray-100">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-8 py-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                    <FiDollarSign className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Transaction #{selectedInvestment._id?.slice(-8)}
+                    </h2>
+                    <p className="text-gray-600 text-sm">
+                      {activeTab === 'requests' ? 'Transaction Request Details' : 'Investment History Details'}
+                    </p>
+                  </div>
+                </div>
                 <button
                   onClick={closeDetails}
-                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-3 text-gray-400 hover:text-gray-600 hover:bg-white/80 rounded-xl transition-all duration-200"
                 >
-                  <FiXCircle size={20} />
+                  <FiXCircle size={24} />
                 </button>
               </div>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Transaction Information</h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Amount:</span>
-                        <span className="font-semibold">{formatCurrency(selectedInvestment.amount)}</span>
+            {/* Content */}
+            <div className="p-8 overflow-y-auto max-h-[calc(95vh-140px)]">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Left Column */}
+                <div className="space-y-6">
+                  {/* Transaction Information Card */}
+                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border border-gray-100 shadow-sm">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <FiTrendingUp className="text-blue-600" size={16} />
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Plan:</span>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <h3 className="text-lg font-semibold text-gray-900">Transaction Information</h3>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-600 font-medium">Amount</span>
+                        <span className="font-bold text-xl text-gray-900">{formatCurrency(selectedInvestment.amount)}</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-600 font-medium">Plan</span>
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                           {activeTab === 'requests' 
                             ? selectedInvestment.plan?.charAt(0).toUpperCase() + selectedInvestment.plan?.slice(1)
                             : selectedInvestment.txnReqId?.plan?.charAt(0).toUpperCase() + selectedInvestment.txnReqId?.plan?.slice(1)}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Type:</span>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-600 font-medium">Type</span>
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                           {activeTab === 'requests' 
                             ? selectedInvestment.type?.charAt(0).toUpperCase() + selectedInvestment.type?.slice(1)
                             : selectedInvestment.txnReqId?.type?.charAt(0).toUpperCase() + selectedInvestment.txnReqId?.type?.slice(1)}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Status:</span>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(selectedInvestment.status)}`}>
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-600 font-medium">Status</span>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(selectedInvestment.status)}`}>
                           {getStatusIcon(selectedInvestment.status)}
-                          <span className="ml-1">{selectedInvestment.status?.charAt(0).toUpperCase() + selectedInvestment.status?.slice(1)}</span>
+                          <span className="ml-2">{selectedInvestment.status?.charAt(0).toUpperCase() + selectedInvestment.status?.slice(1)}</span>
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Created Date:</span>
-                        <span>{formatDate(selectedInvestment.createdAt)}</span>
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-600 font-medium">Created Date</span>
+                        <span className="font-medium text-gray-900">{formatDate(selectedInvestment.createdAt)}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">User Information</h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Name:</span>
-                        <span className="font-semibold">{selectedInvestment.userId?.name}</span>
+                  {/* User Information Card */}
+                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border border-gray-100 shadow-sm">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <FiUser className="text-purple-600" size={16} />
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Email:</span>
-                        <span className="text-sm">{selectedInvestment.userId?.email}</span>
+                      <h3 className="text-lg font-semibold text-gray-900">User Information</h3>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-600 font-medium">Name</span>
+                        <span className="font-semibold text-gray-900">{selectedInvestment.userId?.name}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Phone:</span>
-                        <span className="text-sm">{selectedInvestment.userId?.phone}</span>
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-600 font-medium">Email</span>
+                        <span className="text-sm text-gray-700 break-all">{selectedInvestment.userId?.email}</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-600 font-medium">Phone</span>
+                        <span className="text-sm text-gray-700">{selectedInvestment.userId?.phone}</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                {/* Right Column */}
+                <div className="space-y-6">
+                  {/* Trader Information Card */}
                   {activeTab === 'requests' && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Trader Information</h3>
-                      <div className="space-y-3">
+                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border border-gray-100 shadow-sm">
+                      <div className="flex items-center space-x-3 mb-4">
+                        <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                          <FiUserCheck className="text-orange-600" size={16} />
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900">Trader Information</h3>
+                      </div>
+                      <div className="space-y-4">
                         {selectedInvestment.trader && selectedInvestment.trader.length > 0 ? (
                           <>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Trader Name:</span>
-                              <span className="font-semibold">{selectedInvestment.trader[0]?.name}</span>
+                            <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                              <span className="text-gray-600 font-medium">Trader Name</span>
+                              <span className="font-semibold text-gray-900">{selectedInvestment.trader[0]?.name}</span>
                             </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Trader Type:</span>
-                              <span className="text-sm">{selectedInvestment.trader[0]?.traderType}</span>
+                            <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                              <span className="text-gray-600 font-medium">Trader Type</span>
+                              <span className="text-sm text-gray-700 capitalize">{selectedInvestment.trader[0]?.traderType}</span>
                             </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Trader Email:</span>
-                              <span className="text-sm">{selectedInvestment.trader[0]?.email}</span>
+                            <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                              <span className="text-gray-600 font-medium">Trader Email</span>
+                              <span className="text-sm text-gray-700 break-all">{selectedInvestment.trader[0]?.email}</span>
                             </div>
                           </>
                         ) : (
-                          <div className="text-gray-500 text-center py-4">No trader assigned</div>
+                          <div className="text-center py-8">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                              <FiUserCheck className="text-gray-400" size={24} />
+                            </div>
+                            <p className="text-gray-500 font-medium">No trader assigned</p>
+                          </div>
                         )}
                       </div>
                     </div>
                   )}
 
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Payment Details</h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Wallet TX ID:</span>
-                        <span className="text-sm font-mono">{activeTab === 'requests' 
-                          ? selectedInvestment.walletTxId 
-                          : selectedInvestment.txnReqId?.walletTxId}
+                  {/* Payment Details Card */}
+                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border border-gray-100 shadow-sm">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <FiCreditCard className="text-green-600" size={16} />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900">Payment Details</h3>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-600 font-medium block mb-2">Wallet Transaction ID</span>
+                        <span className="text-sm font-mono text-gray-800 break-all">
+                          {activeTab === 'requests' 
+                            ? selectedInvestment.walletTxId 
+                            : selectedInvestment.txnReqId?.walletTxId}
                         </span>
                       </div>
                       {selectedInvestment.walletAddress && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Wallet Address:</span>
-                          <span className="font-mono text-sm">{selectedInvestment.walletAddress}</span>
+                        <div className="p-3 bg-white rounded-lg border border-gray-100">
+                          <span className="text-gray-600 font-medium block mb-2">Wallet Address</span>
+                          <span className="text-sm font-mono text-gray-800 break-all">{selectedInvestment.walletAddress}</span>
                         </div>
                       )}
                       {activeTab === 'requests' && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-600">Transaction Image:</span>
+                        <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                          <span className="text-gray-600 font-medium">Transaction Image</span>
                           {selectedInvestment.transactionImage ? (
                             <a 
                               href={selectedInvestment.transactionImage} 
                               target="_blank" 
                               rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800 cursor-pointer"
+                              className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
                             >
+                              <FiEye className="mr-1" size={14} />
                               View Image
                             </a>
                           ) : (
-                            <span className="text-gray-500">No image</span>
+                            <span className="text-gray-500 text-sm">No image available</span>
                           )}
                         </div>
                       )}
                     </div>
                   </div>
 
+                  {/* Rejection Reason */}
                   {activeTab === 'requests' && selectedInvestment.rejectionReason && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                      <h4 className="font-semibold text-red-800 mb-2">Rejection Reason</h4>
-                      <p className="text-red-700 text-sm">{selectedInvestment.rejectionReason}</p>
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                          <FiAlertCircle className="text-red-600" size={16} />
+                        </div>
+                        <h4 className="font-semibold text-red-800">Rejection Reason</h4>
+                      </div>
+                      <p className="text-red-700 text-sm leading-relaxed">{selectedInvestment.rejectionReason}</p>
                     </div>
                   )}
                 </div>
               </div>
+            </div>
 
-              <div className="mt-6 flex justify-end space-x-3">
-                <Button variant="outline" onClick={closeDetails}>
-                  Close
-                </Button>
+            {/* Footer */}
+            <div className="bg-gray-50 px-8 py-4 border-t border-gray-200">
+              <div className="flex justify-end">
                 <Button 
-                  icon={<FiDownload />}
-                  onClick={() => openIndividualDownload(selectedInvestment)}
+                  variant="outline" 
+                  onClick={closeDetails}
+                  className="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400"
                 >
-                  Download Statement
+                  Close
                 </Button>
               </div>
             </div>
@@ -776,133 +799,173 @@ const InvestmentHistory = () => {
 
       {/* Transaction Request Details Modal */}
       {showRequestDetails && selectedRequest && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto scrollbar-hide">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Transaction Request #{selectedRequest._id?.slice(-8)}
-                </h2>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[95vh] overflow-hidden shadow-2xl border border-gray-100">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-8 py-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                    <FiDollarSign className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Transaction Request #{selectedRequest._id?.slice(-8)}
+                    </h2>
+                    <p className="text-gray-600 text-sm">
+                      Transaction Request Details
+                    </p>
+                  </div>
+                </div>
                 <button
                   onClick={() => setShowRequestDetails(false)}
-                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-3 text-gray-400 cursor-pointer hover:text-gray-600 hover:bg-white/80 rounded-xl transition-all duration-200"
                 >
-                  <FiXCircle size={20} />
+                  <FiXCircle size={24} />
                 </button>
               </div>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Transaction Information</h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Amount:</span>
-                        <span className="font-semibold">{formatCurrency(selectedRequest.amount)}</span>
+            {/* Content */}
+            <div className="p-8 overflow-y-auto max-h-[calc(95vh-140px)]">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Left Column */}
+                <div className="space-y-6">
+                  {/* Transaction Information Card */}
+                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border border-gray-100 shadow-sm">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <FiTrendingUp className="text-blue-600" size={16} />
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Plan:</span>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <h3 className="text-lg font-semibold text-gray-900">Transaction Information</h3>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-600 font-medium">Amount</span>
+                        <span className="font-bold text-xl text-gray-900">{formatCurrency(selectedRequest.amount)}</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-600 font-medium">Plan</span>
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                           {selectedRequest.plan?.charAt(0).toUpperCase() + selectedRequest.plan?.slice(1)}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Type:</span>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-400 text-green-800">
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-600 font-medium">Type</span>
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                           {selectedRequest.type?.charAt(0).toUpperCase() + selectedRequest.type?.slice(1)}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Status:</span>
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(selectedRequest.status)}`}>
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-600 font-medium">Status</span>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(selectedRequest.status)}`}>
                           {getStatusIcon(selectedRequest.status)}
-                          <span className="ml-1">{selectedRequest.status?.charAt(0).toUpperCase() + selectedRequest.status?.slice(1)}</span>
+                          <span className="ml-2">{selectedRequest.status?.charAt(0).toUpperCase() + selectedRequest.status?.slice(1)}</span>
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Created Date:</span>
-                        <span>{formatDate(selectedRequest.createdAt)}</span>
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-600 font-medium">Created Date</span>
+                        <span className="font-medium text-gray-900">{formatDate(selectedRequest.createdAt)}</span>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">User Information</h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Email:</span>
-                        <span className="text-sm">{selectedRequest.userId?.email}</span>
+                {/* Right Column */}
+                <div className="space-y-6">
+                  {/* Trader Information Card */}
+                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border border-gray-100 shadow-sm">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                        <FiUserCheck className="text-orange-600" size={16} />
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Wallet Transaction ID:</span>
-                        <span className="text-sm font-mono">{selectedRequest.walletTxId}</span>
+                      <h3 className="text-lg font-semibold text-gray-900">Trader Information</h3>
+                    </div>
+                    <div className="space-y-4">
+                      {selectedRequest.trader && selectedRequest.trader.length > 0 ? (
+                        <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                          <span className="text-gray-600 font-medium">Trader Email</span>
+                          <span className="text-sm text-gray-700 break-all">{selectedRequest.trader[0]?.email}</span>
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <FiUserCheck className="text-gray-400" size={24} />
+                          </div>
+                          <p className="text-gray-500 font-medium">No trader assigned</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* User Information Card */}
+                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border border-gray-100 shadow-sm">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <FiUser className="text-purple-600" size={16} />
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Transaction Image:</span>
+                      <h3 className="text-lg font-semibold text-gray-900">User Information</h3>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-600 font-medium">Email</span>
+                        <span className="text-sm text-gray-700 break-all">{selectedRequest.userId?.email}</span>
+                      </div>
+                      <div className="p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-600 font-medium block mb-2">Wallet Transaction ID</span>
+                        <span className="text-sm font-mono text-gray-800 break-all">{selectedRequest.walletTxId}</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                        <span className="text-gray-600 font-medium">Transaction Image</span>
                         {selectedRequest.transactionImage ? (
                           <a 
                             href={selectedRequest.transactionImage} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 cursor-pointer"
+                            className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
                           >
+                            <FiEye className="mr-1" size={14} />
                             View Image
                           </a>
                         ) : (
-                          <span className="text-gray-500">No image</span>
+                          <span className="text-gray-500 text-sm">No image available</span>
                         )}
                       </div>
-                      {selectedRequest.rejectionReason && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                          <h4 className="font-semibold text-red-800 mb-2">Rejection Reason</h4>
-                          <p className="text-red-700 text-sm">{selectedRequest.rejectionReason}</p>
-                        </div>
-                      )}
-                    </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Trader Information</h3>
-                    <div className="space-y-3">
-                      {selectedRequest.trader && selectedRequest.trader.length > 0 ? (
-                        <>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Trader Email:</span>
-                            <span className="text-sm">{selectedRequest.trader[0]?.email}</span>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-gray-500 text-center py-4">No trader assigned</div>
-                      )}
                     </div>
                   </div>
-                </div>
 
-                <div className="flex justify-end mt-6">
-                  <Button variant="outline" onClick={() => setShowRequestDetails(false)}>
-                    Close
-                  </Button>
+                  {/* Rejection Reason */}
+                  {selectedRequest.rejectionReason && (
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                          <FiAlertCircle className="text-red-600" size={16} />
+                        </div>
+                        <h4 className="font-semibold text-red-800">Rejection Reason</h4>
+                      </div>
+                      <p className="text-red-700 text-sm leading-relaxed">{selectedRequest.rejectionReason}</p>
+                    </div>
+                  )}
                 </div>
-                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="bg-gray-50 px-8 py-4 border-t border-gray-200">
+              <div className="flex justify-end">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowRequestDetails(false)}
+                  className="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400"
+                >
+                  Close
+                </Button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Download Statement Modal */}
-      <DownloadStatementModal
-        isOpen={showDownloadModal}
-        onClose={closeDownloadModal}
-        transactions={bulkDownloadMode ? filteredInvestments : []}
-        selectedTransaction={bulkDownloadMode ? null : selectedDownloadTransaction}
-        filters={{
-          status: statusFilter,
-          type: typeFilter,
-          sortBy,
-          sortOrder
-        }}
-        onSuccess={handleDownloadSuccess}
-      />
     </div>
   );
 };

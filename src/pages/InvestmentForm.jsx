@@ -655,11 +655,8 @@ const InvestmentForm = () => {
                     {/* QR Code Scanner Placeholder */}
                     <div className="bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 text-center">
                       <div className="w-48 h-48 bg-gray-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="w-32 h-32 bg-gray-200 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                          <div className="w-48 h-48  border-gray-300 rounded-lg mx-auto mb-2 flex items-center justify-center">
                            <img src={qr} alt="QR Code" className="w-full h-full object-cover" />
-                          </div>
-                          <p className="text-xs text-gray-500">Admin will add scanner here</p>
                         </div>
                       </div>
                       <p className="text-sm text-gray-600">

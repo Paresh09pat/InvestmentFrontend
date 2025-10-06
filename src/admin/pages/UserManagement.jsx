@@ -11,7 +11,6 @@ import {
   FiEye,
   FiMail,
   FiPhone,
-  FiDownload,
   FiAlertCircle
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
@@ -282,13 +281,6 @@ const UserManagement = () => {
           {(user.documents?.aadhaar?.fileName || user.documents?.aadhaar?.cloudinaryUrl) && user.documents?.aadhaar?.status === 'pending' && (
             <>
               <button
-                onClick={() => viewDocument(user._id, 'aadhaar')}
-                className="p-2 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors cursor-pointer"
-                title="View Aadhaar"
-              >
-                <FiDownload size={16} />
-              </button>
-              <button
                 onClick={() => openDocumentModal(user, 'aadhaar', 'verify')}
                 className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors cursor-pointer"
                 title="Approve Aadhaar"
@@ -309,13 +301,6 @@ const UserManagement = () => {
 
           {(user.documents?.pan?.fileName || user.documents?.pan?.cloudinaryUrl) && user.documents?.pan?.status === 'pending' && (
             <>
-              <button
-                onClick={() => viewDocument(user._id, 'pan')}
-                className="p-2 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors cursor-pointer"
-                title="View PAN"
-              >
-                <FiDownload size={16} />
-              </button>
               <button
                 onClick={() => openDocumentModal(user, 'pan', 'verify')}
                 className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors cursor-pointer"

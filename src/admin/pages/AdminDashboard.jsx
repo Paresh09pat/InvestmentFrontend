@@ -558,12 +558,12 @@ const AdminDashboard = () => {
           
           <div className="flex items-center space-x-3">
             {/* Period Selector */}
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 p-2">
               <FiCalendar className="text-gray-500" size={16} />
               <select 
                 value={selectedPeriod} 
                 onChange={(e) => handlePeriodChange(e.target.value)}
-                className="text-sm border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="text-sm border cursor-pointer border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="7d">Last 7 days</option>
                 <option value="30d">Last 30 days</option>
@@ -578,7 +578,7 @@ const AdminDashboard = () => {
               disabled={refreshing}
               variant="outline"
               size="sm"
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-2 p-2"
             >
               <FiRefreshCw className={`${refreshing ? 'animate-spin' : ''}`} size={16} />
               <span>Refresh</span>

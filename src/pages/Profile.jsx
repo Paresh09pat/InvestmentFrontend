@@ -11,7 +11,6 @@ import {
   FiX,
   FiCheck,
   FiAlertCircle,
-  FiDownload,
   FiEye,
   FiCamera,
 } from 'react-icons/fi';

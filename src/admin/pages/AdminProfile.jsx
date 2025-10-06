@@ -19,7 +19,6 @@ import {
   FiGrid,
   FiPlus,
   FiTrash2,
-  FiDownload,
   FiCopy,
   FiUpload,
   FiImage,

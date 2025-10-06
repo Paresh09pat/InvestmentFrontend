@@ -308,7 +308,7 @@ const Terms = () => {
                 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Download PDF
+                View Terms
               </motion.button>
             </motion.div>
           </motion.div>

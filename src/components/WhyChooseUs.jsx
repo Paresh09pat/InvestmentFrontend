@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiDownload, FiShoppingCart, FiClock, FiStar, FiTrendingUp, FiDollarSign, FiTrendingDown } from 'react-icons/fi';
+import { FiShoppingCart, FiClock, FiStar, FiTrendingUp, FiDollarSign, FiTrendingDown } from 'react-icons/fi';
 import { FaBitcoin, FaChartLine, FaUniversity } from 'react-icons/fa';
 import { BsCalendarEvent } from 'react-icons/bs';
 import { MdWorkOutline } from 'react-icons/md';
@@ -230,7 +230,7 @@ const WhyChooseUs = () => {
                   whileTap={{ scale: 0.95 }}
                   className="flex-1 bg-white/10 backdrop-blur py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-white/20 transition-colors"
                 >
-                  <FiDownload />
+                  <FiTrendingUp />
                   View Portfolio
                 </motion.button>
               </div>

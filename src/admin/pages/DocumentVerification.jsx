@@ -7,7 +7,6 @@ import {
   FiCheck,
   FiX,
   FiEye,
-  FiDownload,
   FiAlertCircle,
   FiClock,
   FiShield

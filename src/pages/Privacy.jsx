@@ -410,7 +410,7 @@ const Privacy = () => {
                 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Download Policy
+                View Policy
               </motion.button>
             </motion.div>
           </motion.div>

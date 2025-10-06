@@ -169,13 +169,6 @@ const ManageTrader = () => {
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <button 
-            onClick={() => navigate('/admin/card  ')}
-            className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 flex items-center justify-center space-x-2 cursor-pointer text-sm lg:text-base"
-          >
-            <FiCreditCard className="h-4 w-4" />
-            <span>Manage Card</span>
-          </button>
-          <button 
             onClick={() => navigate('/admin/manage-trader/add-trader')}
             className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 flex items-center justify-center space-x-2 cursor-pointer text-sm lg:text-base"
           >
@@ -362,23 +355,23 @@ const ManageTrader = () => {
                           <p className="text-xs lg:text-sm text-gray-600 line-clamp-2">{trader.description}</p>
                         </div>
 
-                        <div className="mt-3 lg:mt-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                        <div className="mt-3 lg:mt-4 flex flex-col md:flex-row flex-wrap gap-2">
                           <button 
                             onClick={() => handleViewTrader(trader)}
-                            className="flex-1 py-2 px-3 text-blue-600 hover:text-blue-900 text-xs lg:text-sm font-medium cursor-pointer border border-blue-200 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center"
+                            className="w-full md:flex-1 min-w-[110px] py-2 px-3 text-blue-600 hover:text-blue-900 text-sm font-medium cursor-pointer border border-blue-200 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center"
                           >
-                            <FiEye className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                            <FiEye className="h-4 w-4 mr-1" />
                             View
                           </button>
                           <button 
                             onClick={() => handleEditTrader(trader)}
-                            className="flex-1 py-2 px-3 text-indigo-600 hover:text-indigo-900 text-sm font-medium cursor-pointer border border-indigo-200 hover:bg-indigo-50 rounded-lg transition-colors flex items-center justify-center"
+                            className="w-full md:flex-1 min-w-[110px] py-2 px-3 text-indigo-600 hover:text-indigo-900 text-sm font-medium cursor-pointer border border-indigo-200 hover:bg-indigo-50 rounded-lg transition-colors flex items-center justify-center"
                           >
                             <FiEdit className="h-4 w-4 mr-1" />
                             Edit
                           </button>
-                          <button className="flex-1 py-2 px-3 text-red-600 hover:text-red-900 text-xs lg:text-sm font-medium cursor-pointer border border-red-200 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center" onClick={()=>deleteTrader(trader)}>
-                            <FiTrash2 className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                          <button className="w-full md:flex-1 min-w-[110px] py-2 px-3 text-red-600 hover:text-red-900 text-sm font-medium cursor-pointer border border-red-200 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center" onClick={()=>deleteTrader(trader)}>
+                            <FiTrash2 className="h-4 w-4 mr-1" />
                             Delete
                           </button>
                         </div>
@@ -473,23 +466,23 @@ const ManageTrader = () => {
                           <p className="text-xs lg:text-sm text-gray-600 line-clamp-2">{trader.description}</p>
                         </div>
 
-                        <div className="mt-3 lg:mt-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                        <div className="mt-3 lg:mt-4 flex flex-col md:flex-row flex-wrap gap-2">
                           <button 
                             onClick={() => handleViewTrader(trader)}
-                            className="flex-1 py-2 px-3 text-blue-600 hover:text-blue-900 text-xs lg:text-sm font-medium cursor-pointer border border-blue-200 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center"
+                            className="w-full md:flex-1 min-w-[110px] py-2 px-3 text-blue-600 hover:text-blue-900 text-sm font-medium cursor-pointer border border-blue-200 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center"
                           >
-                            <FiEye className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                            <FiEye className="h-4 w-4 mr-1" />
                             View
                           </button>
                           <button 
                             onClick={() => handleEditTrader(trader)}
-                            className="flex-1 py-2 px-3 text-indigo-600 hover:text-indigo-900 text-sm font-medium cursor-pointer border border-indigo-200 hover:bg-indigo-50 rounded-lg transition-colors flex items-center justify-center"
+                            className="w-full md:flex-1 min-w-[110px] py-2 px-3 text-indigo-600 hover:text-indigo-900 text-sm font-medium cursor-pointer border border-indigo-200 hover:bg-indigo-50 rounded-lg transition-colors flex items-center justify-center"
                           >
                             <FiEdit className="h-4 w-4 mr-1" />
                             Edit
                           </button>
-                          <button className="flex-1 py-2 px-3 text-red-600 hover:text-red-900 text-xs lg:text-sm font-medium cursor-pointer border border-red-200 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center" onClick={()=>deleteTrader(trader)}>
-                            <FiTrash2 className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                          <button className="w-full md:flex-1 min-w-[110px] py-2 px-3 text-red-600 hover:text-red-900 text-sm font-medium cursor-pointer border border-red-200 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center" onClick={()=>deleteTrader(trader)}>
+                            <FiTrash2 className="h-4 w-4 mr-1" />
                             Delete
                           </button>
                         </div>

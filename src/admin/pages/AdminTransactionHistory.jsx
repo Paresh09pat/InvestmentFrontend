@@ -5,7 +5,6 @@ import {
   FiTrendingDown,
   FiFilter,
   FiSearch,
-  FiDownload,
   FiEye,
   FiUser,
   FiCalendar,

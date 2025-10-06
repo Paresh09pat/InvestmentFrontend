@@ -12,7 +12,8 @@ import {
   FiUserCheck,
   FiBell,
   FiDollarSign,
-  FiPieChart
+  FiPieChart,
+  FiCreditCard
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/common/Button';
@@ -35,6 +36,7 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
     { name: 'Portfolio Management', path: '/admin/portfolio', icon: FiPieChart },
     { name: 'Documents', path: '/admin/documents', icon: FiFileText },
     { name: 'Manage Trader', path: '/admin/manage-trader', icon: FiUserCheck },
+    { name: 'Manage Card', path: '/admin/card', icon: FiCreditCard },
     { name: 'Transactions', path: '/admin/transactions', icon: FiDollarSign },
     { name: 'Notifications', path: '/admin/notifications', icon: FiBell },
     { name: 'Profile', path: '/admin/profile', icon: FiUser },

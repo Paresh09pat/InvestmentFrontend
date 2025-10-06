@@ -182,7 +182,7 @@ const InvestmentSuccess = () => {
                      >
                        <FiBell className="text-lg" />
                      </motion.div>
-                     <span className="font-medium">You will be notified once it's approved!</span>
+                     <span className="font-medium">You will be notified once it's approved within 45 to 60 minutes</span>
                    </div>
                  </div>
                </motion.div>
@@ -273,11 +273,15 @@ const InvestmentSuccess = () => {
                   </div>
                   <div className="flex items-start space-x-3">
                     <div className="w-6 h-6 bg-yellow-600 text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5">2</div>
-                    <p className="text-yellow-700">You'll receive a notification once it's approved</p>
+                    <p className="text-yellow-700">It will take <b>45 to 60 minutes</b> to verify your investment and reflect in your dashboard</p>
                   </div>
                   <div className="flex items-start space-x-3">
                     <div className="w-6 h-6 bg-yellow-600 text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5">3</div>
-                    <p className="text-yellow-700">Your investment will be processed and trading will begin</p>
+                    <p className="text-yellow-700">You'll receive a notification once it's approved</p>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <div className="w-6 h-6 bg-yellow-600 text-white rounded-full flex items-center justify-center text-sm font-bold mt-0.5">4</div>
+                    <p className="text-yellow-700">Your investment will be processed and trading will begin after approval by admin</p>
                   </div>
                 </div>
               </motion.div>
