@@ -11,9 +11,11 @@ import {
   FiCheckCircle,
   FiClock,
   FiDollarSign,
-  FiBarChart
+  FiBarChart,
+  FiAward,
+  FiStar
 } from 'react-icons/fi';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart, ComposedChart, ScatterChart, Scatter } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart, ComposedChart, ScatterChart, Scatter, PieChart, Pie, Cell } from 'recharts';
 import { useAuth } from '../context/AuthContext';
 import { dummyInvestments } from '../utils/dummyData';
 import { INVESTMENT_STATUS, USER_VERIFICATION_STATUS } from '../utils/constants';
@@ -28,6 +30,7 @@ const Dashboard = () => {
   const [userInvestments, setUserInvestments] = useState([]);
   const [portfolio, setPortfolio] = useState(null);
   const [priceHistory, setPriceHistory] = useState([]);
+  const [activeTab, setActiveTab] = useState('total');
   const [stats, setStats] = useState({
     totalInvested: 0,
     currentValue: 0,
@@ -83,12 +86,114 @@ const Dashboard = () => {
     return stats.totalReturnsPercentage.toFixed(2);
   };
 
+  // Get plan-specific data
+  const getPlanData = (planName) => {
+    if (!portfolio || !portfolio.plans) return null;
+    return portfolio.plans.find(plan => plan.name === planName);
+  };
+
+  // Get current tab data
+  const getCurrentTabData = () => {
+    if (activeTab === 'total') {
+      return {
+        name: 'Total Portfolio',
+        invested: portfolio?.totalInvested || 0,
+        currentValue: portfolio?.currentValue || 0,
+        returns: portfolio?.totalReturns || 0,
+        returnsPercentage: portfolio?.totalReturnsPercentage || 0,
+        priceHistory: portfolio?.priceHistory || [],
+        returnRate: portfolio?.returnRate || { min: 0, max: 0 }
+      };
+    }
+    
+    const planData = getPlanData(activeTab);
+    if (!planData) return null;
+    
+    return {
+      name: planData.name.charAt(0).toUpperCase() + planData.name.slice(1),
+      invested: planData.invested,
+      currentValue: planData.currentValue,
+      returns: planData.returns,
+      returnsPercentage: planData.returns ? ((planData.returns / planData.invested) * 100) : 0,
+      priceHistory: planData.priceHistory || [],
+      returnRate: planData.returnRate
+    };
+  };
+
+  // Get plan icon
+  const getPlanIcon = (planName) => {
+    switch (planName) {
+      case 'silver':
+        return <FiAward className="text-gray-500" size={20} />;
+      case 'gold':
+        return <FiStar className="text-yellow-500" size={20} />;
+      case 'platinum':
+        return <FiAward className="text-purple-500" size={20} />;
+      default:
+        return <FiPieChart className="text-blue-500" size={20} />;
+    }
+  };
+
+  // Get plan color
+  const getPlanColor = (planName) => {
+    switch (planName) {
+      case 'silver':
+        return 'text-gray-600 bg-gray-100 border-gray-200';
+      case 'gold':
+        return 'text-yellow-600 bg-yellow-100 border-yellow-200';
+      case 'platinum':
+        return 'text-purple-600 bg-purple-100 border-purple-200';
+      default:
+        return 'text-blue-600 bg-blue-100 border-blue-200';
+    }
+  };
+
+  // Tabs component
+  const TabsComponent = () => {
+    if (!portfolio || !portfolio.plans) return null;
+
+    const tabs = [
+      { id: 'total', name: 'Total', icon: <FiPieChart size={16} /> }
+    ];
+
+    // Add plan tabs
+    portfolio.plans.forEach(plan => {
+      tabs.push({
+        id: plan.name,
+        name: plan.name.charAt(0).toUpperCase() + plan.name.slice(1),
+        icon: getPlanIcon(plan.name)
+      });
+    });
+
+    return (
+      <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+              activeTab === tab.id
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
+          >
+            {tab.icon}
+            <span>{tab.name}</span>
+          </button>
+        ))}
+      </div>
+    );
+  };
+
   // Interactive chart component for price history
   const PriceHistoryChart = ({ data }) => {
     if (!data || data.length === 0) return null;
 
-    // Get the current total invested from portfolio data
-    const currentTotalInvested = portfolio?.totalInvested || stats.totalInvested;
+    const currentTabData = getCurrentTabData();
+    if (!currentTabData) return null;
+
+    // Get the current invested amount for the active tab
+    const currentTotalInvested = currentTabData.invested;
 
     // Transform data for Recharts
     const chartData = data.map((point, index) => {
@@ -126,7 +231,7 @@ const Dashboard = () => {
     const maxValue = Math.max(...data.map(d => d.value));
     const minValue = Math.min(...data.map(d => d.value));
     const range = maxValue - minValue;
-     const isPositive = stats.totalReturns >= 0;
+    const isPositive = currentTabData.returns >= 0;
     
     // Calculate proper Y-axis domain
     const yAxisMin = Math.min(minValue, currentTotalInvested) * 0.95;
@@ -184,7 +289,7 @@ const Dashboard = () => {
               <span>•</span>
               <span>Invested: <span className="font-semibold text-gray-900">${currentTotalInvested.toLocaleString()}</span></span>
               <span>•</span>
-               <span>Current: <span className="font-semibold text-gray-900">${stats.currentValue.toLocaleString()}</span></span>
+               <span>Current: <span className="font-semibold text-gray-900">${currentTabData.currentValue.toLocaleString()}</span></span>
             </div>
             <p className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full inline-block">
               📅 {new Date(data[0]?.updatedAt).toLocaleDateString()} → {new Date(data[data.length - 1]?.updatedAt).toLocaleDateString()}
@@ -214,7 +319,7 @@ const Dashboard = () => {
                 {isPositive ? 'Profit' : 'Loss'}
               </p>
                <p className={`text-lg font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                 {Math.abs(stats.totalReturnsPercentage).toFixed(1)}%
+                 {Math.abs(currentTabData.returnsPercentage).toFixed(1)}%
                </p>
             </div>
           </div>
@@ -321,7 +426,7 @@ const Dashboard = () => {
             </div>
             <p className="text-xs font-medium text-gray-700 mb-1">Current Value</p>
              <p className="text-lg font-bold text-gray-900">
-               ${stats.currentValue.toLocaleString()}
+               ${currentTabData.currentValue.toLocaleString()}
              </p>
           </div>
           
@@ -343,7 +448,7 @@ const Dashboard = () => {
               {isPositive ? 'Profit' : 'Loss'}
             </p>
              <p className={`text-lg font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-               {isPositive ? '+' : ''}${stats.totalReturns.toLocaleString()}
+               {isPositive ? '+' : ''}${currentTabData.returns.toLocaleString()}
              </p>
           </div>
         </div>
@@ -439,168 +544,254 @@ const Dashboard = () => {
             </Card>
           )}
 
+          {/* Tabs Component */}
+          {portfolio && <TabsComponent />}
+
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card hover className="animate-fade-in">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Invested</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(stats.totalInvested)}
-                  </p>
-                </div>
-                <div className="bg-blue-100 p-3 rounded-full">
-                  <span className="text-blue-600 text-2xl font-bold">$</span>
-                </div>
-              </div>
-            </Card>
+            {(() => {
+              const currentTabData = getCurrentTabData();
+              if (!currentTabData) {
+                // Fallback to original stats if no tab data
+                return (
+                  <>
+                    <Card hover className="animate-fade-in">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Total Invested</p>
+                          <p className="text-2xl font-bold text-gray-900">
+                            {formatCurrency(stats.totalInvested)}
+                          </p>
+                        </div>
+                        <div className="bg-blue-100 p-3 rounded-full">
+                          <span className="text-blue-600 text-2xl font-bold">$</span>
+                        </div>
+                      </div>
+                    </Card>
 
-            <Card hover className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Current Value</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {formatCurrency(stats.currentValue)}
-                  </p>
-                </div>
-                <div className="bg-green-100 p-3 rounded-full">
-                  <FiTrendingUp className="text-green-600" size={24} />
-                </div>
-              </div>
-            </Card>
+                    <Card hover className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Current Value</p>
+                          <p className="text-2xl font-bold text-gray-900">
+                            {formatCurrency(stats.currentValue)}
+                          </p>
+                        </div>
+                        <div className="bg-green-100 p-3 rounded-full">
+                          <FiTrendingUp className="text-green-600" size={24} />
+                        </div>
+                      </div>
+                    </Card>
 
-            <Card hover className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Returns</p>
-                   <p className={`text-2xl font-bold ${stats.totalReturns >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                     {stats.totalReturns >= 0 ? '+' : ''}{formatCurrency(stats.totalReturns)}
-                  </p>
-                   <p className={`text-sm ${stats.totalReturnsPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                     {stats.totalReturnsPercentage >= 0 ? '+' : ''}{calculateReturnsPercentage()}%
-                  </p>
-                </div>
-                <div className="bg-purple-100 p-3 rounded-full">
-                  <FiPieChart className="text-purple-600" size={24} />
-                </div>
-              </div>
-            </Card>
+                    <Card hover className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Total Returns</p>
+                           <p className={`text-2xl font-bold ${stats.totalReturns >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                             {stats.totalReturns >= 0 ? '+' : ''}{formatCurrency(stats.totalReturns)}
+                          </p>
+                           <p className={`text-sm ${stats.totalReturnsPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                             {stats.totalReturnsPercentage >= 0 ? '+' : ''}{calculateReturnsPercentage()}%
+                          </p>
+                        </div>
+                        <div className="bg-purple-100 p-3 rounded-full">
+                          <FiPieChart className="text-purple-600" size={24} />
+                        </div>
+                      </div>
+                    </Card>
 
-            <Card hover className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Active Investments</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {stats.activeInvestments}
-                  </p>
-                </div>
-                <div className="bg-orange-100 p-3 rounded-full">
-                  <FiActivity className="text-orange-600" size={24} />
-                </div>
-              </div>
-            </Card>
+                    <Card hover className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Active Investments</p>
+                          <p className="text-2xl font-bold text-gray-900">
+                            {stats.activeInvestments}
+                          </p>
+                        </div>
+                        <div className="bg-orange-100 p-3 rounded-full">
+                          <FiActivity className="text-orange-600" size={24} />
+                        </div>
+                      </div>
+                    </Card>
+                  </>
+                );
+              }
+
+              return (
+                <>
+                  <Card hover className="animate-fade-in">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">
+                          {activeTab === 'total' ? 'Total Invested' : `${currentTabData.name} Invested`}
+                        </p>
+                        <p className="text-2xl font-bold text-gray-900">
+                          {formatCurrency(currentTabData.invested)}
+                        </p>
+                      </div>
+                      <div className="bg-blue-100 p-3 rounded-full">
+                        <span className="text-blue-600 text-2xl font-bold">$</span>
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card hover className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Current Value</p>
+                        <p className="text-2xl font-bold text-gray-900">
+                          {formatCurrency(currentTabData.currentValue)}
+                        </p>
+                      </div>
+                      <div className="bg-green-100 p-3 rounded-full">
+                        <FiTrendingUp className="text-green-600" size={24} />
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card hover className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Returns</p>
+                         <p className={`text-2xl font-bold ${currentTabData.returns >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                           {currentTabData.returns >= 0 ? '+' : ''}{formatCurrency(currentTabData.returns)}
+                        </p>
+                         <p className={`text-sm ${currentTabData.returnsPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                           {currentTabData.returnsPercentage >= 0 ? '+' : ''}{currentTabData.returnsPercentage.toFixed(2)}%
+                        </p>
+                      </div>
+                      <div className="bg-purple-100 p-3 rounded-full">
+                        <FiPieChart className="text-purple-600" size={24} />
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card hover className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Return Rate</p>
+                        <p className="text-2xl font-bold text-gray-900">
+                          {currentTabData.returnRate.min}% - {currentTabData.returnRate.max}%
+                        </p>
+                        <p className="text-sm text-gray-600">Annual Range</p>
+                      </div>
+                      <div className="bg-orange-100 p-3 rounded-full">
+                        {getPlanIcon(activeTab)}
+                      </div>
+                    </div>
+                  </Card>
+                </>
+              );
+            })()}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Recent Investments */}
             <div className="lg:col-span-2 space-y-6">
               {/* Price History Chart */}
-              {priceHistory.length > 0 && (
-                <Card className="animate-slide-up">
-                  <PriceHistoryChart data={priceHistory} />
-                </Card>
-              )}
+              {(() => {
+                const currentTabData = getCurrentTabData();
+                if (currentTabData && currentTabData.priceHistory && currentTabData.priceHistory.length > 0) {
+                  return (
+                    <Card className="animate-slide-up">
+                      <PriceHistoryChart data={currentTabData.priceHistory} />
+                    </Card>
+                  );
+                }
+                return null;
+              })()}
 
               {/* Admin Price History Updates */}
-              {priceHistory.length > 0 && (
-                <Card className="animate-slide-up">
-                  <div className="flex items-center justify-between mb-6">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">Price History Updates</h3>
-                      <p className="text-sm text-gray-600">
-                        Recent portfolio value updates by admin
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <FiActivity className="text-blue-500" size={20} />
-                      <span className="text-sm font-medium text-gray-700">
-                        {priceHistory.length} updates
-                      </span>
-                    </div>
-                  </div>
+              {(() => {
+                const currentTabData = getCurrentTabData();
+                if (currentTabData && currentTabData.priceHistory && currentTabData.priceHistory.length > 0) {
+                  return (
+                    <Card className="animate-slide-up">
+                      <div className="flex items-center justify-between mb-6">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {activeTab === 'total' ? 'Portfolio' : currentTabData.name} Price History
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            Recent value updates by admin
+                          </p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <FiActivity className="text-blue-500" size={20} />
+                          <span className="text-sm font-medium text-gray-700">
+                            {currentTabData.priceHistory.length} updates
+                          </span>
+                        </div>
+                      </div>
 
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {priceHistory
-                      .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-                      .map((update, index) => {
-                        const isLatest = index === 0;
-                        const previousValue = index < priceHistory.length - 1 
-                          ? priceHistory[index + 1]?.value 
-                          : null;
-                        const change = previousValue ? update.value - previousValue : 0;
-                        const changePercentage = previousValue ? ((change / previousValue) * 100) : 0;
+                      <div className="space-y-3 max-h-64 overflow-y-auto">
+                        {currentTabData.priceHistory
+                          .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+                          .map((update, index) => {
+                            const isLatest = index === 0;
+                            const previousValue = index < currentTabData.priceHistory.length - 1 
+                              ? currentTabData.priceHistory[index + 1]?.value 
+                              : null;
+                            const change = previousValue ? update.value - previousValue : 0;
+                            const changePercentage = previousValue ? ((change / previousValue) * 100) : 0;
 
-                        return (
-                          <div 
-                            key={update._id}
-                            className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 ${
-                              isLatest 
-                                ? 'bg-blue-50 border-blue-200 shadow-sm' 
-                                : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                            }`}
-                          >
-                            <div className="flex items-center space-x-3">
-                              <div className={`w-2 h-2 rounded-full ${
-                                isLatest ? 'bg-blue-500' : 'bg-gray-400'
-                              }`} />
-                              <div>
-                                <p className="text-sm font-medium text-gray-900">
-                                  ${update.value.toLocaleString()}
-                                </p>
-                                <p className="text-xs text-gray-600">
-                                  {new Date(update.updatedAt).toLocaleDateString()} at{' '}
-                                  {new Date(update.updatedAt).toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}
-                                </p>
+                            return (
+                              <div 
+                                key={update._id}
+                                className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 ${
+                                  isLatest 
+                                    ? 'bg-blue-50 border-blue-200 shadow-sm' 
+                                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                                }`}
+                              >
+                                <div className="flex items-center space-x-3">
+                                  <div className={`w-2 h-2 rounded-full ${
+                                    isLatest ? 'bg-blue-500' : 'bg-gray-400'
+                                  }`} />
+                                  <div>
+                                    <p className="text-sm font-medium text-gray-900">
+                                      ${update.value.toLocaleString()}
+                                    </p>
+                                    <p className="text-xs text-gray-600">
+                                      {new Date(update.updatedAt).toLocaleDateString()} at{' '}
+                                      {new Date(update.updatedAt).toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </p>
+                                  </div>
+                                </div>
+                                
+                                <div className="text-right">
+                                  {change !== 0 && (
+                                    <p className={`text-sm font-medium ${
+                                      change > 0 ? 'text-green-600' : 'text-red-600'
+                                    }`}>
+                                      {change > 0 ? '+' : ''}${change.toLocaleString()}
+                                    </p>
+                                  )}
+                                  {changePercentage !== 0 && (
+                                    <p className={`text-xs ${
+                                      changePercentage > 0 ? 'text-green-600' : 'text-red-600'
+                                    }`}>
+                                      {changePercentage > 0 ? '+' : ''}{changePercentage.toFixed(2)}%
+                                    </p>
+                                  )}
+                                  {isLatest && (
+                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                      Latest
+                                    </span>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                            
-                            <div className="text-right">
-                              {change !== 0 && (
-                                <p className={`text-sm font-medium ${
-                                  change > 0 ? 'text-green-600' : 'text-red-600'
-                                }`}>
-                                  {change > 0 ? '+' : ''}${change.toLocaleString()}
-                                </p>
-                              )}
-                              {changePercentage !== 0 && (
-                                <p className={`text-xs ${
-                                  changePercentage > 0 ? 'text-green-600' : 'text-red-600'
-                                }`}>
-                                  {changePercentage > 0 ? '+' : ''}{changePercentage.toFixed(2)}%
-                                </p>
-                              )}
-                              {isLatest && (
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                  Latest
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                  </div>
-
-                  {priceHistory.length === 0 && (
-                    <div className="text-center py-8 text-gray-500">
-                      <FiActivity className="mx-auto text-gray-300 mb-2" size={32} />
-                      <p className="text-sm">No price history updates available</p>
-                    </div>
-                  )}
-                </Card>
-              )}
+                            );
+                          })}
+                      </div>
+                    </Card>
+                  );
+                }
+                return null;
+              })()}
 
               <Card className="animate-slide-up">
                 <div className="flex items-center justify-between mb-6">
@@ -778,24 +969,111 @@ const Dashboard = () => {
               {/* Investment Breakdown */}
               <Card className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Investment Breakdown
+                  {activeTab === 'total' ? 'Portfolio Breakdown' : `${getCurrentTabData()?.name} Details`}
                 </h3>
-                {portfolio ? (
+                {portfolio && portfolio.plans ? (
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900">Investment Portfolio</p>
-                        <p className="text-sm text-gray-600">100% of portfolio</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium text-gray-900">
-                          {formatCurrency(portfolio.currentValue)}
-                        </p>
-                        <p className={`text-sm ${portfolio.totalReturns >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {portfolio.totalReturns >= 0 ? '+' : ''}{formatCurrency(portfolio.totalReturns)}
-                        </p>
-                      </div>
-                    </div>
+                    {activeTab === 'total' ? (
+                      // Show all plans when total tab is selected
+                      portfolio.plans.map((plan, index) => {
+                        const percentage = portfolio.totalInvested > 0 ? ((plan.invested / portfolio.totalInvested) * 100).toFixed(1) : 0;
+                        return (
+                          <div key={plan._id} className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                            <div className="flex items-center space-x-3">
+                              {getPlanIcon(plan.name)}
+                              <div>
+                                <p className="font-medium text-gray-900 capitalize">
+                                  {plan.name} Plan
+                                </p>
+                                <p className="text-sm text-gray-600">{percentage}% of portfolio</p>
+                                <p className="text-xs text-gray-500">
+                                  {plan.returnRate.min}% - {plan.returnRate.max}% return rate
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium text-gray-900">
+                                {formatCurrency(plan.currentValue)}
+                              </p>
+                              <p className={`text-sm ${plan.returns >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {plan.returns >= 0 ? '+' : ''}{formatCurrency(plan.returns)}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Invested: {formatCurrency(plan.invested)}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      // Show specific plan details when individual plan tab is selected
+                      (() => {
+                        const currentTabData = getCurrentTabData();
+                        if (!currentTabData) return null;
+                        
+                        return (
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                              <div className="flex items-center space-x-3">
+                                {getPlanIcon(activeTab)}
+                                <div>
+                                  <p className="font-semibold text-gray-900 capitalize">
+                                    {currentTabData.name} Plan
+                                  </p>
+                                  <p className="text-sm text-gray-600">
+                                    {currentTabData.returnRate.min}% - {currentTabData.returnRate.max}% annual return
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-lg font-bold text-gray-900">
+                                  {formatCurrency(currentTabData.currentValue)}
+                                </p>
+                                <p className={`text-sm font-medium ${currentTabData.returns >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {currentTabData.returns >= 0 ? '+' : ''}{formatCurrency(currentTabData.returns)}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="bg-gray-50 p-3 rounded-lg">
+                                <p className="text-xs text-gray-600 mb-1">Invested Amount</p>
+                                <p className="font-semibold text-gray-900">
+                                  {formatCurrency(currentTabData.invested)}
+                                </p>
+                              </div>
+                              <div className="bg-gray-50 p-3 rounded-lg">
+                                <p className="text-xs text-gray-600 mb-1">Return Rate</p>
+                                <p className="font-semibold text-gray-900">
+                                  {currentTabData.returnsPercentage.toFixed(2)}%
+                                </p>
+                              </div>
+                            </div>
+                            
+                            {currentTabData.priceHistory && currentTabData.priceHistory.length > 0 && (
+                              <div className="bg-gray-50 p-3 rounded-lg">
+                                <p className="text-xs text-gray-600 mb-2">Recent Updates</p>
+                                <div className="space-y-2">
+                                  {currentTabData.priceHistory
+                                    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+                                    .slice(0, 3)
+                                    .map((update, index) => (
+                                      <div key={update._id} className="flex justify-between text-sm">
+                                        <span className="text-gray-600">
+                                          {new Date(update.updatedAt).toLocaleDateString()}
+                                        </span>
+                                        <span className="font-medium text-gray-900">
+                                          {formatCurrency(update.value)}
+                                        </span>
+                                      </div>
+                                    ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()
+                    )}
                   </div>
                 ) : userInvestments.length > 0 ? (
                   <div className="space-y-3">

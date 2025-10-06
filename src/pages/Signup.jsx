@@ -183,6 +183,7 @@ const Signup = () => {
               label="Phone Number"
               type="tel"
               name="phone"
+              maxLength={10}
               value={formData.phone}
               onChange={handleChange}
               placeholder="Enter your phone number"

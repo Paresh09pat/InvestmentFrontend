@@ -1,23 +1,23 @@
 // Withdrawal page
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-  FiArrowLeft, 
-  FiDollarSign, 
-  FiCreditCard,
-  FiShield,
+import { useEffect, useState } from 'react';
+import {
   FiAlertCircle,
+  FiArrowLeft,
   FiCheckCircle,
   FiClock,
+  FiDollarSign,
   FiHome,
-  FiSmartphone,
-  FiCopy
+  FiShield,
+  FiSmartphone
 } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+import Button from '../components/common/Button';
+import Card from '../components/common/Card';
+import Input from '../components/forms/Input';
 import { useAuth } from '../context/AuthContext';
 import { USER_VERIFICATION_STATUS } from '../utils/constants';
-import Card from '../components/common/Card';
-import Button from '../components/common/Button';
-import Input from '../components/forms/Input';
+import axios from 'axios';
+import { VITE_APP_API_URL } from '../utils/constants';
 
 const Withdrawal = () => {
   const { user } = useAuth();
@@ -25,7 +25,6 @@ const Withdrawal = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   
-  // Withdrawal form state
   const [formData, setFormData] = useState({
     amount: '',
     withdrawalMethod: 'bank',
@@ -34,12 +33,10 @@ const Withdrawal = () => {
     notes: ''
   });
 
-  // User balance and withdrawal info
   const [userBalance, setUserBalance] = useState({
-    totalBalance: 25480,
-    availableBalance: 18480,
-    pendingWithdrawals: 2000,
-    lastWithdrawal: new Date().toLocaleDateString()
+    totalBalance: "",
+    availableBalance: '',
+  
   });
 
   const [withdrawalMethods] = useState([
@@ -61,27 +58,9 @@ const Withdrawal = () => {
     }
   ]);
 
-  const [recentWithdrawals] = useState([
-    {
-      id: 1,
-      amount: 5000,
-      method: 'Bank Transfer',
-      status: 'completed',
-      date: '2024-01-15',
-      transactionId: 'WDL-7854-2121'
-    },
-    {
-      id: 2,
-      amount: 2500,
-      method: 'UPI',
-      status: 'pending',
-      date: '2024-01-20',
-      transactionId: 'WDL-7854-2122'
-    }
-  ]);
+
 
   useEffect(() => {
-    // Redirect if not verified
     if (user?.verificationStatus !== USER_VERIFICATION_STATUS.VERIFIED) {
       navigate('/profile');
     }
@@ -94,7 +73,6 @@ const Withdrawal = () => {
       [name]: value
     }));
     
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -113,15 +91,7 @@ const Withdrawal = () => {
     } else if (parseFloat(formData.amount) < 100) {
       newErrors.amount = 'Minimum withdrawal amount is $100';
     } else if (parseFloat(formData.amount) > userBalance.availableBalance) {
-      newErrors.amount = 'Amount exceeds available balance';
-    }
-
-    if (formData.withdrawalMethod === 'bank' && !formData.bankAccount) {
-      newErrors.bankAccount = 'Bank account details are required';
-    }
-
-    if (formData.withdrawalMethod === 'upi' && !formData.upiId) {
-      newErrors.upiId = 'UPI ID is required';
+      newErrors.amount = `Amount exceeds available balance: ${userBalance.availableBalance}`;
     }
 
     setErrors(newErrors);
@@ -138,13 +108,10 @@ const Withdrawal = () => {
     setLoading(true);
     
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // In real app, this would call the withdrawal API
       console.log('Withdrawal request:', formData);
       
-      // Reset form
       setFormData({
         amount: '',
         withdrawalMethod: 'bank',
@@ -153,10 +120,8 @@ const Withdrawal = () => {
         notes: ''
       });
       
-      // Show success message
       alert('Withdrawal request submitted successfully! You will receive confirmation via email.');
       
-      // Navigate back to dashboard
       navigate('/dashboard');
       
     } catch (error) {
@@ -201,11 +166,33 @@ const Withdrawal = () => {
     }
   };
 
+  const fetchPortfolio = async()=>{
+    try{
+      const response = await axios.get(`${VITE_APP_API_URL}/api/auth/portfolio`, {
+        withCredentials: true
+      });
+
+      console.log("Withdrawal portfolio:", response?.data?.portfolio);
+      
+      setUserBalance({
+        totalBalance: response?.data?.portfolio?.totalInvested,
+        availableBalance: response?.data?.portfolio?.totalReturns,
+      });
+      
+    }
+    catch(err){
+      console.log("Error fetching portfolio:", err);
+    }
+  }
+
+  useEffect(()=>{
+    fetchPortfolio();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="pt-20 pb-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
           <div className="mb-8">
             <Button
               variant="ghost"
@@ -225,7 +212,6 @@ const Withdrawal = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Withdrawal Form */}
             <div className="lg:col-span-2">
               <Card className="animate-fade-in">
                 <div className="flex items-center space-x-2 mb-6">
@@ -244,7 +230,6 @@ const Withdrawal = () => {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Amount */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                           Withdrawal Address*
@@ -262,7 +247,6 @@ const Withdrawal = () => {
                     </div>
                   </div>
 
-                  {/* Amount */}
                   <Input
                     label="Withdrawal Amount"
                     name="amount"
@@ -276,7 +260,6 @@ const Withdrawal = () => {
                     min="100"
                   />
 
-                  {/* Security Info */}
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div className="flex items-center space-x-2 mb-2">
                       <FiShield className="text-blue-600" size={20} />
@@ -292,7 +275,6 @@ const Withdrawal = () => {
                     </ul>
                   </div>
 
-                  {/* Submit Button */}
                   <Button
                     type="submit"
                     fullWidth
@@ -307,7 +289,6 @@ const Withdrawal = () => {
               </Card>
             </div>
 
-            {/* Sidebar */}
             <div className="space-y-6">
               {/* Balance Info */}
               <Card className="animate-slide-up">
@@ -329,69 +310,11 @@ const Withdrawal = () => {
                       {formatCurrency(userBalance.availableBalance)}
                     </span>
                   </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Pending Withdrawals</span>
-                    <span className="text-sm text-yellow-600 font-medium">
-                      {formatCurrency(userBalance.pendingWithdrawals)}
-                    </span>
-                  </div>
-                  
-                  <div className="border-t pt-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Last Withdrawal</span>
-                      <span className="text-gray-700">{userBalance.lastWithdrawal}</span>
-                    </div>
-                  </div>
+
                 </div>
               </Card>
 
-              {/* Quick Stats */}
-              <Card className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Recent Withdrawals
-                </h3>
-                
-                {recentWithdrawals.length > 0 ? (
-                  <div className="space-y-3">
-                    {recentWithdrawals.map((withdrawal) => (
-                      <div key={withdrawal.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          {getStatusIcon(withdrawal.status)}
-                          <div>
-                            <p className="font-medium text-gray-900">
-                              {formatCurrency(withdrawal.amount)}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {withdrawal.date}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(withdrawal.status)}`}>
-                            {withdrawal.status}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-600 text-center py-4">
-                    No recent withdrawals
-                  </p>
-                )}
-                
-                <div className="mt-4 pt-4 border-t">
-                  <Button
-                    variant="outline"
-                    fullWidth
-                    size="small"
-                    onClick={() => navigate('/dashboard')}
-                  >
-                    View All Transactions
-                  </Button>
-                </div>
-              </Card>
+          
 
               {/* Security Tips */}
               <Card className="animate-slide-up" style={{ animationDelay: '0.4s' }}>

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { 
-  FiUser, 
-  FiMail, 
-  FiPhone, 
-  FiCalendar, 
+import {
+  FiUser,
+  FiMail,
+  FiPhone,
+  FiCalendar,
   FiShield,
   FiUpload,
   FiEdit,
@@ -13,8 +13,9 @@ import {
   FiAlertCircle,
   FiDownload,
   FiEye,
-  FiCamera
+  FiCamera,
 } from 'react-icons/fi';
+import { FaWallet } from "react-icons/fa";
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 import { USER_VERIFICATION_STATUS, VITE_APP_API_URL } from '../utils/constants';
@@ -25,15 +26,16 @@ import DocumentUploadModal from '../components/modals/DocumentUploadModal';
 import ProfilePictureUpload from '../components/modals/ProfilePictureUpload';
 import axios from 'axios';
 
-  
+
 
 const Profile = () => {
-  const { user, updateUserProfile } = useAuth();
+  const { user, updateUserProfile, checkAuthStatus } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: ''
+    phone: '',
+    trustWalletAddress: ''
   });
   const [documents, setDocuments] = useState({
     aadhaar: null,
@@ -53,7 +55,8 @@ const Profile = () => {
       setFormData({
         name: user.name || '',
         email: user.email || '',
-        phone: user.phone || ''
+        phone: user.phone || '',
+        trustWalletAddress: user.trustWalletAddress || ''
       });
     }
   }, [user]);
@@ -64,7 +67,7 @@ const Profile = () => {
       ...prev,
       [name]: value
     }));
-    
+
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -115,29 +118,26 @@ const Profile = () => {
         }
       );
 
-      // Update user data with the response
-      await updateUserProfile(response.data.user);
-      
-      // Show success toast
+      checkAuthStatus()
       toast.success(`${currentDocType.toUpperCase()} document uploaded successfully!`, {
         position: "top-right",
         autoClose: 4000,
       });
-      
+
       setShowDocumentModal(false);
       setDocuments(prev => ({
         ...prev,
         [currentDocType]: null
       }));
-      
+
     } catch (error) {
       console.error('Document upload error:', error);
       let errorMessage = 'Failed to upload document. Please try again.';
-      
+
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       }
-      
+
       // Show error toast
       toast.error(errorMessage, {
         position: "top-right",
@@ -174,10 +174,17 @@ const Profile = () => {
       newErrors.phone = 'Phone is required';
     }
 
+    // Require wallet address if documents are verified
+    const aadhaarVerified = user?.documents?.aadhaar?.status === 'verified';
+    const panVerified = user?.documents?.pan?.status === 'verified';
+    if ((aadhaarVerified && panVerified) && !formData.trustWalletAddress.trim()) {
+      newErrors.trustWalletAddress = 'Wallet address is required for verified users';
+    }
+
     return newErrors;
   };
 
-  const handleSave = async () => {    
+  const handleSave = async () => {
     const newErrors = validateForm();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -189,32 +196,34 @@ const Profile = () => {
       // Only send name and phone for update (email is not editable)
       const updateData = {
         name: formData.name,
-        phone: formData.phone
+        phone: formData.phone,
+        trustWalletAddress: formData.trustWalletAddress
       };
-      
+
       // Call the updateUserProfile function and wait for it to complete
       await updateUserProfile(updateData);
-      
+
       // Clear any existing errors and show success message
       setErrors({});
-      
+      checkAuthStatus();
       // Show success toast
       toast.success('Profile updated successfully!', {
         position: "top-right",
         autoClose: 3000,
       });
-      
+
       // Exit editing mode
       setIsEditing(false);
       
+
     } catch (error) {
       console.error('Profile update error:', error);
       let errorMessage = 'Failed to update profile. Please try again.';
-      
+
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       }
-      
+
       // Show error toast
       toast.error(errorMessage, {
         position: "top-right",
@@ -255,6 +264,15 @@ const Profile = () => {
     const doc = user?.documents?.[docType];
     if (!doc) return 'not_uploaded';
     return doc.status || 'pending';
+  };
+
+  // Check if documents are verified but wallet address is missing
+  const isDocumentsVerifiedButWalletMissing = () => {
+    const aadhaarVerified = user?.documents?.aadhaar?.status === 'verified';
+    const panVerified = user?.documents?.pan?.status === 'verified';
+    const walletAddressMissing = !user?.trustWalletAddress || user.trustWalletAddress.trim() === '';
+    
+    return (aadhaarVerified && panVerified) && walletAddressMissing;
   };
 
   return (
@@ -302,7 +320,8 @@ const Profile = () => {
                           setFormData({
                             name: user?.name || '',
                             email: user?.email || '',
-                            phone: user?.phone || ''
+                            phone: user?.phone || '',
+                            trustWalletAddress: user?.trustWalletAddress || ''
                           });
                           setErrors({});
                         }}
@@ -367,14 +386,23 @@ const Profile = () => {
                     error={errors.phone}
                   />
 
-                  {/* <Input
-                    label="Join Date"
-                    value={new Date(user?.joinDate || Date.now()).toLocaleDateString()}
-                    disabled
-                    icon={<FiCalendar />}
-                  /> */}
+
+                  <Input
+                    label="Trust Wallet Address"
+                    name="trustWalletAddress"
+                    value={formData.trustWalletAddress}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    icon={<FaWallet />}
+                    error={errors.trustWalletAddress}
+                    required={isDocumentsVerifiedButWalletMissing()}
+                    placeholder={isDocumentsVerifiedButWalletMissing() ? "Required for verified users" : "Enter your Trust Wallet address"}
+                  />
+
                 </div>
               </Card>
+
+
 
               {/* Document Verification */}
               <Card className="mt-8 animate-slide-up">
@@ -400,17 +428,16 @@ const Profile = () => {
                       </div>
                     </div>
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full text-center ${
-                        getDocumentStatus('aadhaar') === 'verified' 
-                          ? 'text-green-600 bg-green-100'
-                          : getDocumentStatus('aadhaar') === 'pending'
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full text-center ${getDocumentStatus('aadhaar') === 'verified'
+                        ? 'text-green-600 bg-green-100'
+                        : getDocumentStatus('aadhaar') === 'pending'
                           ? 'text-yellow-600 bg-yellow-100'
                           : getDocumentStatus('aadhaar') === 'rejected'
-                          ? 'text-red-600 bg-red-100'
-                          : 'text-gray-600 bg-gray-100'
-                      }`}>
-                        {getDocumentStatus('aadhaar') === 'not_uploaded' 
-                          ? 'Not Uploaded' 
+                            ? 'text-red-600 bg-red-100'
+                            : 'text-gray-600 bg-gray-100'
+                        }`}>
+                        {getDocumentStatus('aadhaar') === 'not_uploaded'
+                          ? 'Not Uploaded'
                           : getDocumentStatus('aadhaar')
                         }
                       </span>
@@ -460,17 +487,16 @@ const Profile = () => {
                       </div>
                     </div>
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full text-center ${
-                        getDocumentStatus('pan') === 'verified' 
-                          ? 'text-green-600 bg-green-100'
-                          : getDocumentStatus('pan') === 'pending'
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full text-center ${getDocumentStatus('pan') === 'verified'
+                        ? 'text-green-600 bg-green-100'
+                        : getDocumentStatus('pan') === 'pending'
                           ? 'text-yellow-600 bg-yellow-100'
                           : getDocumentStatus('pan') === 'rejected'
-                          ? 'text-red-600 bg-red-100'
-                          : 'text-gray-600 bg-gray-100'
-                      }`}>
-                        {getDocumentStatus('pan') === 'not_uploaded' 
-                          ? 'Not Uploaded' 
+                            ? 'text-red-600 bg-red-100'
+                            : 'text-gray-600 bg-gray-100'
+                        }`}>
+                        {getDocumentStatus('pan') === 'not_uploaded'
+                          ? 'Not Uploaded'
                           : getDocumentStatus('pan')
                         }
                       </span>
@@ -503,6 +529,35 @@ const Profile = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Wallet Address Warning for Verified Users */}
+                {isDocumentsVerifiedButWalletMissing() && (
+                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-start space-x-3">
+                      <FaWallet className="text-blue-600 flex-shrink-0 mt-0.5" size={16} />
+                      <div className="flex-1">
+                        <h3 className="font-medium text-blue-800 text-sm sm:text-base mb-1">
+                          Add Your Wallet Address
+                        </h3>
+                        <p className="text-xs sm:text-sm text-blue-700 mb-3">
+                          Your documents are verified! Please add your Trust Wallet address to complete your profile and enable investment features.
+                        </p>
+                        <Button
+                          variant="outline"
+                          size="small"
+                          onClick={() => {
+                            setIsEditing(true);
+                            setSuccessMessage('');
+                            setErrors({});
+                          }}
+                          className="text-blue-600 border-blue-300 hover:bg-blue-100"
+                        >
+                          Add Wallet Address
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </Card>
             </div>
 
@@ -521,9 +576,9 @@ const Profile = () => {
                       </div>
                     ) : (
                       <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-lg sm:text-2xl font-bold">
-                      {user?.name?.charAt(0) || 'U'}
-                    </span>
+                        <span className="text-white text-lg sm:text-2xl font-bold">
+                          {user?.name?.charAt(0) || 'U'}
+                        </span>
                       </div>
                     )}
                     <button
@@ -566,7 +621,7 @@ const Profile = () => {
                     </span>
                   </div>
 
-           
+
                 </div>
 
                 {user?.verificationStatus !== USER_VERIFICATION_STATUS.VERIFIED && (
@@ -581,23 +636,21 @@ const Profile = () => {
                     <div className="space-y-2">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 text-xs sm:text-sm">
                         <span>Aadhaar Card:</span>
-                        <span className={`px-2 py-1 rounded text-xs ${
-                          user?.documents?.aadhaar?.status === 'verified' ? 'bg-green-100 text-green-800' :
+                        <span className={`px-2 py-1 rounded text-xs ${user?.documents?.aadhaar?.status === 'verified' ? 'bg-green-100 text-green-800' :
                           user?.documents?.aadhaar?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          user?.documents?.aadhaar?.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
+                            user?.documents?.aadhaar?.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                              'bg-gray-100 text-gray-800'
+                          }`}>
                           {user?.documents?.aadhaar?.status || 'Not uploaded'}
                         </span>
                       </div>
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 text-xs sm:text-sm">
                         <span>PAN Card:</span>
-                        <span className={`px-2 py-1 rounded text-xs ${
-                          user?.documents?.pan?.status === 'verified' ? 'bg-green-100 text-green-800' :
+                        <span className={`px-2 py-1 rounded text-xs ${user?.documents?.pan?.status === 'verified' ? 'bg-green-100 text-green-800' :
                           user?.documents?.pan?.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          user?.documents?.pan?.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
+                            user?.documents?.pan?.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                              'bg-gray-100 text-gray-800'
+                          }`}>
                           {user?.documents?.pan?.status || 'Not uploaded'}
                         </span>
                       </div>
@@ -622,7 +675,7 @@ const Profile = () => {
           }));
         }}
         documentType={currentDocType}
-            onFileChange={(file) => handleDocumentUpload(file, currentDocType)}
+        onFileChange={(file) => handleDocumentUpload(file, currentDocType)}
         file={documents[currentDocType]}
         onFileUpload={submitDocument}
         loading={uploadLoading}

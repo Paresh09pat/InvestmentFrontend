@@ -34,6 +34,7 @@ const PortfolioManagement = () => {
     totalPages: 0
   });
   const [selectedPortfolio, setSelectedPortfolio] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState(null);
   const [showPortfolioModal, setShowPortfolioModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingCurrentValue, setEditingCurrentValue] = useState(false);
@@ -140,20 +141,21 @@ const PortfolioManagement = () => {
 
   const handleViewPortfolio = (portfolio) => {
     setSelectedPortfolio(portfolio);
-    setCurrentValueInput(portfolio.currentValue.toString());
+    setSelectedPlan(null);
     setEditingCurrentValue(false);
     setShowPortfolioModal(true);
   };
 
   const handleEditPortfolio = (portfolio) => {
     setSelectedPortfolio(portfolio);
+    setSelectedPlan(null);
     setFormData({
       userId: portfolio.user._id,
-      totalValue: portfolio.currentValue.toString(),
-      cashBalance: (portfolio.currentValue - portfolio.totalInvested).toString(),
-      investedAmount: portfolio.totalInvested.toString(),
-      profitLoss: portfolio.totalReturns.toString(),
-      profitLossPercentage: portfolio.totalReturnsPercentage.toString(),
+      totalValue: '',
+      cashBalance: '',
+      investedAmount: '',
+      profitLoss: '',
+      profitLossPercentage: '',
       riskLevel: portfolio.riskLevel || 'medium',
       status: portfolio.status || 'active',
       notes: portfolio.notes || ''
@@ -187,30 +189,45 @@ const PortfolioManagement = () => {
   };
 
   const handleUpdateCurrentValue = async () => {
-    if (!selectedPortfolio || !currentValueInput) return;
+    if (!selectedPortfolio || !selectedPlan || !currentValueInput) return;
     
     setLoading(true);
     try {
       const response = await axios.put(
         `${VITE_APP_API_URL}/api/admin/portfolio/${selectedPortfolio._id}`,
-        { currentValue: parseFloat(currentValueInput) },
+        { 
+          currentValue: parseFloat(currentValueInput),
+          planName: selectedPlan.name
+        },
         { withCredentials: true }
       );
       
       // Update the portfolio in the list
       setPortfolios(prev => prev.map(p => 
         p._id === selectedPortfolio._id 
-          ? { ...p, currentValue: parseFloat(currentValueInput) }
+          ? {
+              ...p,
+              plans: p.plans.map(plan => 
+                plan.name === selectedPlan.name
+                  ? { ...plan, currentValue: parseFloat(currentValueInput) }
+                  : plan
+              ),
+              currentValue: p.plans.reduce((sum, plan) => sum + (plan.name === selectedPlan.name ? parseFloat(currentValueInput) : plan.currentValue), 0)
+            }
           : p
       ));
       
       // Update the selected portfolio
       setSelectedPortfolio(prev => ({
         ...prev,
-        currentValue: parseFloat(currentValueInput)
+        plans: prev.plans.map(plan => 
+          plan.name === selectedPlan.name
+            ? { ...plan, currentValue: parseFloat(currentValueInput) }
+            : plan
+        ),
+        currentValue: prev.plans.reduce((sum, plan) => sum + (plan.name === selectedPlan.name ? parseFloat(currentValueInput) : plan.currentValue), 0)
       }));
       
-   
       setEditingCurrentValue(false);
       
       // Show success toast
@@ -233,18 +250,29 @@ const PortfolioManagement = () => {
     
     setLoading(true);
     try {
-      if (showEditModal) {
-        // Update existing portfolio current value
+      if (showEditModal && selectedPlan) {
+        // Update existing portfolio current value for specific plan
         const response = await axios.put(
           `${VITE_APP_API_URL}/api/admin/portfolio/${selectedPortfolio._id}`,
-          { currentValue: parseFloat(formData.totalValue) },
+          { 
+            currentValue: parseFloat(formData.totalValue),
+            planName: selectedPlan.name
+          },
           { withCredentials: true }
         );
         
         // Update the portfolio in the list
         setPortfolios(prev => prev.map(p => 
           p._id === selectedPortfolio._id 
-            ? { ...p, currentValue: parseFloat(formData.totalValue) }
+            ? {
+                ...p,
+                plans: p.plans.map(plan => 
+                  plan.name === selectedPlan.name
+                    ? { ...plan, currentValue: parseFloat(formData.totalValue) }
+                    : plan
+                ),
+                currentValue: p.plans.reduce((sum, plan) => sum + (plan.name === selectedPlan.name ? parseFloat(formData.totalValue) : plan.currentValue), 0)
+              }
             : p
         ));
         
@@ -259,6 +287,7 @@ const PortfolioManagement = () => {
       
       setShowEditModal(false);
       setSelectedPortfolio(null);
+      setSelectedPlan(null);
     } catch (error) {
       console.error('Error saving portfolio:', error);
       toast.error(error.response?.data?.message || 'Failed to save portfolio');
@@ -382,19 +411,19 @@ const PortfolioManagement = () => {
                     User
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Portfolio Value
+                    Silver Plan
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    P&L
+                    Gold Plan
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Risk Level
+                    Platinum Plan
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    Total Value
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Last Updated
+                    Total P&L
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -418,82 +447,127 @@ const PortfolioManagement = () => {
                     </td>
                   </tr>
                 ) : (
-                  filteredPortfolios.map((portfolio) => (
-                    <tr key={portfolio._id} className="hover:bg-gray-50">
-                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          {portfolio.user.profilePicture?.cloudinaryUrl ? (
-                            <img 
-                              src={portfolio.user.profilePicture.cloudinaryUrl} 
-                              alt={portfolio.user.name}
-                              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover flex-shrink-0"
-                            />
-                          ) : (
-                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                              <span className="text-white text-xs sm:text-sm font-medium">
-                                {portfolio.user.name.charAt(0)}
-                              </span>
-                            </div>
-                          )}
-                          <div className="ml-2 sm:ml-4 min-w-0">
-                            <div className="text-sm font-medium text-gray-900 truncate">
-                              {portfolio.user.name}
-                            </div>
-                            <div className="text-xs sm:text-sm text-gray-500 truncate">
-                              {portfolio.user.email}
+                  filteredPortfolios.map((portfolio) => {
+                    // Get plan data
+                    const silverPlan = portfolio.plans?.find(p => p.name === 'silver') || { invested: 0, currentValue: 0, returns: 0 };
+                    const goldPlan = portfolio.plans?.find(p => p.name === 'gold') || { invested: 0, currentValue: 0, returns: 0 };
+                    const platinumPlan = portfolio.plans?.find(p => p.name === 'platinum') || { invested: 0, currentValue: 0, returns: 0 };
+
+                    return (
+                      <tr key={portfolio._id} className="hover:bg-gray-50">
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            {portfolio.user.profilePicture?.cloudinaryUrl ? (
+                              <img 
+                                src={portfolio.user.profilePicture.cloudinaryUrl} 
+                                alt={portfolio.user.name}
+                                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover flex-shrink-0"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span className="text-white text-xs sm:text-sm font-medium">
+                                  {portfolio.user.name.charAt(0)}
+                                </span>
+                              </div>
+                            )}
+                            <div className="ml-2 sm:ml-4 min-w-0">
+                              <div className="text-sm font-medium text-gray-900 truncate">
+                                {portfolio.user.name}
+                              </div>
+                              <div className="text-xs sm:text-sm text-gray-500 truncate">
+                                {portfolio.user.email}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {formatCurrency(portfolio.currentValue)}
-                        </div>
-                        <div className="text-xs sm:text-sm text-gray-500">
-                          Invested: {formatCurrency(portfolio.totalInvested)}
-                        </div>
-                      </td>
-                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                        <div className={`text-sm font-medium ${getProfitLossColor(portfolio.totalReturns)}`}>
-                          {portfolio.totalReturns >= 0 ? '+' : ''}{formatCurrency(portfolio.totalReturns)}
-                        </div>
-                        <div className={`text-xs sm:text-sm ${getProfitLossColor(portfolio.totalReturns)}`}>
-                          {portfolio.totalReturnsPercentage >= 0 ? '+' : ''}{portfolio.totalReturnsPercentage.toFixed(2)}%
-                        </div>
-                      </td>
-                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRiskLevelColor(portfolio.riskLevel || 'medium')}`}>
-                          {portfolio.riskLevel || 'medium'}
-                        </span>
-                      </td>
-                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(portfolio.status || 'active')}`}>
-                          {portfolio.status || 'active'}
-                        </span>
-                      </td>
-                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
-                        {new Date(portfolio.updatedAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-1 sm:space-x-2">
-                          <button
-                            onClick={() => handleViewPortfolio(portfolio)}
-                            className="text-blue-600 hover:text-blue-900 cursor-pointer p-1 rounded hover:bg-blue-50 transition-colors"
-                            title="View Details"
-                          >
-                            <FiEye size={14} className="sm:w-4 sm:h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleEditPortfolio(portfolio)}
-                            className="text-green-600 hover:text-green-900 cursor-pointer p-1 rounded hover:bg-green-50 transition-colors"
-                            title="Edit Portfolio"
-                          >
-                            <FiEdit size={14} className="sm:w-4 sm:h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                        
+                        {/* Silver Plan */}
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                          <div className={`text-sm font-medium ${silverPlan.invested > 0 ? 'text-gray-900' : 'text-gray-400'}`}>
+                            {formatCurrency(silverPlan.currentValue)}
+                          </div>
+                          <div className="text-xs sm:text-sm text-gray-500">
+                            Invested: {formatCurrency(silverPlan.invested)}
+                          </div>
+                          {silverPlan.returns !== 0 && (
+                            <div className={`text-xs ${getProfitLossColor(silverPlan.returns)}`}>
+                              {silverPlan.returns >= 0 ? '+' : ''}{formatCurrency(silverPlan.returns)}
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Gold Plan */}
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                          <div className={`text-sm font-medium ${goldPlan.invested > 0 ? 'text-gray-900' : 'text-gray-400'}`}>
+                            {formatCurrency(goldPlan.currentValue)}
+                          </div>
+                          <div className="text-xs sm:text-sm text-gray-500">
+                            Invested: {formatCurrency(goldPlan.invested)}
+                          </div>
+                          {goldPlan.returns !== 0 && (
+                            <div className={`text-xs ${getProfitLossColor(goldPlan.returns)}`}>
+                              {goldPlan.returns >= 0 ? '+' : ''}{formatCurrency(goldPlan.returns)}
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Platinum Plan */}
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                          <div className={`text-sm font-medium ${platinumPlan.invested > 0 ? 'text-gray-900' : 'text-gray-400'}`}>
+                            {formatCurrency(platinumPlan.currentValue)}
+                          </div>
+                          <div className="text-xs sm:text-sm text-gray-500">
+                            Invested: {formatCurrency(platinumPlan.invested)}
+                          </div>
+                          {platinumPlan.returns !== 0 && (
+                            <div className={`text-xs ${getProfitLossColor(platinumPlan.returns)}`}>
+                              {platinumPlan.returns >= 0 ? '+' : ''}{formatCurrency(platinumPlan.returns)}
+                            </div>
+                          )}
+                        </td>
+
+                        {/* Total Value */}
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {formatCurrency(portfolio.currentValue)}
+                          </div>
+                          <div className="text-xs sm:text-sm text-gray-500">
+                            Invested: {formatCurrency(portfolio.totalInvested)}
+                          </div>
+                        </td>
+
+                        {/* Total P&L */}
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                          <div className={`text-sm font-medium ${getProfitLossColor(portfolio.totalReturns)}`}>
+                            {portfolio.totalReturns >= 0 ? '+' : ''}{formatCurrency(portfolio.totalReturns)}
+                          </div>
+                          <div className={`text-xs sm:text-sm ${getProfitLossColor(portfolio.totalReturns)}`}>
+                            {portfolio.totalReturnsPercentage >= 0 ? '+' : ''}{portfolio.totalReturnsPercentage.toFixed(2)}%
+                          </div>
+                        </td>
+
+                        {/* Actions */}
+                        <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <div className="flex space-x-1 sm:space-x-2">
+                            <button
+                              onClick={() => handleViewPortfolio(portfolio)}
+                              className="text-blue-600 hover:text-blue-900 cursor-pointer p-1 rounded hover:bg-blue-50 transition-colors"
+                              title="View Details"
+                            >
+                              <FiEye size={14} className="sm:w-4 sm:h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleEditPortfolio(portfolio)}
+                              className="text-green-600 hover:text-green-900 cursor-pointer p-1 rounded hover:bg-green-50 transition-colors"
+                              title="Edit Portfolio"
+                            >
+                              <FiEdit size={14} className="sm:w-4 sm:h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -630,50 +704,12 @@ const PortfolioManagement = () => {
                 {/* Current Value Card */}
                 <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                   <div className="flex items-center justify-between mb-3">
-                    <h4 className="text-sm font-medium text-gray-600">Current Value</h4>
+                    <h4 className="text-sm font-medium text-gray-600">Total Current Value</h4>
                     <FiDollarSign className="text-blue-500" size={20} />
                   </div>
                   <p className="text-2xl font-bold text-gray-900 mb-3">
                     {formatCurrency(selectedPortfolio.currentValue)}
                   </p>
-                  {!editingCurrentValue && (
-                    <button
-                      onClick={() => setEditingCurrentValue(true)}
-                      className="w-full px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
-                    >
-                      Update Value
-                    </button>
-                  )}
-                  
-                  {editingCurrentValue && (
-                    <div className="space-y-2">
-                      <input
-                        type="number"
-                        value={currentValueInput}
-                        onChange={(e) => setCurrentValueInput(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter new value"
-                      />
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={handleUpdateCurrentValue}
-                          disabled={loading}
-                          className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                        >
-                          {loading ? 'Saving...' : 'Save'}
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingCurrentValue(false);
-                            setCurrentValueInput(selectedPortfolio.currentValue.toString());
-                          }}
-                          className="flex-1 px-3 py-2 bg-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-400 transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* Total Invested Card */}
@@ -709,31 +745,136 @@ const PortfolioManagement = () => {
                 </div>
               </div>
 
-              {/* Price History Section */}
-              {selectedPortfolio.priceHistory && selectedPortfolio.priceHistory.length > 0 && (
-                <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Price History</h4>
-                  <div className="max-h-64 overflow-y-auto space-y-3 pr-2">
-                    {selectedPortfolio.priceHistory.map((history, index) => (
-                      <div key={history._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span className="text-blue-600 font-bold text-sm">#{index + 1}</span>
-                          </div>
-                          <div>
-                            <p className="font-semibold text-gray-900">
-                              {formatCurrency(history.value)}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              {new Date(history.updatedAt).toLocaleString()}
-                            </p>
-                          </div>
+              {/* Investment Plans Section */}
+              <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">Investment Plans</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {selectedPortfolio.plans && selectedPortfolio.plans.map((plan) => (
+                    <div key={plan._id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h5 className="font-semibold text-gray-900 capitalize">{plan.name} Plan</h5>
+                        <div className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          plan.invested > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {plan.invested > 0 ? 'Active' : 'Inactive'}
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      
+                      <div className="space-y-2 mb-4">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Invested:</span>
+                          <span className="text-sm font-medium text-gray-900">
+                            {formatCurrency(plan.invested)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Current Value:</span>
+                          <span className="text-sm font-medium text-gray-900">
+                            {formatCurrency(plan.currentValue)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Returns:</span>
+                          <span className={`text-sm font-medium ${
+                            plan.returns >= 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {plan.returns >= 0 ? '+' : ''}{formatCurrency(plan.returns)}
+                          </span>
+                        </div>
+                        {plan.returnRate.min && plan.returnRate.max && (
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Return Rate:</span>
+                            <span className="text-sm font-medium text-gray-900">
+                              {plan.returnRate.min}% - {plan.returnRate.max}%
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {plan.invested > 0 && (
+                        <div className="space-y-2">
+                          {!editingCurrentValue || selectedPlan?.name !== plan.name ? (
+                            <button
+                              onClick={() => {
+                                setSelectedPlan(plan);
+                                setCurrentValueInput(plan.currentValue.toString());
+                                setEditingCurrentValue(true);
+                              }}
+                              className="w-full px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+                            >
+                              Update Value
+                            </button>
+                          ) : (
+                            <div className="space-y-2">
+                              <input
+                                type="number"
+                                value={currentValueInput}
+                                onChange={(e) => setCurrentValueInput(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Enter new value"
+                              />
+                              <div className="flex space-x-2">
+                                <button
+                                  onClick={handleUpdateCurrentValue}
+                                  disabled={loading}
+                                  className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                                >
+                                  {loading ? 'Saving...' : 'Save'}
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setEditingCurrentValue(false);
+                                    setSelectedPlan(null);
+                                    setCurrentValueInput('');
+                                  }}
+                                  className="flex-1 px-3 py-2 bg-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-400 transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
+
+              {/* Price History Section */}
+              <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">Price History by Plan</h4>
+                <div className="space-y-4">
+                  {selectedPortfolio.plans && selectedPortfolio.plans.map((plan) => (
+                    <div key={plan._id} className="border border-gray-200 rounded-lg p-4">
+                      <h5 className="font-semibold text-gray-900 mb-3 capitalize">{plan.name} Plan History</h5>
+                      {plan.priceHistory && plan.priceHistory.length > 0 ? (
+                        <div className="max-h-48 overflow-y-auto space-y-2 pr-2">
+                          {plan.priceHistory.map((history, index) => (
+                            <div key={history._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                                  <span className="text-blue-600 font-bold text-xs">#{index + 1}</span>
+                                </div>
+                                <div>
+                                  <p className="font-semibold text-gray-900">
+                                    {formatCurrency(history.value)}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {new Date(history.updatedAt).toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 text-sm">No price history available</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
 
               {/* Portfolio Information */}
               <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
@@ -812,40 +953,99 @@ const PortfolioManagement = () => {
                 </div>
               </div>
 
-              {/* Current Value Section */}
-              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+              {/* Plan Selection Section */}
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
                 <div className="flex items-center space-x-2 mb-4">
-                  <FiDollarSign className="text-yellow-600" size={24} />
-                  <h4 className="text-lg font-semibold text-yellow-800">Update Current Value</h4>
+                  <FiActivity className="text-blue-600" size={24} />
+                  <h4 className="text-lg font-semibold text-blue-800">Select Investment Plan</h4>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      New Current Value *
-                    </label>
-                    <input
-                      type="number"
-                      name="totalValue"
-                      value={formData.totalValue}
-                      onChange={handleFormChange}
-                      className="w-full px-4 py-3 border border-yellow-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-lg font-semibold"
-                      placeholder="Enter new value"
-                      required
-                    />
-                    {errors.totalValue && (
-                      <p className="mt-1 text-sm text-red-600">{errors.totalValue}</p>
-                    )}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {selectedPortfolio.plans && selectedPortfolio.plans.map((plan) => (
+                    <div 
+                      key={plan._id} 
+                      className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                        selectedPlan?.name === plan.name 
+                          ? 'border-blue-500 bg-blue-100' 
+                          : 'border-gray-200 bg-white hover:border-blue-300'
+                      }`}
+                      onClick={() => {
+                        setSelectedPlan(plan);
+                        setFormData(prev => ({
+                          ...prev,
+                          totalValue: plan.currentValue.toString()
+                        }));
+                      }}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h5 className="font-semibold text-gray-900 capitalize">{plan.name} Plan</h5>
+                        <div className={`px-2 py-1 text-xs font-medium rounded-full ${
+                          plan.invested > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {plan.invested > 0 ? 'Active' : 'Inactive'}
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Invested:</span>
+                          <span className="font-medium">{formatCurrency(plan.invested)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Current:</span>
+                          <span className="font-medium">{formatCurrency(plan.currentValue)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Returns:</span>
+                          <span className={`font-medium ${plan.returns >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {plan.returns >= 0 ? '+' : ''}{formatCurrency(plan.returns)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {!selectedPlan && (
+                  <p className="text-sm text-blue-600 mt-2">Please select a plan to update its value</p>
+                )}
+              </div>
+
+              {/* Current Value Section */}
+              {selectedPlan && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <FiDollarSign className="text-yellow-600" size={24} />
+                    <h4 className="text-lg font-semibold text-yellow-800">
+                      Update {selectedPlan.name.charAt(0).toUpperCase() + selectedPlan.name.slice(1)} Plan Value
+                    </h4>
                   </div>
-                  <div className="flex items-end">
-                    <div className="w-full p-4 bg-white rounded-lg border border-yellow-200">
-                      <div className="text-sm text-gray-500 mb-1">Previous Value</div>
-                      <div className="text-xl font-bold text-gray-900">
-                        {formatCurrency(selectedPortfolio.currentValue)}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        New Current Value *
+                      </label>
+                      <input
+                        type="number"
+                        name="totalValue"
+                        value={formData.totalValue}
+                        onChange={handleFormChange}
+                        className="w-full px-4 py-3 border border-yellow-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-lg font-semibold"
+                        placeholder="Enter new value"
+                        required
+                      />
+                      {errors.totalValue && (
+                        <p className="mt-1 text-sm text-red-600">{errors.totalValue}</p>
+                      )}
+                    </div>
+                    <div className="flex items-end">
+                      <div className="w-full p-4 bg-white rounded-lg border border-yellow-200">
+                        <div className="text-sm text-gray-500 mb-1">Previous Value</div>
+                        <div className="text-xl font-bold text-gray-900">
+                          {formatCurrency(selectedPlan.currentValue)}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Read-only Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -909,7 +1109,10 @@ const PortfolioManagement = () => {
               <div className="flex space-x-4 pt-4 border-t border-gray-200">
                 <Button
                   variant="outline"
-                  onClick={() => setShowEditModal(false)}
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedPlan(null);
+                  }}
                   className="flex-1 cursor-pointer py-3"
                 >
                   Cancel
@@ -918,9 +1121,10 @@ const PortfolioManagement = () => {
                   variant="primary"
                   onClick={handleSavePortfolio}
                   loading={loading}
-                  className="flex-1 cursor-pointer py-3"
+                  disabled={!selectedPlan}
+                  className="flex-1 cursor-pointer py-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Updating...' : 'Update Portfolio'}
+                  {loading ? 'Updating...' : `Update ${selectedPlan?.name ? selectedPlan.name.charAt(0).toUpperCase() + selectedPlan.name.slice(1) : ''} Plan`}
                 </Button>
               </div>
             </div>

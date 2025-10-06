@@ -3,6 +3,8 @@ import { FiUpload, FiX, FiUser, FiCamera } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
+import axios from 'axios';
+import { VITE_APP_API_URL } from '../../utils/constants';
 
 const ProfilePictureUpload = ({ 
   isOpen, 
@@ -61,40 +63,46 @@ const ProfilePictureUpload = ({
       const formData = new FormData();
       formData.append('profilePicture', selectedFile);
 
-      const response = await fetch('/api/profile/upload-profile-picture', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
+      const response = await axios.post(`${VITE_APP_API_URL}/api/profile/upload-profile-picture`, formData , {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
       // Check if response is ok and has content
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Server error response:', errorText);
-        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+      if (!response.data.success) {
+        toast.error(response.data.message || 'Failed to upload profile picture', {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        setLoading(false);
+        return;
       }
 
       // Check if response has content
-      const contentType = response.headers.get('content-type');
+      const contentType = response.headers['content-type'];
       if (!contentType || !contentType.includes('application/json')) {
-        const responseText = await response.text();
-        console.error('Non-JSON response:', responseText);
-        throw new Error('Server returned non-JSON response');
+        toast.error('Server returned non-JSON response', {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        return;
       }
 
-      const data = await response.json();
+      const data = response.data.user;
 
       toast.success('Profile picture uploaded successfully!', {
         position: "top-right",
         autoClose: 3000,
       });
 
-      onUploadSuccess(data.user);
+      onUploadSuccess(data);
       handleClose();
 
     } catch (error) {
-      console.error('Profile picture upload error:', error);
-      toast.error(error.message || 'Failed to upload profile picture', {
+      console.error('Profile picture upload error:', error.response.data.message);
+      toast.error(error.response.data.message || 'Failed to upload profile picture', {
         position: "top-right",
         autoClose: 5000,
       });
@@ -112,15 +120,21 @@ const ProfilePictureUpload = ({
   const handleRemovePicture = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/profile/delete-profile-picture', {
-        method: 'DELETE',
-        credentials: 'include',
+      const response = await axios.delete(`${VITE_APP_API_URL}/api/profile/delete-profile-picture`, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
-      const data = await response.json();
+      const data = response.data.user;
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Delete failed');
+      if (!response.data.success) {
+        toast.error(response.data.message || 'Delete failed', {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        return;
       }
 
       toast.success('Profile picture removed successfully!', {
@@ -128,12 +142,12 @@ const ProfilePictureUpload = ({
         autoClose: 3000,
       });
 
-      onUploadSuccess(data.user);
+      onUploadSuccess(data);
       handleClose();
 
     } catch (error) {
-      console.error('Profile picture deletion error:', error);
-      toast.error(error.message || 'Failed to remove profile picture', {
+      console.error('Profile picture deletion error:', error.response.data.message);
+      toast.error(error.response.data.message || 'Failed to remove profile picture', {
         position: "top-right",
         autoClose: 5000,
       });

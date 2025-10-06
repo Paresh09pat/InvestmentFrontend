@@ -1,9 +1,54 @@
 import { motion } from 'framer-motion';
-import { FiShield, FiSettings, FiTool, FiClock, FiMail, FiArrowLeft } from 'react-icons/fi';
+import { FiShield, FiSettings, FiTool, FiClock, FiMail, FiArrowLeft, FiAlertCircle, FiCheck } from 'react-icons/fi';
+import { FaWallet } from "react-icons/fa";
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { USER_VERIFICATION_STATUS } from '../utils/constants';
 
 
 const Features = () => {
+  const { user } = useAuth();
+
+  // Check verification status and show appropriate message
+  const getVerificationMessage = () => {
+    if (!user) return null;
+
+    const aadhaarVerified = user?.documents?.aadhaar?.status === 'verified';
+    const panVerified = user?.documents?.pan?.status === 'verified';
+    const userVerified = user?.verificationStatus === USER_VERIFICATION_STATUS.VERIFIED;
+    const walletAddressMissing = !user?.trustWalletAddress || user.trustWalletAddress.trim() === '';
+
+    // If documents are verified but user verification is false and wallet address is missing
+    if ((aadhaarVerified && panVerified) && !userVerified && walletAddressMissing) {
+      return {
+        type: 'wallet',
+        title: 'Add Your Wallet Address',
+        message: 'Your documents are verified! Please add your Trust Wallet address to complete verification and access investment features.',
+        icon: FaWallet,
+        color: 'from-blue-500 to-blue-600',
+        bgColor: 'bg-blue-50 border-blue-200',
+        textColor: 'text-blue-800'
+      };
+    }
+
+    // If documents are verified and wallet address exists but user verification is still pending
+    if ((aadhaarVerified && panVerified) && !userVerified && !walletAddressMissing) {
+      return {
+        type: 'review',
+        title: 'Under Review',
+        message: 'Your documents are verified and under review. Please wait for verification to access investment features.',
+        icon: FiClock,
+        color: 'from-yellow-500 to-yellow-600',
+        bgColor: 'bg-yellow-50 border-yellow-200',
+        textColor: 'text-yellow-800'
+      };
+    }
+
+    return null;
+  };
+
+  const verificationMessage = getVerificationMessage();
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -151,6 +196,56 @@ const Features = () => {
           </motion.p>
         </div>
       </motion.div>
+
+      {/* Verification Status Message */}
+      {verificationMessage && (
+        <motion.section 
+          className="relative z-10 py-8"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div 
+              className={`${verificationMessage.bgColor} border rounded-2xl p-6 shadow-lg`}
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <div className="flex items-start space-x-4">
+                <motion.div 
+                  className={`w-12 h-12 bg-gradient-to-r ${verificationMessage.color} rounded-xl flex items-center justify-center flex-shrink-0`}
+                  whileHover={{ rotate: 360, scale: 1.1 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <verificationMessage.icon className="h-6 w-6 text-white" />
+                </motion.div>
+                <div className="flex-1">
+                  <h3 className={`text-lg font-bold ${verificationMessage.textColor} mb-2`}>
+                    {verificationMessage.title}
+                  </h3>
+                  <p className={`text-sm ${verificationMessage.textColor} mb-4`}>
+                    {verificationMessage.message}
+                  </p>
+                  {verificationMessage.type === 'wallet' && (
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Link
+                        to="/profile"
+                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200"
+                      >
+                        <FaWallet className="h-4 w-4 mr-2" />
+                        Add Wallet Address
+                      </Link>
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </motion.section>
+      )}
 
       {/* Construction Animation */}
       <motion.section 
