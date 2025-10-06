@@ -92,20 +92,8 @@ const Dashboard = () => {
     return portfolio.plans.find(plan => plan.name === planName);
   };
 
-  // Get current tab data
+  // Get current tab data - only for individual plans
   const getCurrentTabData = () => {
-    if (activeTab === 'total') {
-      return {
-        name: 'Total Portfolio',
-        invested: portfolio?.totalInvested || 0,
-        currentValue: portfolio?.currentValue || 0,
-        returns: portfolio?.totalReturns || 0,
-        returnsPercentage: portfolio?.totalReturnsPercentage || 0,
-        priceHistory: portfolio?.priceHistory || [],
-        returnRate: portfolio?.returnRate || { min: 0, max: 0 }
-      };
-    }
-    
     const planData = getPlanData(activeTab);
     if (!planData) return null;
     
@@ -117,6 +105,19 @@ const Dashboard = () => {
       returnsPercentage: planData.returns ? ((planData.returns / planData.invested) * 100) : 0,
       priceHistory: planData.priceHistory || [],
       returnRate: planData.returnRate
+    };
+  };
+
+  // Get total portfolio data
+  const getTotalPortfolioData = () => {
+    return {
+      name: 'Total Portfolio',
+      invested: portfolio?.totalInvested || 0,
+      currentValue: portfolio?.currentValue || 0,
+      returns: portfolio?.totalReturns || 0,
+      returnsPercentage: portfolio?.totalReturnsPercentage || 0,
+      priceHistory: portfolio?.priceHistory || [],
+      returnRate: portfolio?.returnRate || { min: 0, max: 0 }
     };
   };
 
@@ -148,22 +149,16 @@ const Dashboard = () => {
     }
   };
 
-  // Tabs component
+  // Tabs component - only for individual plans
   const TabsComponent = () => {
     if (!portfolio || !portfolio.plans) return null;
 
-    const tabs = [
-      { id: 'total', name: 'Total', icon: <FiPieChart size={16} /> }
-    ];
-
-    // Add plan tabs
-    portfolio.plans.forEach(plan => {
-      tabs.push({
-        id: plan.name,
-        name: plan.name.charAt(0).toUpperCase() + plan.name.slice(1),
-        icon: getPlanIcon(plan.name)
-      });
-    });
+    // Only show plan tabs, no total tab
+    const tabs = portfolio.plans.map(plan => ({
+      id: plan.name,
+      name: plan.name.charAt(0).toUpperCase() + plan.name.slice(1),
+      icon: getPlanIcon(plan.name)
+    }));
 
     return (
       <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
@@ -504,6 +499,13 @@ const Dashboard = () => {
     getPortfolioSummary();
   }, []);
 
+  // Set default active tab when portfolio loads
+  useEffect(() => {
+    if (portfolio && portfolio.plans && portfolio.plans.length > 0 && !activeTab) {
+      setActiveTab(portfolio.plans[0].name);
+    }
+  }, [portfolio, activeTab]);
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -544,15 +546,12 @@ const Dashboard = () => {
             </Card>
           )}
 
-          {/* Tabs Component */}
-          {portfolio && <TabsComponent />}
-
-          {/* Stats Cards */}
+          {/* Total Portfolio Stats Cards - Always Visible */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {(() => {
-              const currentTabData = getCurrentTabData();
-              if (!currentTabData) {
-                // Fallback to original stats if no tab data
+              const totalData = getTotalPortfolioData();
+              if (!totalData) {
+                // Fallback to original stats if no portfolio data
                 return (
                   <>
                     <Card hover className="animate-fade-in">
@@ -622,11 +621,9 @@ const Dashboard = () => {
                   <Card hover className="animate-fade-in">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600">
-                          {activeTab === 'total' ? 'Total Invested' : `${currentTabData.name} Invested`}
-                        </p>
+                        <p className="text-sm font-medium text-gray-600">Total Invested</p>
                         <p className="text-2xl font-bold text-gray-900">
-                          {formatCurrency(currentTabData.invested)}
+                          {formatCurrency(totalData.invested)}
                         </p>
                       </div>
                       <div className="bg-blue-100 p-3 rounded-full">
@@ -640,7 +637,7 @@ const Dashboard = () => {
                       <div>
                         <p className="text-sm font-medium text-gray-600">Current Value</p>
                         <p className="text-2xl font-bold text-gray-900">
-                          {formatCurrency(currentTabData.currentValue)}
+                          {formatCurrency(totalData.currentValue)}
                         </p>
                       </div>
                       <div className="bg-green-100 p-3 rounded-full">
@@ -652,12 +649,12 @@ const Dashboard = () => {
                   <Card hover className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600">Returns</p>
-                         <p className={`text-2xl font-bold ${currentTabData.returns >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                           {currentTabData.returns >= 0 ? '+' : ''}{formatCurrency(currentTabData.returns)}
+                        <p className="text-sm font-medium text-gray-600">Total Returns</p>
+                         <p className={`text-2xl font-bold ${totalData.returns >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                           {totalData.returns >= 0 ? '+' : ''}{formatCurrency(totalData.returns)}
                         </p>
-                         <p className={`text-sm ${currentTabData.returnsPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                           {currentTabData.returnsPercentage >= 0 ? '+' : ''}{currentTabData.returnsPercentage.toFixed(2)}%
+                         <p className={`text-sm ${totalData.returnsPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                           {totalData.returnsPercentage >= 0 ? '+' : ''}{totalData.returnsPercentage.toFixed(2)}%
                         </p>
                       </div>
                       <div className="bg-purple-100 p-3 rounded-full">
@@ -669,14 +666,14 @@ const Dashboard = () => {
                   <Card hover className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600">Return Rate</p>
+                        <p className="text-sm font-medium text-gray-600">Active Plans</p>
                         <p className="text-2xl font-bold text-gray-900">
-                          {currentTabData.returnRate.min}% - {currentTabData.returnRate.max}%
+                          {portfolio?.plans?.length || 0}
                         </p>
-                        <p className="text-sm text-gray-600">Annual Range</p>
+                        <p className="text-sm text-gray-600">Investment Plans</p>
                       </div>
                       <div className="bg-orange-100 p-3 rounded-full">
-                        {getPlanIcon(activeTab)}
+                        <FiActivity className="text-orange-600" size={24} />
                       </div>
                     </div>
                   </Card>
@@ -685,10 +682,13 @@ const Dashboard = () => {
             })()}
           </div>
 
+          {/* Plan Tabs - Only for detailed sections */}
+          {portfolio && <TabsComponent />}
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Recent Investments */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Price History Chart */}
+              {/* Price History Chart - Shows selected plan data */}
               {(() => {
                 const currentTabData = getCurrentTabData();
                 if (currentTabData && currentTabData.priceHistory && currentTabData.priceHistory.length > 0) {
@@ -698,10 +698,19 @@ const Dashboard = () => {
                     </Card>
                   );
                 }
+                // If no plan is selected or no data, show total portfolio chart
+                const totalData = getTotalPortfolioData();
+                if (totalData && totalData.priceHistory && totalData.priceHistory.length > 0) {
+                  return (
+                    <Card className="animate-slide-up">
+                      <PriceHistoryChart data={totalData.priceHistory} />
+                    </Card>
+                  );
+                }
                 return null;
               })()}
 
-              {/* Admin Price History Updates */}
+              {/* Admin Price History Updates - Shows selected plan data */}
               {(() => {
                 const currentTabData = getCurrentTabData();
                 if (currentTabData && currentTabData.priceHistory && currentTabData.priceHistory.length > 0) {
@@ -710,7 +719,7 @@ const Dashboard = () => {
                       <div className="flex items-center justify-between mb-6">
                         <div>
                           <h3 className="text-lg font-semibold text-gray-900">
-                            {activeTab === 'total' ? 'Portfolio' : currentTabData.name} Price History
+                            {currentTabData.name} Price History
                           </h3>
                           <p className="text-sm text-gray-600">
                             Recent value updates by admin
@@ -731,6 +740,94 @@ const Dashboard = () => {
                             const isLatest = index === 0;
                             const previousValue = index < currentTabData.priceHistory.length - 1 
                               ? currentTabData.priceHistory[index + 1]?.value 
+                              : null;
+                            const change = previousValue ? update.value - previousValue : 0;
+                            const changePercentage = previousValue ? ((change / previousValue) * 100) : 0;
+
+                            return (
+                              <div 
+                                key={update._id}
+                                className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 ${
+                                  isLatest 
+                                    ? 'bg-blue-50 border-blue-200 shadow-sm' 
+                                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                                }`}
+                              >
+                                <div className="flex items-center space-x-3">
+                                  <div className={`w-2 h-2 rounded-full ${
+                                    isLatest ? 'bg-blue-500' : 'bg-gray-400'
+                                  }`} />
+                                  <div>
+                                    <p className="text-sm font-medium text-gray-900">
+                                      ${update.value.toLocaleString()}
+                                    </p>
+                                    <p className="text-xs text-gray-600">
+                                      {new Date(update.updatedAt).toLocaleDateString()} at{' '}
+                                      {new Date(update.updatedAt).toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </p>
+                                  </div>
+                                </div>
+                                
+                                <div className="text-right">
+                                  {change !== 0 && (
+                                    <p className={`text-sm font-medium ${
+                                      change > 0 ? 'text-green-600' : 'text-red-600'
+                                    }`}>
+                                      {change > 0 ? '+' : ''}${change.toLocaleString()}
+                                    </p>
+                                  )}
+                                  {changePercentage !== 0 && (
+                                    <p className={`text-xs ${
+                                      changePercentage > 0 ? 'text-green-600' : 'text-red-600'
+                                    }`}>
+                                      {changePercentage > 0 ? '+' : ''}{changePercentage.toFixed(2)}%
+                                    </p>
+                                  )}
+                                  {isLatest && (
+                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                      Latest
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </Card>
+                  );
+                }
+                // If no plan is selected or no data, show total portfolio history
+                const totalData = getTotalPortfolioData();
+                if (totalData && totalData.priceHistory && totalData.priceHistory.length > 0) {
+                  return (
+                    <Card className="animate-slide-up">
+                      <div className="flex items-center justify-between mb-6">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            Total Portfolio Price History
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            Recent value updates by admin
+                          </p>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <FiActivity className="text-blue-500" size={20} />
+                          <span className="text-sm font-medium text-gray-700">
+                            {totalData.priceHistory.length} updates
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 max-h-64 overflow-y-auto">
+                        {totalData.priceHistory
+                          .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+                          .map((update, index) => {
+                            const isLatest = index === 0;
+                            const previousValue = index < totalData.priceHistory.length - 1 
+                              ? totalData.priceHistory[index + 1]?.value 
                               : null;
                             const change = previousValue ? update.value - previousValue : 0;
                             const changePercentage = previousValue ? ((change / previousValue) * 100) : 0;
@@ -969,48 +1066,17 @@ const Dashboard = () => {
               {/* Investment Breakdown */}
               <Card className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  {activeTab === 'total' ? 'Portfolio Breakdown' : `${getCurrentTabData()?.name} Details`}
+                  {(() => {
+                    const currentTabData = getCurrentTabData();
+                    return currentTabData ? `${currentTabData.name} Details` : 'Portfolio Breakdown';
+                  })()}
                 </h3>
                 {portfolio && portfolio.plans ? (
                   <div className="space-y-3">
-                    {activeTab === 'total' ? (
-                      // Show all plans when total tab is selected
-                      portfolio.plans.map((plan, index) => {
-                        const percentage = portfolio.totalInvested > 0 ? ((plan.invested / portfolio.totalInvested) * 100).toFixed(1) : 0;
-                        return (
-                          <div key={plan._id} className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                            <div className="flex items-center space-x-3">
-                              {getPlanIcon(plan.name)}
-                              <div>
-                                <p className="font-medium text-gray-900 capitalize">
-                                  {plan.name} Plan
-                                </p>
-                                <p className="text-sm text-gray-600">{percentage}% of portfolio</p>
-                                <p className="text-xs text-gray-500">
-                                  {plan.returnRate.min}% - {plan.returnRate.max}% return rate
-                                </p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-medium text-gray-900">
-                                {formatCurrency(plan.currentValue)}
-                              </p>
-                              <p className={`text-sm ${plan.returns >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {plan.returns >= 0 ? '+' : ''}{formatCurrency(plan.returns)}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                Invested: {formatCurrency(plan.invested)}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      // Show specific plan details when individual plan tab is selected
-                      (() => {
-                        const currentTabData = getCurrentTabData();
-                        if (!currentTabData) return null;
-                        
+                    {(() => {
+                      const currentTabData = getCurrentTabData();
+                      if (currentTabData) {
+                        // Show specific plan details when individual plan tab is selected
                         return (
                           <div className="space-y-4">
                             <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
@@ -1072,8 +1138,40 @@ const Dashboard = () => {
                             )}
                           </div>
                         );
-                      })()
-                    )}
+                      } else {
+                        // Show all plans when no tab is selected
+                        return portfolio.plans.map((plan, index) => {
+                          const percentage = portfolio.totalInvested > 0 ? ((plan.invested / portfolio.totalInvested) * 100).toFixed(1) : 0;
+                          return (
+                            <div key={plan._id} className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                              <div className="flex items-center space-x-3">
+                                {getPlanIcon(plan.name)}
+                                <div>
+                                  <p className="font-medium text-gray-900 capitalize">
+                                    {plan.name} Plan
+                                  </p>
+                                  <p className="text-sm text-gray-600">{percentage}% of portfolio</p>
+                                  <p className="text-xs text-gray-500">
+                                    {plan.returnRate.min}% - {plan.returnRate.max}% return rate
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-medium text-gray-900">
+                                  {formatCurrency(plan.currentValue)}
+                                </p>
+                                <p className={`text-sm ${plan.returns >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {plan.returns >= 0 ? '+' : ''}{formatCurrency(plan.returns)}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  Invested: {formatCurrency(plan.invested)}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        });
+                      }
+                    })()}
                   </div>
                 ) : userInvestments.length > 0 ? (
                   <div className="space-y-3">
