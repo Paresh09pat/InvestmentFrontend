@@ -190,7 +190,7 @@ const MembershipTiers = () => {
                     <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                       {data.returnRate}
                     </div>
-                    <p className="text-sm text-gray-500 mt-2">Expected returns per annum</p>
+                    <p className="text-sm text-gray-500 mt-2">Expected returns per month</p>
                   </div>
 
                   {/* Investment Range */}

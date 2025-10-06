@@ -195,16 +195,6 @@ const Footer = () => {
               </span>
             </motion.div>
 
-            <motion.p
-              className="text-gray-400 mb-4 sm:mb-6 max-w-lg text-sm sm:text-base lg:text-lg leading-relaxed"
-              initial={{ y: 20, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.8 }}
-            >
-              Your trusted partner in building wealth through smart investments.
-              <span className="text-white font-semibold"> Secure, reliable, and profitable.</span>
-            </motion.p>
 
             {/* Contact Information */}
             <motion.div
@@ -354,26 +344,7 @@ const Footer = () => {
             >
               Stay updated with our latest investment insights and market trends.
             </motion.p>
-            <motion.div
-              className="flex flex-col sm:flex-row gap-2"
-              initial={{ y: 20, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-            >
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-400 transition-colors duration-300 backdrop-blur-sm"
-              />
-              <motion.button
-                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Subscribe
-              </motion.button>
-            </motion.div>
+          
           </motion.div>
         </motion.div>
 
@@ -402,7 +373,7 @@ const Footer = () => {
               viewport={{ once: true }}
               transition={{ delay: 1, duration: 0.8 }}
             >
-              <div className="text-gray-400 text-sm sm:text-base">Developed by : <a href="https://www.linkedin.com/in/deepak-kumar-9012b0269/" target="_blank" className="text-blue-400 hover:text-blue-300 transition-colors duration-300">PYP Technology</a></div>
+              <div className="text-gray-400 text-sm sm:text-base invisible">Developed by : <a href="https://www.linkedin.com/in/deepak-kumar-9012b0269/" target="_blank" className="text-blue-400 hover:text-blue-300 transition-colors duration-300">PYP Technology</a></div>
             </motion.div>
           </div>
         </motion.div>

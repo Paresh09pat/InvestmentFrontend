@@ -156,7 +156,7 @@ const WhyChooseUs = () => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-400 mb-1">Expected Returns</p>
-                  <p className="text-2xl font-bold">12-18% <span className="text-green-400">APY</span></p>
+                  <p className="text-2xl font-bold">12-18% <span className="text-green-400">EMR</span></p>
                 </div>
               </div>
 
