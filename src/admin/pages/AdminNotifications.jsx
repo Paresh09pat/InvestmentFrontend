@@ -11,6 +11,7 @@ import {
 import Card from "../../components/common/Card";
 import { VITE_APP_API_URL } from "../../utils/constants";
 import { toast } from "react-toastify";
+import { formatDateTime, formatDateForTable } from "../../utils/dateUtils";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { useAuth } from "../../context/AuthContext";
 
@@ -47,7 +48,7 @@ const AdminNotifications = () => {
 
     if (diffDays === 1) return "Yesterday";
     if (diffDays <= 7) return `${diffDays} days ago`;
-    return date.toLocaleDateString();
+    return formatDateForTable(dateString).date;
   };
 
   const unreadCount = notifications.filter((notif) => !notif.read).length;
@@ -156,7 +157,10 @@ const AdminNotifications = () => {
                   </p>
 
                   <div className="flex items-center space-x-4 text-xs text-gray-500">
-                    <span>{formatDate(notification.createdAt)}</span>
+                    <div>
+                      <div>{formatDateForTable(notification.createdAt).date}</div>
+                      <div className="text-xs text-gray-400">{formatDateForTable(notification.createdAt).time}</div>
+                    </div>
                     {notification.userName && (
                       <span>• User: {notification.userName}</span>
                     )}

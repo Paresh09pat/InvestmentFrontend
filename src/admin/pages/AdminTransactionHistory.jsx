@@ -22,6 +22,7 @@ import Button from "../../components/common/Button";
 import Input from "../../components/forms/Input";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import TransactionViewModal from "../components/TransactionViewModal";
+import { formatDateTime, formatDateForTable } from "../../utils/dateUtils";
 import { toast } from "react-toastify";
 // Transaction constants
 const TRANSACTION_TYPES = {
@@ -514,10 +515,10 @@ const AdminTransactionHistory = () => {
                     <td className="py-4 px-4">
                       <div>
                         <p className="text-sm text-gray-900">
-                          {new Date(transaction.createdAt).toLocaleDateString()}
+                          {formatDateForTable(transaction.createdAt).date}
                         </p>
                         <p className="text-xs text-gray-600">
-                          {formatTransactionTime(transaction.createdAt)}
+                          {formatDateForTable(transaction.createdAt).time}
                         </p>
                       </div>
                     </td>

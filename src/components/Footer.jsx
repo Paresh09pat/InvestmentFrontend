@@ -173,28 +173,11 @@ const Footer = () => {
             className="col-span-1 sm:col-span-2 lg:col-span-2"
             variants={itemVariants}
           >
-            <motion.div
-              className="flex items-center space-x-3 mb-4 sm:mb-6"
-              initial={{ x: -50, opacity: 0 }}
-              whileInView={{ x: 0, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            >
-              <motion.div
-                className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 sm:p-3 rounded-xl shadow-lg"
-                whileHover={{
-                  scale: 1.1,
-                  rotate: 5,
-                  transition: { type: "spring", stiffness: 300 }
-                }}
-              >
-                <FiShield className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
-              </motion.div>
-              <span className="text-xl sm:text-2xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Trdexa
-              </span>
-            </motion.div>
 
+            <div className='flex justify-start'>
+              <img src="/trdexalogo.jpg" alt="logo" className="w-30 h-10 mb-4 justify-center" />
+
+            </div>
 
             {/* Contact Information */}
             <motion.div
@@ -344,7 +327,7 @@ const Footer = () => {
             >
               Stay updated with our latest investment insights and market trends.
             </motion.p>
-          
+
           </motion.div>
         </motion.div>
 

@@ -19,6 +19,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useAuth } from '../context/AuthContext';
 import { dummyInvestments } from '../utils/dummyData';
 import { INVESTMENT_STATUS, USER_VERIFICATION_STATUS } from '../utils/constants';
+import { formatDateTime, formatDateForTable } from '../utils/dateUtils';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import axios from 'axios';
@@ -287,7 +288,7 @@ const Dashboard = () => {
                <span>Current: <span className="font-semibold text-gray-900">${currentTabData.currentValue.toLocaleString()}</span></span>
             </div>
             <p className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full inline-block">
-              📅 {new Date(data[0]?.updatedAt).toLocaleDateString()} → {new Date(data[data.length - 1]?.updatedAt).toLocaleDateString()}
+              📅 {formatDateForTable(data[0]?.updatedAt).date} → {formatDateForTable(data[data.length - 1]?.updatedAt).date}
             </p>
             <p className="text-xs text-gray-500 mt-1">
               Range: ${minValue.toLocaleString()} - ${maxValue.toLocaleString()}
@@ -762,11 +763,7 @@ const Dashboard = () => {
                                       ${update.value.toLocaleString()}
                                     </p>
                                     <p className="text-xs text-gray-600">
-                                      {new Date(update.updatedAt).toLocaleDateString()} at{' '}
-                                      {new Date(update.updatedAt).toLocaleTimeString([], {
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                      })}
+                                      {formatDateForTable(update.updatedAt).date} at {formatDateForTable(update.updatedAt).time}
                                     </p>
                                   </div>
                                 </div>
@@ -850,11 +847,7 @@ const Dashboard = () => {
                                       ${update.value.toLocaleString()}
                                     </p>
                                     <p className="text-xs text-gray-600">
-                                      {new Date(update.updatedAt).toLocaleDateString()} at{' '}
-                                      {new Date(update.updatedAt).toLocaleTimeString([], {
-                                        hour: '2-digit',
-                                        minute: '2-digit'
-                                      })}
+                                      {formatDateForTable(update.updatedAt).date} at {formatDateForTable(update.updatedAt).time}
                                     </p>
                                   </div>
                                 </div>
@@ -930,7 +923,7 @@ const Dashboard = () => {
                             Invested: {formatCurrency(portfolio.totalInvested)}
                           </p>
                           <p className="text-sm text-gray-600">
-                            Created: {new Date(portfolio.createdAt).toLocaleDateString()}
+                            Created: {formatDateForTable(portfolio.createdAt).date} at {formatDateForTable(portfolio.createdAt).time}
                           </p>
                         </div>
                 </div>
@@ -967,7 +960,7 @@ const Dashboard = () => {
                               Invested: {formatCurrency(investment.amount)}
                             </p>
                             <p className="text-sm text-gray-600">
-                              Started: {new Date(investment.investmentDate).toLocaleDateString()}
+                              Started: {formatDateForTable(investment.investmentDate).date} at {formatDateForTable(investment.investmentDate).time}
                             </p>
                           </div>
                         </div>
@@ -1126,7 +1119,7 @@ const Dashboard = () => {
                                     .map((update, index) => (
                                       <div key={update._id} className="flex justify-between text-sm">
                                         <span className="text-gray-600">
-                                          {new Date(update.updatedAt).toLocaleDateString()}
+                                          {formatDateForTable(update.updatedAt).date} {formatDateForTable(update.updatedAt).time}
                                         </span>
                                         <span className="font-medium text-gray-900">
                                           {formatCurrency(update.value)}

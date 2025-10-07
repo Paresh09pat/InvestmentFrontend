@@ -19,6 +19,7 @@ import Card from '../../components/common/Card';
 import Modal from '../../components/common/Modal';
 import Input from '../../components/forms/Input';
 import { VITE_APP_API_URL } from '../../utils/constants';
+import { formatDateTime, formatDateForTable } from '../../utils/dateUtils';
 import { toast } from 'react-toastify';
 
 const PortfolioManagement = () => {
@@ -861,7 +862,7 @@ const PortfolioManagement = () => {
                                     {formatCurrency(history.value)}
                                   </p>
                                   <p className="text-xs text-gray-500">
-                                    {new Date(history.updatedAt).toLocaleString()}
+                                    {formatDateForTable(history.updatedAt).date} at {formatDateForTable(history.updatedAt).time}
                                   </p>
                                 </div>
                               </div>
@@ -887,11 +888,17 @@ const PortfolioManagement = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Created:</span>
-                      <span className="text-gray-900">{new Date(selectedPortfolio.createdAt).toLocaleDateString()}</span>
+                      <div>
+                        <div className="text-gray-900">{formatDateForTable(selectedPortfolio.createdAt).date}</div>
+                        <div className="text-sm text-gray-500">{formatDateForTable(selectedPortfolio.createdAt).time}</div>
+                      </div>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Last Updated:</span>
-                      <span className="text-gray-900">{new Date(selectedPortfolio.updatedAt).toLocaleDateString()}</span>
+                      <div>
+                        <div className="text-gray-900">{formatDateForTable(selectedPortfolio.updatedAt).date}</div>
+                        <div className="text-sm text-gray-500">{formatDateForTable(selectedPortfolio.updatedAt).time}</div>
+                      </div>
                     </div>
                   </div>
                   <div className="space-y-3">
@@ -1096,9 +1103,10 @@ const PortfolioManagement = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Created:</span>
-                      <span className="text-sm text-gray-900">
-                        {new Date(selectedPortfolio.createdAt).toLocaleDateString()}
-                      </span>
+                      <div className="text-sm text-gray-900">
+                        <div>{formatDateForTable(selectedPortfolio.createdAt).date}</div>
+                        <div className="text-xs text-gray-500">{formatDateForTable(selectedPortfolio.createdAt).time}</div>
+                      </div>
                     </div>
                   </div>
                 </div>

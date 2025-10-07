@@ -12,6 +12,7 @@ import {
   FiShield
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { formatDateTime, formatDateForTable } from '../../utils/dateUtils';
 import { USER_VERIFICATION_STATUS, VITE_APP_API_URL } from '../../utils/constants';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
@@ -162,7 +163,7 @@ const DocumentVerification = () => {
     {
       key: 'createdAt', 
       title: 'Join Date',
-      render: (value) => new Date(value).toLocaleDateString()
+      render: (value) => formatDateForTable(value).date
     },
     {
       key: 'documents',
@@ -175,7 +176,7 @@ const DocumentVerification = () => {
                 Aadhaar
               </span>
               <span className="text-xs text-gray-500">
-                {new Date(user.documents.aadhaar.uploadedAt).toLocaleDateString()}
+                {formatDateForTable(user.documents.aadhaar.uploadedAt).date} at {formatDateForTable(user.documents.aadhaar.uploadedAt).time}
               </span>
             </div>
           )}
@@ -185,7 +186,7 @@ const DocumentVerification = () => {
                 PAN
               </span>
               <span className="text-xs text-gray-500">
-                {new Date(user.documents.pan.uploadedAt).toLocaleDateString()}
+                {formatDateForTable(user.documents.pan.uploadedAt).date} at {formatDateForTable(user.documents.pan.uploadedAt).time}
               </span>
             </div>
           )}

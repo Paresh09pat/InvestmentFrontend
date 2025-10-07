@@ -24,6 +24,7 @@ import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Pagination from '../components/common/Pagination';
 import { INVESTMENT_STATUS, VITE_APP_API_URL } from '../utils/constants';
+import { formatDateTime, formatDateForTable } from '../utils/dateUtils';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
@@ -170,12 +171,9 @@ const InvestmentHistory = () => {
     }).format(amount);
   };
 
+  // Using the new date utility function
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    return formatDateTime(dateString);
   };
 
   const calculateDaysRemaining = (maturityDate) => {
@@ -535,7 +533,10 @@ const InvestmentHistory = () => {
                           </span>
                         </td>
                         <td className="py-4 px-4">
-                          <span className="text-gray-600">{formatDate(transaction.createdAt)}</span>
+                          <div className="text-gray-600">
+                            <div className="text-sm font-medium">{formatDateForTable(transaction.createdAt).date}</div>
+                            <div className="text-xs text-gray-500">{formatDateForTable(transaction.createdAt).time}</div>
+                          </div>
                         </td>
                         <td className="py-4 px-4">
                           <div className="flex justify-center border-2 border-blue-500 cursor-pointer rounded-lg">
@@ -652,7 +653,10 @@ const InvestmentHistory = () => {
                       </div>
                       <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
                         <span className="text-gray-600 font-medium">Created Date</span>
-                        <span className="font-medium text-gray-900">{formatDate(selectedInvestment.createdAt)}</span>
+                        <div className="text-right">
+                          <div className="font-medium text-gray-900">{formatDateForTable(selectedInvestment.createdAt).date}</div>
+                          <div className="text-sm text-gray-500">{formatDateForTable(selectedInvestment.createdAt).time}</div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -865,7 +869,10 @@ const InvestmentHistory = () => {
                       </div>
                       <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
                         <span className="text-gray-600 font-medium">Created Date</span>
-                        <span className="font-medium text-gray-900">{formatDate(selectedRequest.createdAt)}</span>
+                        <div className="text-right">
+                          <div className="font-medium text-gray-900">{formatDateForTable(selectedRequest.createdAt).date}</div>
+                          <div className="text-sm text-gray-500">{formatDateForTable(selectedRequest.createdAt).time}</div>
+                        </div>
                       </div>
                     </div>
                   </div>

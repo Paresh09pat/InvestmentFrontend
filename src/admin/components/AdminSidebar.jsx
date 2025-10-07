@@ -74,17 +74,9 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
     `}>
       <div className="p-4 h-full flex flex-col">
         {/* Logo Section */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-2">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg flex-shrink-0">
-              <FiShield className="h-6 w-6 text-white" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Trdexa
-              </span>
-              <div className="text-xs text-gray-500">Admin Panel</div>
-            </div>
+        <div className="flex items-center justify-center mb-2">
+          <div className="flex items-center">
+              <img src="/trdexalogo.jpg" alt="logo" className="w-30 h-10" />
           </div>
           <div className="flex items-center space-x-2">
             {/* Mobile Close Button - Only show on mobile */}

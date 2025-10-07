@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatDateTime, formatDateForTable } from '../../utils/dateUtils';
 import { 
   FiX, 
   FiUser, 
@@ -291,20 +292,20 @@ const TransactionViewModal = ({ isOpen, onClose, transaction }) => {
                       <div>
                         <p className="text-sm text-gray-600">Created At</p>
                         <p className="font-medium text-gray-900">
-                          {new Date(transaction.createdAt).toLocaleString()}
+                          {formatDateForTable(transaction.createdAt).date}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {formatTransactionTime(transaction.createdAt)}
+                          {formatDateForTable(transaction.createdAt).time}
                         </p>
                       </div>
                       {transaction.updatedAt && transaction.updatedAt !== transaction.createdAt && (
                         <div>
                           <p className="text-sm text-gray-600">Last Updated</p>
                           <p className="font-medium text-gray-900">
-                            {new Date(transaction.updatedAt).toLocaleString()}
+                            {formatDateForTable(transaction.updatedAt).date}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {formatTransactionTime(transaction.updatedAt)}
+                            {formatDateForTable(transaction.updatedAt).time}
                           </p>
                         </div>
                       )}

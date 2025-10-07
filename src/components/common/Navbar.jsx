@@ -91,12 +91,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
-              <FiShield className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Trdexa
-            </span>
+           <img src="/trdexalogo.jpg" alt="logo" className="w-30 h-10" />
           </Link>
 
           {/* Desktop Navigation */}

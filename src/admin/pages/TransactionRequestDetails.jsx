@@ -22,6 +22,7 @@ import {
   FiLoader,
 } from "react-icons/fi";
 import { INVESTMENT_STATUS, VITE_APP_API_URL } from "../../utils/constants";
+import { formatDateTime, formatDateForTable } from "../../utils/dateUtils";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Modal from "../../components/common/Modal";
@@ -429,18 +430,10 @@ import Input from "../../components/forms/Input";
                     <div className="p-4 bg-gray-50 rounded-lg border">
                       <div className="flex items-center space-x-3">
                         <FiCalendar className="text-gray-400" size={18} />
-                        <span className="text-gray-900">
-                          {new Date(transactionRequest.createdAt).toLocaleDateString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )}
-                        </span>
+                        <div className="text-gray-900">
+                          <div className="font-medium">{formatDateForTable(transactionRequest.createdAt).date}</div>
+                          <div className="text-sm text-gray-600">{formatDateForTable(transactionRequest.createdAt).time}</div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -662,14 +655,14 @@ import Input from "../../components/forms/Input";
                 <div className="p-4 bg-gray-50 rounded-lg border">
                   <span className="font-medium text-gray-700">Created:</span>
                   <p className="text-sm text-gray-600 mt-1">
-                    {new Date(transactionRequest.createdAt).toLocaleString()}
+                    {formatDateForTable(transactionRequest.createdAt).date} at {formatDateForTable(transactionRequest.createdAt).time}
                   </p>
                 </div>
                 {transactionRequest.updatedAt && (
                   <div className="p-4 bg-gray-50 rounded-lg border">
                     <span className="font-medium text-gray-700">Last Updated:</span>
                     <p className="text-sm text-gray-600 mt-1">
-                      {new Date(transactionRequest.updatedAt).toLocaleString()}
+                      {formatDateForTable(transactionRequest.updatedAt).date} at {formatDateForTable(transactionRequest.updatedAt).time}
                     </p>
                   </div>
                 )}

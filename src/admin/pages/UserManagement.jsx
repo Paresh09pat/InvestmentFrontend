@@ -15,6 +15,7 @@ import {
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { USER_VERIFICATION_STATUS, VITE_APP_API_URL } from '../../utils/constants';
+import { formatDateTime, formatDateForTable } from '../../utils/dateUtils';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import Table from '../../components/common/Table';
@@ -215,7 +216,7 @@ const UserManagement = () => {
     {
       key: 'createdAt',
       title: 'Join Date',
-      render: (value) => new Date(value).toLocaleDateString()
+      render: (value) => formatDateForTable(value).date
     },
     {
       key: 'totalInvested',
@@ -464,7 +465,10 @@ const UserManagement = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Join Date
                   </label>
-                  <span>{new Date(selectedUser.joinDate).toLocaleDateString()}</span>
+                  <div>
+                    <div>{formatDateForTable(selectedUser.joinDate).date}</div>
+                    <div className="text-sm text-gray-500">{formatDateForTable(selectedUser.joinDate).time}</div>
+                  </div>
                 </div>
 
                 <div>

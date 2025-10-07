@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { FiBell, FiX } from 'react-icons/fi';
 import { generateDummyAdminNotifications } from '../../utils/adminNotificationDummyData';
+import { formatDateTime, formatDateForTable } from '../../utils/dateUtils';
 
 const AdminNotificationBell = () => {
   const [notifications, setNotifications] = useState([]);
@@ -38,7 +39,7 @@ const AdminNotificationBell = () => {
 
     if (diffDays === 1) return 'Yesterday';
     if (diffDays <= 7) return `${diffDays} days ago`;
-    return date.toLocaleDateString();
+    return formatDateForTable(dateString).date;
   };
 
   const getNotificationIcon = (type) => {
@@ -128,9 +129,10 @@ const AdminNotificationBell = () => {
                       <p className="text-xs text-gray-600 mt-1 line-clamp-2">
                         {notification.message}
                       </p>
-                      <p className="text-xs text-gray-500 mt-2">
-                        {formatDate(notification.createdAt)}
-                      </p>
+                      <div className="text-xs text-gray-500 mt-2">
+                        <div>{formatDateForTable(notification.createdAt).date}</div>
+                        <div>{formatDateForTable(notification.createdAt).time}</div>
+                      </div>
                     </div>
                     {!notification.read && (
                       <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2"></div>

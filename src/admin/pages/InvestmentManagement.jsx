@@ -13,6 +13,7 @@ import {
   FiActivity,
 } from "react-icons/fi";
 import { INVESTMENT_STATUS, VITE_APP_API_URL } from "../../utils/constants";
+import { formatDateTime, formatDateForTable } from "../../utils/dateUtils";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Table from "../../components/common/Table";
@@ -215,7 +216,12 @@ const InvestmentManagement = () => {
     {
       key: "createdAt",
       title: "Request Date",
-      render: (value) => new Date(value).toLocaleDateString(),
+      render: (value) => (
+        <div>
+          <div className="text-sm font-medium">{formatDateForTable(value).date}</div>
+          <div className="text-xs text-gray-500">{formatDateForTable(value).time}</div>
+        </div>
+      ),
     },
     {
       key: "status",

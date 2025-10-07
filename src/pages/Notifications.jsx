@@ -18,6 +18,7 @@ import Button from "../components/common/Button";
 import Input from "../components/forms/Input";
 import axios from "axios";
 import { VITE_APP_API_URL } from "../utils/constants";
+import { formatDateTime, formatDateForTable } from "../utils/dateUtils";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
@@ -160,7 +161,7 @@ const Notifications = () => {
 
     if (diffDays === 1) return "Yesterday";
     if (diffDays <= 7) return `${diffDays} days ago`;
-    return date.toLocaleDateString();
+    return formatDateForTable(dateString).date;
   };
 
   const getNotifications = useCallback(
@@ -375,9 +376,10 @@ const Notifications = () => {
                           {notification.message}
                         </p>
 
-                        <p className="text-xs text-gray-500">
-                          {formatDate(notification.createdAt)}
-                        </p>
+                        <div className="text-xs text-gray-500">
+                          <div>{formatDateForTable(notification.createdAt).date}</div>
+                          <div>{formatDateForTable(notification.createdAt).time}</div>
+                        </div>
                       </div>
                     </div>
 
