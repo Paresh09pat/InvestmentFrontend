@@ -8,7 +8,8 @@ import {
   FiDollarSign,
   FiHome,
   FiShield,
-  FiSmartphone
+  FiSmartphone,
+  FiInfo
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/common/Button';
@@ -30,14 +31,17 @@ const Withdrawal = () => {
     withdrawalMethod: 'bank',
     bankAccount: '',
     upiId: '',
-    notes: ''
+    notes: '',
+    address: ''
   });
 
   const [userBalance, setUserBalance] = useState({
     totalBalance: "",
     availableBalance: '',
-  
+    plans: []
   });
+
+  const [selectedPlan, setSelectedPlan] = useState(null);
 
   const [withdrawalMethods] = useState([
     {
@@ -84,52 +88,30 @@ const Withdrawal = () => {
   const validateForm = () => {
     const newErrors = {};
 
+    if (!selectedPlan) {
+      newErrors.plan = 'Please select a plan to withdraw returns from';
+    }
+
     if (!formData.amount) {
       newErrors.amount = 'Amount is required';
     } else if (parseFloat(formData.amount) <= 0) {
       newErrors.amount = 'Amount must be greater than 0';
     } else if (parseFloat(formData.amount) < 100) {
       newErrors.amount = 'Minimum withdrawal amount is $100';
-    } else if (parseFloat(formData.amount) > userBalance.availableBalance) {
-      newErrors.amount = `Amount exceeds available balance: ${userBalance.availableBalance}`;
+    } else if (selectedPlan && selectedPlan.returns <= 0) {
+      newErrors.amount = 'No positive returns available for withdrawal from this plan';
+    } else if (selectedPlan && parseFloat(formData.amount) > selectedPlan.returns) {
+      newErrors.amount = `Amount exceeds available returns: ${formatCurrency(selectedPlan.returns)}`;
+    }
+
+    if (!formData.address) {
+      newErrors.address = 'Withdrawal address is required';
+    } else if (formData.address.length < 10) {
+      newErrors.address = 'Please enter a valid wallet address';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-    
-    setLoading(true);
-    
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      console.log('Withdrawal request:', formData);
-      
-      setFormData({
-        amount: '',
-        withdrawalMethod: 'bank',
-        bankAccount: '',
-        upiId: '',
-        notes: ''
-      });
-      
-      alert('Withdrawal request submitted successfully! You will receive confirmation via email.');
-      
-      navigate('/dashboard');
-      
-    } catch (error) {
-      console.error('Withdrawal error:', error);
-      setErrors({ general: 'Failed to submit withdrawal request. Please try again.' });
-    } finally {
-      setLoading(false);
-    }
   };
 
   const formatCurrency = (amount) => {
@@ -166,6 +148,51 @@ const Withdrawal = () => {
     }
   };
 
+  const withdrawal = async () => {
+    if (!validateForm()) {
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      const response = await axios.post(`${VITE_APP_API_URL}/api/transaction/create`, {
+        amount: parseFloat(formData.amount),
+        plan: selectedPlan.name,
+        type: 'withdrawal',
+        walletAddress: formData.address,
+        trader: user?.id || user?._id
+      }, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if(response.data.success){
+        alert('Withdrawal request submitted successfully! You will receive confirmation via email.');
+        setFormData({
+          amount: '',
+          withdrawalMethod: 'bank',
+          bankAccount: '',
+          upiId: '',
+          notes: '',
+          address: ''
+        });
+        setSelectedPlan(null);
+        navigate('/dashboard');
+      } else {
+        setErrors({ general: response.data.message || 'Failed to submit withdrawal request' });
+      }
+    } catch(err) {
+      console.log("Error withdrawing:", err);
+      setErrors({ general: 'Failed to submit withdrawal request. Please try again.' });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+
   const fetchPortfolio = async()=>{
     try{
       const response = await axios.get(`${VITE_APP_API_URL}/api/auth/portfolio`, {
@@ -174,9 +201,11 @@ const Withdrawal = () => {
 
       console.log("Withdrawal portfolio:", response?.data?.portfolio);
       
+      const portfolio = response?.data?.portfolio;
       setUserBalance({
-        totalBalance: response?.data?.portfolio?.totalInvested,
-        availableBalance: response?.data?.portfolio?.totalReturns,
+        totalBalance: portfolio?.totalInvested || 0,
+        availableBalance: portfolio?.totalReturns || 0,
+        plans: portfolio?.plans || []
       });
       
     }
@@ -211,6 +240,34 @@ const Withdrawal = () => {
             </p>
           </div>
 
+          {/* Investment Withdrawal Button */}
+          <div className="mb-8">
+            <Card className="bg-gradient-to-r from-red-50 to-orange-50 border-red-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="bg-gradient-to-r from-red-500 to-orange-500 p-3 rounded-lg">
+                    <FiDollarSign className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Need to Withdraw Your Investment?
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      Request to withdraw your total investment amount before maturity (12-month lock period)
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => navigate('/investment-withdrawal')}
+                  className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700"
+                  size="large"
+                >
+                  Withdraw Investment Amount
+                </Button>
+              </div>
+            </Card>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <Card className="animate-fade-in">
@@ -229,7 +286,104 @@ const Withdrawal = () => {
                   </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={withdrawal} className="space-y-6">
+                  {/* Plan Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Plan for Returns Withdrawal*
+                    </label>
+                    <div className="space-y-3">
+                      {userBalance.plans?.filter(plan => plan.returns !== 0).map((plan) => (
+                        <div
+                          key={plan._id}
+                          className={`border rounded-lg p-4 transition-all duration-200 ${
+                            plan.returns <= 0 
+                              ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
+                              : selectedPlan?._id === plan._id
+                                ? 'border-green-500 bg-green-50 cursor-pointer'
+                                : 'border-gray-200 hover:border-gray-300 cursor-pointer'
+                          }`}
+                          onClick={() => plan.returns > 0 && setSelectedPlan(plan)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className={`w-4 h-4 rounded-full border-2 ${
+                                plan.returns <= 0
+                                  ? 'border-gray-300 bg-gray-200'
+                                  : selectedPlan?._id === plan._id
+                                    ? 'border-green-500 bg-green-500'
+                                    : 'border-gray-300'
+                              }`}>
+                                {selectedPlan?._id === plan._id && plan.returns > 0 && (
+                                  <div className="w-full h-full rounded-full bg-white scale-50"></div>
+                                )}
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-gray-900 capitalize">
+                                  {plan.name} Plan
+                                </h4>
+                                <p className={`text-sm ${
+                                  plan.returns < 0 ? 'text-red-600' : 'text-gray-600'
+                                }`}>
+                                  Available Returns: {formatCurrency(plan.returns)}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className={`font-semibold ${
+                                plan.returns < 0 ? 'text-red-600' : 'text-green-600'
+                              }`}>
+                                {formatCurrency(plan.returns)}
+                              </div>
+                              <div className="text-sm text-gray-600">Returns</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {errors.plan && (
+                      <p className="text-red-600 text-sm mt-1">{errors.plan}</p>
+                    )}
+                  </div>
+
+                  {/* Selected Plan Details */}
+                  {selectedPlan && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <FiInfo className="text-green-600" size={20} />
+                        <h4 className="font-medium text-green-900">Selected Plan Returns</h4>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-green-700">Plan:</span>
+                          <span className="font-semibold text-green-900 ml-2 capitalize">
+                            {selectedPlan.name}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-green-700">Available Returns:</span>
+                          <span className={`font-semibold ml-2 ${
+                            selectedPlan.returns < 0 ? 'text-red-900' : 'text-green-900'
+                          }`}>
+                            {formatCurrency(selectedPlan.returns)}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-green-700">Invested Amount:</span>
+                          <span className="font-semibold text-green-900 ml-2">
+                            {formatCurrency(selectedPlan.invested)}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-green-700">Current Value:</span>
+                          <span className="font-semibold text-green-900 ml-2">
+                            {formatCurrency(selectedPlan.currentValue)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                           Withdrawal Address*
@@ -239,12 +393,17 @@ const Withdrawal = () => {
                             name="address"
                             value={formData.address}
                             onChange={handleChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+                              errors.address ? 'border-red-300' : 'border-gray-300'
+                            }`}
                             placeholder="Enter wallet address"
                             rows={4}
                             required
                           />
                     </div>
+                    {errors.address && (
+                      <p className="text-red-600 text-sm mt-1">{errors.address}</p>
+                    )}
                   </div>
 
                   <Input
@@ -253,11 +412,13 @@ const Withdrawal = () => {
                     type="number"
                     value={formData.amount}
                     onChange={handleChange}
-                    placeholder="500"
+                    placeholder={selectedPlan ? `Max: ${formatCurrency(selectedPlan.returns)}` : "Enter amount to withdraw"}
                     icon={<FiDollarSign />}
                     error={errors.amount}
                     required
                     min="100"
+                    max={selectedPlan ? selectedPlan.returns : userBalance.availableBalance}
+                    disabled={!selectedPlan}
                   />
 
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -276,7 +437,8 @@ const Withdrawal = () => {
                   </div>
 
                   <Button
-                    type="submit"
+                    type="button"
+                    onClick={withdrawal}
                     fullWidth
                     loading={loading}
                     disabled={loading}
@@ -284,7 +446,7 @@ const Withdrawal = () => {
                     className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
                   >
                     {loading ? 'Processing...' : 'Request Withdrawal'}
-                  </Button>
+                  </Button> 
                 </form>
               </Card>
             </div>
@@ -298,19 +460,79 @@ const Withdrawal = () => {
                 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Total Balance</span>
+                    <span className="text-gray-600">Total Invested</span>
                     <span className="text-2xl font-bold text-gray-900">
-                      {formatCurrency(userBalance.totalBalance)}
+                      {formatCurrency(userBalance.totalBalance)}  
                     </span>
                   </div>
                   
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Available for Withdrawal</span>
-                    <span className="text-lg font-semibold text-green-600">
+                    <span className="text-gray-600">Total Returns Available</span>
+                    <span className={`text-lg font-semibold $ {
+                      userBalance.availableBalance < 0 ? 'text-red-600' : 'text-green-600'
+                    }`}>
                       {formatCurrency(userBalance.availableBalance)}
                     </span>
                   </div>
+                </div>
+              </Card>
 
+              {/* Individual Plans Returns */}
+              <Card className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Plan Returns
+                </h3>
+                
+                <div className="space-y-3">
+                  {userBalance.plans?.filter(plan => plan.returns !== 0).map((plan) => (
+                    <div key={plan._id} className="border border-gray-200 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-semibold text-gray-900 capitalize">
+                          {plan.name} Plan
+                        </h4>
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          selectedPlan?._id === plan._id 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {selectedPlan?._id === plan._id ? 'Selected' : 'Available'}
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-1 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Invested:</span>  
+                          <span className="font-medium">{formatCurrency(plan.invested)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Current Value:</span>
+                          <span className="font-medium text-green-600">{formatCurrency(plan.currentValue)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Returns:</span>
+                          <span className={`font-medium ${
+                            plan.returns < 0 ? 'text-red-600' : 'text-green-600'
+                          }`}>
+                            {formatCurrency(plan.returns)}
+                          </span>
+                        </div>
+                        {plan.returnRate?.min && plan.returnRate?.max && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Return Rate:</span>
+                            <span className="font-medium text-blue-600">
+                              {plan.returnRate.min}% - {plan.returnRate.max}%
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {userBalance.plans?.filter(plan => plan.returns !== 0).length === 0 && (
+                    <div className="text-center py-4">
+                      <p className="text-gray-500 text-sm">No returns available for withdrawal</p>
+                    </div>
+                  )}
                 </div>
               </Card>
 

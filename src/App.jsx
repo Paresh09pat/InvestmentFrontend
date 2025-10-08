@@ -20,6 +20,7 @@ const InvestmentForm = lazy(() => import('./pages/InvestmentForm'));
 const InvestmentSuccess = lazy(() => import('./pages/InvestmentSuccess'));
 const InvestmentHistory = lazy(() => import('./pages/InvestmentHistory'));
 const Withdrawal = lazy(() => import('./pages/Withdrawal'));
+const InvestmentWithdrawal = lazy(() => import('./pages/InvestmentWithdrawal'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 
@@ -121,6 +122,11 @@ function App() {
                 <Route path="/withdrawal" element={
                   <ProtectedRoute requireVerification={true}>
                     <Withdrawal />
+                  </ProtectedRoute>
+                } />
+                <Route path="/investment-withdrawal" element={
+                  <ProtectedRoute requireVerification={true}>
+                    <InvestmentWithdrawal />
                   </ProtectedRoute>
                 } />
               </Routes>
