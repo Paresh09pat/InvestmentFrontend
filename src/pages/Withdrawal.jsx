@@ -1,4 +1,5 @@
 // Withdrawal page
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 import {
   FiAlertCircle,
@@ -6,19 +7,16 @@ import {
   FiCheckCircle,
   FiClock,
   FiDollarSign,
-  FiHome,
-  FiShield,
-  FiSmartphone,
-  FiInfo
+  FiInfo,
+  FiShield
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
 import Input from '../components/forms/Input';
 import { useAuth } from '../context/AuthContext';
-import { USER_VERIFICATION_STATUS } from '../utils/constants';
-import axios from 'axios';
-import { VITE_APP_API_URL } from '../utils/constants';
+import { USER_VERIFICATION_STATUS, VITE_APP_API_URL } from '../utils/constants';
 
 const Withdrawal = () => {
   const { user } = useAuth();
@@ -43,24 +41,7 @@ const Withdrawal = () => {
 
   const [selectedPlan, setSelectedPlan] = useState(null);
 
-  const [withdrawalMethods] = useState([
-    {
-      id: 'bank',
-      name: 'Bank Transfer',
-      icon: FiHome,
-      description: 'Direct bank account transfer',
-      fee: '$2.50',
-      processingTime: '1-3 business days'
-    },
-    {
-      id: 'upi',
-      name: 'UPI',
-      icon: FiSmartphone,
-      description: 'Instant UPI payment',
-      fee: 'Free',
-      processingTime: 'Instant'
-    }
-  ]);
+ 
 
 
 
@@ -96,9 +77,11 @@ const Withdrawal = () => {
       newErrors.amount = 'Amount is required';
     } else if (parseFloat(formData.amount) <= 0) {
       newErrors.amount = 'Amount must be greater than 0';
-    } else if (parseFloat(formData.amount) < 100) {
-      newErrors.amount = 'Minimum withdrawal amount is $100';
-    } else if (selectedPlan && selectedPlan.returns <= 0) {
+    } 
+    // else if (parseFloat(formData.amount) < 100) {
+    //   newErrors.amount = 'Minimum withdrawal amount is $100';
+    // }
+     else if (selectedPlan && selectedPlan.returns <= 0) {
       newErrors.amount = 'No positive returns available for withdrawal from this plan';
     } else if (selectedPlan && parseFloat(formData.amount) > selectedPlan.returns) {
       newErrors.amount = `Amount exceeds available returns: ${formatCurrency(selectedPlan.returns)}`;
@@ -170,7 +153,10 @@ const Withdrawal = () => {
       });
 
       if(response.data.success){
-        alert('Withdrawal request submitted successfully! You will receive confirmation via email.');
+        toast.success('Withdrawal request submitted successfully! You will receive confirmation via email.', {
+          position: "top-right",
+          autoClose: 5000,
+        });
         setFormData({
           amount: '',
           withdrawalMethod: 'bank',
@@ -182,11 +168,42 @@ const Withdrawal = () => {
         setSelectedPlan(null);
         navigate('/dashboard');
       } else {
-        setErrors({ general: response.data.message || 'Failed to submit withdrawal request' });
+        const errorMessage = response.data.message || 'Failed to submit withdrawal request';
+        setErrors({ general: errorMessage });
+        toast.error(errorMessage, {
+          position: "top-right",
+          autoClose: 5000,
+        });
       }
     } catch(err) {
       console.log("Error withdrawing:", err);
-      setErrors({ general: 'Failed to submit withdrawal request. Please try again.' });
+      
+      let errorMessage = 'Failed to submit withdrawal request. Please try again.';
+      
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.response?.data?.errors) {
+        // Handle validation errors from server
+        const serverErrors = err.response.data.errors;
+        setErrors(serverErrors);
+        errorMessage = 'Please fix the form errors';
+      } else if (err.response?.status === 500) {
+        errorMessage = 'Internal server error. Please try again later.';
+      } else if (err.code === 'ERR_NETWORK') {
+        errorMessage = 'Network error: Cannot connect to server. Please check your connection.';
+      } else if (err.response?.status === 401) {
+        errorMessage = 'Authentication failed. Please log in again.';
+      } else if (err.response?.status === 403) {
+        errorMessage = 'You do not have permission to perform this action.';
+      } else if (err.response?.status === 400) {
+        errorMessage = 'Invalid request. Please check your input.';
+      }
+      
+      setErrors({ general: errorMessage });
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 5000,
+      });
     } finally {
       setLoading(false);
     }
@@ -211,6 +228,21 @@ const Withdrawal = () => {
     }
     catch(err){
       console.log("Error fetching portfolio:", err);
+      
+      let errorMessage = 'Failed to load portfolio data';
+      
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.code === 'ERR_NETWORK') {
+        errorMessage = 'Network error: Cannot connect to server. Please check your connection.';
+      } else if (err.response?.status === 401) {
+        errorMessage = 'Authentication failed. Please log in again.';
+      }
+      
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 5000,
+      });
     }
   }
 
