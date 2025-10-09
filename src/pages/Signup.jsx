@@ -1,6 +1,6 @@
 // Signup page
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { FiUser, FiMail, FiLock, FiPhone, FiEye, FiEyeOff, FiShield } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
@@ -11,16 +11,29 @@ import Input from '../components/forms/Input';
 const Signup = () => {
   const navigate = useNavigate();
   const { signup } = useAuth();
-  
+  const [searchParams] = useSearchParams();
+  const refId = searchParams.get('refId');
+  console.log("searchParams", searchParams.toString());
+  console.log("refId", refId);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     password: '',
     confirmPassword: '',
-    agree: false
+    agree: false,
+    referralCode: refId || ''
   });
-  
+
+  useEffect(() => {
+    if (refId) {
+      setFormData(prev => ({ ...prev, refId }));
+    } else {
+      setFormData(prev => ({ ...prev, refId: '' }));
+    }
+  }, [refId]);
+
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -28,14 +41,14 @@ const Signup = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Name validation
     if (!formData.name.trim()) {
       newErrors.name = 'Full name is required';
     } else if (formData.name.trim().length < 2) {
       newErrors.name = 'Name must be at least 2 characters';
     }
-    
+
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email) {
@@ -43,7 +56,7 @@ const Signup = () => {
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
     // Phone validation
     const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
     if (!formData.phone) {
@@ -51,26 +64,26 @@ const Signup = () => {
     } else if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
       newErrors.phone = 'Please enter a valid phone number';
     }
-    
+
     // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-    
+
     // Confirm password validation
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    
+
     // Terms agreement validation
     if (!formData.agree) {
       newErrors.agree = 'You must agree to the terms and conditions';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -81,7 +94,7 @@ const Signup = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
@@ -90,37 +103,37 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       // Remove confirmPassword before sending to AuthContext
       const { confirmPassword, ...dataToSend } = formData;
-      
+
       // Use AuthContext signup function instead of direct API call
       await signup(dataToSend);
-      
+
       // Show success toast
       toast.success('Registration successful! Please login to continue.', {
         position: "top-right",
         autoClose: 4000,
       });
-      
+
       navigate('/login');
     } catch (error) {
       console.error('Registration error:', error);
       let errorMessage = 'Registration failed. Please try again.';
-      
+
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       // Show error toast
       toast.error(errorMessage, {
         position: "top-right",
