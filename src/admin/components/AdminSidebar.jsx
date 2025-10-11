@@ -15,7 +15,7 @@ import {
   FiPieChart,
   FiCreditCard,
   FiTrendingDown,
-  FiArchive
+  FiArchive,
   FiGift
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
@@ -26,27 +26,24 @@ import Button from '../../components/common/Button';
 const AdminSidebar = ({ isCollapsed, onToggle }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout,adminNotifications } = useAuth();
+  const { logout, adminNotifications, adminCounts } = useAuth();
   const isMobile = window.innerWidth < 768;
-  
-  // Mock notification count - replace with actual data from context/API
-  const notificationCount = 3;
 
   const navItems = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: FiHome },
     { name: 'User Management', path: '/admin/users', icon: FiUsers },
     { name: 'Portfolio Management', path: '/admin/portfolio', icon: FiPieChart },
-    { name: 'Deposit Requests', path: '/admin/deposit-requests', icon: FiTrendingUp },
-    { name: 'Withdrawal Requests', path: '/admin/withdrawal-requests', icon: FiTrendingDown },
+    { name: 'Deposit Requests', path: '/admin/deposit-requests', icon: FiTrendingUp, count: adminCounts.pendingInvestments },
+    { name: 'Withdrawal Requests', path: '/admin/withdrawal-requests', icon: FiTrendingDown, count: adminCounts.pendingWithdrawals },
     { name: 'Investment Withdrawal', path: '/admin/investment-withdrawal-requests', icon: FiArchive },
-    { name: 'Documents', path: '/admin/documents', icon: FiFileText },
+    { name: 'Documents', path: '/admin/documents', icon: FiFileText, count: adminCounts.pendingDocuments },
     { name: 'Manage Trader', path: '/admin/manage-trader', icon: FiUserCheck },
     { name: 'Manage Card', path: '/admin/card', icon: FiCreditCard },
     { name: 'Withdrawal History', path: '/admin/withdrawal-history', icon: FiTrendingDown },
     { name: 'Deposit History', path: '/admin/deposit-history', icon: FiTrendingUp },
     { name: 'Transactions', path: '/admin/transactions', icon: FiDollarSign },
-    { name: 'Referrals', path: '/admin/referrals', icon: FiGift },
-    { name: 'Notifications', path: '/admin/notifications', icon: FiBell },
+    { name: 'Referrals', path: '/admin/referrals', icon: FiGift, count: adminCounts.pendingReferrals },
+    { name: 'Notifications', path: '/admin/notifications', icon: FiBell, count: adminNotifications },
     { name: 'Profile', path: '/admin/profile', icon: FiUser },
     // { name: 'Settings', path: '/admin/settings', icon: FiSettings },
   ];
@@ -122,10 +119,10 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
                   size={20} 
                   className="flex-shrink-0"
                 />
-                {/* Notification count badge for Notifications item */}
-                {item.name === 'Notifications' && adminNotifications > 0 && (
+                {/* Count badge for items with counts */}
+                {item.count !== undefined && item.count > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-                    {adminNotifications > 99 ? '99+' : adminNotifications}
+                    {item.count > 99 ? '99+' : item.count}
                   </span>
                 )}
               </div>
