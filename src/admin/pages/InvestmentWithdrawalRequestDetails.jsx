@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
-  FiArrowLeft,
   FiCheck,
   FiX,
   FiCalendar,
@@ -22,6 +21,7 @@ import {
   FiLoader,
   FiFileText,
   FiArchive,
+  FiArrowLeft,
 } from "react-icons/fi";
 import { INVESTMENT_STATUS, VITE_APP_API_URL } from "../../utils/constants";
 import { formatDateForTable } from "../../utils/dateUtils";
@@ -45,15 +45,6 @@ const InvestmentWithdrawalRequestDetails = () => {
   const [showRejectionReasonInput, setShowRejectionReasonInput] = useState(false);
   const [statusRejectionReason, setStatusRejectionReason] = useState('');
 
-  // Function to get the appropriate back navigation
-  const getBackNavigation = () => {
-    return "/admin/investment-withdrawal-requests";
-  };
-
-  // Function to get the appropriate back button text
-  const getBackButtonText = () => {
-    return "Back to Investment Withdrawal Requests";
-  };
 
   // API function to fetch investment withdrawal request by ID
   const fetchInvestmentWithdrawalRequestById = async (requestId, isRefresh = false) => {
@@ -68,7 +59,7 @@ const InvestmentWithdrawalRequestDetails = () => {
         { withCredentials: true }
       );
 
-      if (response.data.success && response.data.message === "Investment request fetched successfully") {
+      if (response.data.data) {
         setTransactionRequest(response.data.data);
         console.log("Investment withdrawal request data:", response.data.data);
       } else {
@@ -98,23 +89,22 @@ const InvestmentWithdrawalRequestDetails = () => {
         { withCredentials: true }
       );
 
-      if (response.data.success) {
+      if (response.data.data) {
         // Update the transaction request data immediately with the response data
         setTransactionRequest(response.data.data);
         // Clear any existing errors
         setError(null);
         return true;
       } else {
-        setError(
-          response.data.message || "Failed to update investment withdrawal request"
-        );
+        const errorMessage = response.data.message || "Failed to update investment withdrawal request";
+        setError(errorMessage);
+        console.error("Update failed:", errorMessage);
         return false;
       }
     } catch (error) {
       console.error("Error updating investment withdrawal request:", error);
-      setError(
-        error.response?.data?.message || "Failed to update investment withdrawal request"
-      );
+      const errorMessage = error.response?.data?.message || "Failed to update investment withdrawal request";
+      setError(errorMessage);
       return false;
     }
   };
@@ -136,12 +126,10 @@ const InvestmentWithdrawalRequestDetails = () => {
     if (success) {
       setRejectionReason("");
       setSuccessMessage('Investment withdrawal request rejected successfully');
-      // Clear success message after 2 seconds and then redirect
+      // Clear success message after 3 seconds
       setTimeout(() => {
         setSuccessMessage('');
-        // Redirect to Investment Withdrawal Requests list page
-        navigate('/admin/investment-withdrawal-requests');
-      }, 2000);
+      }, 3000);
     }
   };
 
@@ -160,6 +148,7 @@ const InvestmentWithdrawalRequestDetails = () => {
 
     setIsUpdatingStatus(true);
     setError(null);
+    setSuccessMessage('');
 
     const updateData = {
       status: newStatus,
@@ -177,12 +166,13 @@ const InvestmentWithdrawalRequestDetails = () => {
       setShowRejectionReasonInput(false);
       setStatusRejectionReason('');
       setSuccessMessage('Investment withdrawal request status updated successfully');
-      // Clear success message after 2 seconds and then redirect
+      // Clear success message after 3 seconds
       setTimeout(() => {
         setSuccessMessage('');
-        // Redirect to Investment Withdrawal Requests list page
-        navigate('/admin/investment-withdrawal-requests');
-      }, 2000);
+      }, 3000);
+    } else {
+      // If update failed, the error is already set by updateInvestmentWithdrawalRequest
+      console.error('Status update failed');
     }
 
     setIsUpdatingStatus(false);
@@ -261,17 +251,6 @@ const InvestmentWithdrawalRequestDetails = () => {
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="space-y-6 animate-fade-in">
-            <div className="flex items-center justify-between">
-              <Button
-                variant="outline"
-                onClick={() => navigate(getBackNavigation())}
-                icon={<FiArrowLeft />}
-                className="border-gray-300 text-gray-600 hover:bg-gray-50"
-              >
-                {getBackButtonText()}
-              </Button>
-            </div>
-
             <Card className="shadow-sm border-gray-200">
               <div className="text-center py-16">
                 <div className="relative">
@@ -293,18 +272,7 @@ const InvestmentWithdrawalRequestDetails = () => {
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="space-y-6 animate-fade-in">
-            <div className="flex items-center justify-between">
-              <Button
-                variant="outline"
-                onClick={() => navigate(getBackNavigation())}
-                icon={<FiArrowLeft />}
-                className="border-gray-300 text-gray-600 hover:bg-gray-50"
-              >
-                {getBackButtonText()}
-              </Button>
-            </div>
-
-            {/* <Card className="shadow-sm border-gray-200">
+            <Card className="shadow-sm border-gray-200">
               <div className="bg-red-50 border border-red-200 rounded-lg p-8">
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
@@ -324,7 +292,7 @@ const InvestmentWithdrawalRequestDetails = () => {
                         Try Again
                       </Button>
                       <Button
-                        onClick={() => navigate(getBackNavigation())}
+                        onClick={() => navigate('/admin/investment-withdrawal-requests')}
                         className="bg-red-600 hover:bg-red-700 text-white"
                       >
                         Go Back
@@ -333,7 +301,7 @@ const InvestmentWithdrawalRequestDetails = () => {
                   </div>
                 </div>
               </div>
-            </Card> */}
+            </Card>
           </div>
         </div>
       </div>
@@ -345,17 +313,6 @@ const InvestmentWithdrawalRequestDetails = () => {
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="space-y-6 animate-fade-in">
-            <div className="flex items-center justify-between">
-              <Button
-                variant="outline"
-                onClick={() => navigate(getBackNavigation())}
-                icon={<FiArrowLeft />}
-                className="border-gray-300 text-gray-600 hover:bg-gray-50"
-              >
-                {getBackButtonText()}
-              </Button>
-            </div>
-
             <Card className="shadow-sm border-gray-200">
               <div className="text-center py-16">
                 <div className="p-4 bg-gray-100 rounded-full w-16 h-16 mx-auto mb-6">
@@ -366,7 +323,7 @@ const InvestmentWithdrawalRequestDetails = () => {
                   The investment withdrawal request you're looking for could not be found.
                 </p>
                 <Button
-                  onClick={() => navigate(getBackNavigation())}
+                  onClick={() => navigate('/admin/investment-withdrawal-requests')}
                   className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   Go Back to Requests
@@ -386,22 +343,21 @@ const InvestmentWithdrawalRequestDetails = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center space-x-4 mb-6">
-            <Button
-              variant="outline"
-              onClick={() => navigate(getBackNavigation())}
-              icon={<FiArrowLeft />}
-              size="small"
-              className="border-gray-300 text-gray-600 hover:bg-gray-50"
-            >
-              {getBackButtonText()}
-            </Button>
-          </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Investment Withdrawal Request Details</h1>
-                <p className="text-gray-600">View and manage investment withdrawal request information</p>
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/admin/investment-withdrawal-requests')}
+                  icon={<FiArrowLeft />}
+                  className="border-gray-300 text-gray-600 hover:bg-gray-50"
+                >
+                  Back
+                </Button>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">Investment Withdrawal Request Details</h1>
+                  <p className="text-gray-600">View and manage investment withdrawal request information</p>
+                </div>
               </div>
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-500">Request ID:</span>

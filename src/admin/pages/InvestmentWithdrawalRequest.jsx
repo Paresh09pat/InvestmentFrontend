@@ -320,8 +320,6 @@ const InvestmentWithdrawalRequest = () => {
               <option value={TRANSACTION_STATUS.PENDING}>Pending</option>
               <option value={TRANSACTION_STATUS.APPROVED}>Approved</option>
               <option value={TRANSACTION_STATUS.REJECTED}>Rejected</option>
-              <option value={TRANSACTION_STATUS.COMPLETED}>Completed</option>
-              <option value={TRANSACTION_STATUS.PROCESSING}>Processing</option>
             </select>
           </div>
 
