@@ -1,5 +1,5 @@
 // InvestmentHistory page
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FiTrendingUp, 
@@ -19,17 +19,15 @@ import {
   FiUserCheck,
   FiCreditCard
 } from 'react-icons/fi';
-import { useAuth } from '../context/AuthContext';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Pagination from '../components/common/Pagination';
 import { INVESTMENT_STATUS, VITE_APP_API_URL } from '../utils/constants';
-import { formatDateTime, formatDateForTable } from '../utils/dateUtils';
+import { formatDateForTable } from '../utils/dateUtils';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const InvestmentHistory = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   // Active tab state
@@ -41,9 +39,11 @@ const InvestmentHistory = () => {
   // Transaction requests data from API
   const [txnRequests, setTxnRequests] = useState([]);
 
+  // Investment requests data from API
+  const [investmentRequests, setInvestmentRequests] = useState([]);
+
   const [filteredInvestments, setFilteredInvestments] = useState(investments);
   const [statusFilter, setStatusFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
   const [selectedInvestment, setSelectedInvestment] = useState(null);
@@ -62,8 +62,7 @@ const InvestmentHistory = () => {
   useEffect(() => {
     let filtered = investments.filter(investment => {
       const matchesStatus = statusFilter === 'all' || investment.status === statusFilter;
-      const matchesType = typeFilter === 'all' || investment.type === typeFilter;
-      return matchesStatus && matchesType;
+      return matchesStatus;
     });
 
     // Sort investments
@@ -94,7 +93,7 @@ const InvestmentHistory = () => {
     });
 
     setFilteredInvestments(filtered);
-  }, [investments, statusFilter, typeFilter, sortBy, sortOrder]);
+  }, [investments, statusFilter, sortBy, sortOrder]);
 
 
   const handleStatusFilter = (status) => {
@@ -102,10 +101,6 @@ const InvestmentHistory = () => {
     setPagination(prev => ({ ...prev, currentPage: 1 }));
   };
 
-  const handleTypeFilter = (type) => {
-    setTypeFilter(type);
-    setPagination(prev => ({ ...prev, currentPage: 1 }));
-  };
 
   const handleSort = (field) => {
     if (sortBy === field) {
@@ -171,25 +166,13 @@ const InvestmentHistory = () => {
     }).format(amount);
   };
 
-  // Using the new date utility function
-  const formatDate = (dateString) => {
-    return formatDateTime(dateString);
-  };
-
-  const calculateDaysRemaining = (maturityDate) => {
-    const today = new Date();
-    const maturity = new Date(maturityDate);
-    const diffTime = maturity - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
-  };
 
   const totalInvested = investments.reduce((sum, inv) => sum + inv.amount, 0);
   const pendingInvestments = investments.filter(inv => inv.status === 'pending').length;
   const completedInvestments = investments.filter(inv => inv.status === 'approved').length;
 
 
-  const getInvestments = async()=>{
+  const getInvestments = useCallback(async()=>{
     try{
       setLoading(true);
       
@@ -197,7 +180,6 @@ const InvestmentHistory = () => {
       const queryParams = new URLSearchParams();
       
       if (statusFilter !== 'all') queryParams.append('status', statusFilter);
-      if (typeFilter !== 'all') queryParams.append('type', typeFilter);
       if (sortBy) queryParams.append('sortBy', sortBy);
       if (sortOrder) queryParams.append('sortOrder', sortOrder);
       queryParams.append('page', pagination.currentPage);
@@ -220,9 +202,9 @@ const InvestmentHistory = () => {
     finally {
       setLoading(false);
     }
-  }
+  }, [statusFilter, sortBy, sortOrder, pagination.currentPage, pagination.itemsPerPage])
 
-  const getTxnRequests = async()=>{
+  const getTxnRequests = useCallback(async()=>{
     try{
       setLoading(true);
       
@@ -230,7 +212,6 @@ const InvestmentHistory = () => {
       const queryParams = new URLSearchParams();
       
       if (statusFilter !== 'all') queryParams.append('status', statusFilter);
-      if (typeFilter !== 'all') queryParams.append('type', typeFilter);
       if (sortBy) queryParams.append('sortBy', sortBy);
       if (sortOrder) queryParams.append('sortOrder', sortOrder);
       queryParams.append('page', pagination.currentPage);
@@ -252,24 +233,57 @@ const InvestmentHistory = () => {
     finally {
       setLoading(false);
     }
-  }
+  }, [statusFilter, sortBy, sortOrder, pagination.currentPage, pagination.itemsPerPage])
+
+  const getInvestmentRequests = useCallback(async()=>{
+    try{
+      setLoading(true);
+      
+      // Build query parameters
+      const queryParams = new URLSearchParams();
+      
+      if (statusFilter !== 'all') queryParams.append('status', statusFilter);
+      if (sortBy) queryParams.append('sortBy', sortBy);
+      if (sortOrder) queryParams.append('sortOrder', sortOrder);
+      queryParams.append('page', pagination.currentPage);
+      queryParams.append('limit', pagination.itemsPerPage);
+      
+      const res = await axios.get(`${VITE_APP_API_URL}/api/investment?${queryParams.toString()}`, { withCredentials: true });
+      if(res.data.success){
+        setInvestmentRequests(res.data.data);
+        setFilteredInvestments(res.data.data);
+        if(res.data.pagination) {
+          setPagination(res.data.pagination);
+        }
+      }
+    }
+    catch(err){
+      console.log(err);
+      toast.error("Failed to fetch investment requests");
+    }
+    finally {
+      setLoading(false);
+    }
+  }, [statusFilter, sortBy, sortOrder, pagination.currentPage, pagination.itemsPerPage])
+
 
   useEffect(()=>{
     if (activeTab === 'history') {
       getInvestments();
+    } else if (activeTab === 'investment-requests') {
+      getInvestmentRequests();
     } else {
       getTxnRequests();
     }
-  }, [statusFilter, typeFilter, sortBy, sortOrder, pagination.currentPage, pagination.itemsPerPage, activeTab])
+  }, [activeTab, getInvestments, getInvestmentRequests, getTxnRequests])
 
-  const getCurrentData = () => {
-    return activeTab === 'requests' ? txnRequests : investments;
-  };
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     if (tab === 'history') {
       setFilteredInvestments(investments);
+    } else if (tab === 'investment-requests') {
+      setFilteredInvestments(investmentRequests);
     } else {
       setFilteredInvestments(txnRequests);
     }
@@ -286,11 +300,14 @@ const InvestmentHistory = () => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  {activeTab === 'requests' ? 'Transaction Requests' : 'Investment History'}
+                  {activeTab === 'requests' ? 'Transaction Requests' : 
+                   activeTab === 'investment-requests' ? 'Investment Requests' : 'Investment History'}
                 </h1>
                 <p className="text-gray-600">
                   {activeTab === 'requests' 
                     ? 'Monitor your transaction requests and their statuses'
+                    : activeTab === 'investment-requests'
+                    ? 'Track your investment requests and their approval status'
                     : 'Track all your investments and their performance'
                   }
                 </p>
@@ -327,6 +344,16 @@ const InvestmentHistory = () => {
               Transaction Requests
             </button>
             <button
+              onClick={() => handleTabChange('investment-requests')}
+              className={`pb-2 text-sm font-medium transition-colors ${
+                activeTab === 'investment-requests'
+                  ? 'text-blue-600 outline-none border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Investment Requests
+            </button>
+            <button
               onClick={() => handleTabChange('history')}
               className={`pb-2 text-sm font-medium transition-colors ${
                 activeTab === 'history'
@@ -350,6 +377,8 @@ const InvestmentHistory = () => {
                   <p className="text-2xl font-bold text-gray-900">
                     {activeTab === 'requests' 
                       ? formatCurrency(txnRequests.reduce((sum, req) => sum + req.amount, 0))
+                      : activeTab === 'investment-requests'
+                      ? formatCurrency(investmentRequests.reduce((sum, req) => sum + req.amount, 0))
                       : formatCurrency(totalInvested)}
                   </p>
                 </div>
@@ -368,6 +397,8 @@ const InvestmentHistory = () => {
                   <p className="text-2xl font-bold text-gray-900">
                     {activeTab === 'requests' 
                       ? txnRequests.filter(req => req.status === 'approved').length
+                      : activeTab === 'investment-requests'
+                      ? investmentRequests.filter(req => req.status === 'approved').length
                       : completedInvestments}
                   </p>
                 </div>
@@ -384,6 +415,8 @@ const InvestmentHistory = () => {
                   <p className="text-2xl font-bold text-gray-900">
                     {activeTab === 'requests' 
                       ? txnRequests.filter(req => req.status === 'pending').length
+                      : activeTab === 'investment-requests'
+                      ? investmentRequests.filter(req => req.status === 'pending').length
                       : pendingInvestments}
                   </p>
                 </div>
@@ -398,7 +431,8 @@ const InvestmentHistory = () => {
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {activeTab === 'requests' ? txnRequests.length : investments.length}
+                    {activeTab === 'requests' ? txnRequests.length : 
+                     activeTab === 'investment-requests' ? investmentRequests.length : investments.length}
                   </p>
                 </div>
               </div>
@@ -423,26 +457,6 @@ const InvestmentHistory = () => {
                       }`}
                     >
                       {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Type Filter */}
-              <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium text-gray-700">Type:</span>
-                <div className="flex space-x-2">
-                  {['all', 'deposit', 'withdrawal'].map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => handleTypeFilter(type)}
-                      className={`px-3 py-1 cursor-pointer text-sm rounded-full border transition-colors ${
-                        typeFilter === type
-                          ? 'bg-green-100 text-green-800 border-green-300'
-                          : 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200'
-                      }`}
-                    >
-                      {type === 'all' ? 'All' : type.charAt(0).toUpperCase() + type.slice(1)}
                     </button>
                   ))}
                 </div>
@@ -515,6 +529,8 @@ const InvestmentHistory = () => {
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                             {activeTab === 'requests' 
                               ? transaction.plan?.charAt(0).toUpperCase() + transaction.plan?.slice(1)
+                              : activeTab === 'investment-requests'
+                              ? transaction.plan?.charAt(0).toUpperCase() + transaction.plan?.slice(1)
                               : transaction.txnReqId?.plan?.charAt(0).toUpperCase() + transaction.txnReqId?.plan?.slice(1)}
                           </span>
                         </td>
@@ -523,6 +539,8 @@ const InvestmentHistory = () => {
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                             {activeTab === 'requests' 
                               ? transaction.type?.charAt(0).toUpperCase() + transaction.type?.slice(1)
+                              : activeTab === 'investment-requests'
+                              ? 'Investment'
                               : transaction.txnReqId?.type?.charAt(0).toUpperCase() + transaction.txnReqId?.type?.slice(1)}
                           </span>
                         </td>
@@ -541,7 +559,15 @@ const InvestmentHistory = () => {
                         <td className="py-4 px-4">
                           <div className="flex justify-center border-2 border-blue-500 cursor-pointer rounded-lg">
                             <button
-                              onClick={() => activeTab === 'requests' ? handleViewRequestDetails(transaction) : handleViewDetails(transaction)}
+                              onClick={() => {
+                                if (activeTab === 'requests') {
+                                  handleViewRequestDetails(transaction);
+                                } else if (activeTab === 'investment-requests') {
+                                  handleViewRequestDetails(transaction);
+                                } else {
+                                  handleViewDetails(transaction);
+                                }
+                              }}
                               className="p-1 text-blue-600 flex items-center justify-center gap-2 hover:text-blue-800 cursor-pointer rounded-lg transition-colors"
                               title="View Details"
                             >
@@ -594,10 +620,11 @@ const InvestmentHistory = () => {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900">
-                      Transaction #{selectedInvestment._id?.slice(-8)}
+                      {activeTab === 'investment-requests' ? 'Investment Request' : 'Transaction'} #{selectedInvestment._id?.slice(-8)}
                     </h2>
                     <p className="text-gray-600 text-sm">
-                      {activeTab === 'requests' ? 'Transaction Request Details' : 'Investment History Details'}
+                      {activeTab === 'requests' ? 'Transaction Request Details' : 
+                       activeTab === 'investment-requests' ? 'Investment Request Details' : 'Investment History Details'}
                     </p>
                   </div>
                 </div>
@@ -633,6 +660,8 @@ const InvestmentHistory = () => {
                         <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                           {activeTab === 'requests' 
                             ? selectedInvestment.plan?.charAt(0).toUpperCase() + selectedInvestment.plan?.slice(1)
+                            : activeTab === 'investment-requests'
+                            ? selectedInvestment.plan?.charAt(0).toUpperCase() + selectedInvestment.plan?.slice(1)
                             : selectedInvestment.txnReqId?.plan?.charAt(0).toUpperCase() + selectedInvestment.txnReqId?.plan?.slice(1)}
                         </span>
                       </div>
@@ -641,6 +670,8 @@ const InvestmentHistory = () => {
                         <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                           {activeTab === 'requests' 
                             ? selectedInvestment.type?.charAt(0).toUpperCase() + selectedInvestment.type?.slice(1)
+                            : activeTab === 'investment-requests'
+                            ? 'Investment'
                             : selectedInvestment.txnReqId?.type?.charAt(0).toUpperCase() + selectedInvestment.txnReqId?.type?.slice(1)}
                         </span>
                       </div>
@@ -689,7 +720,7 @@ const InvestmentHistory = () => {
                 {/* Right Column */}
                 <div className="space-y-6">
                   {/* Trader Information Card */}
-                  {activeTab === 'requests' && (
+                  {(activeTab === 'requests' || activeTab === 'investment-requests') && (
                     <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border border-gray-100 shadow-sm">
                       <div className="flex items-center space-x-3 mb-4">
                         <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
@@ -739,6 +770,8 @@ const InvestmentHistory = () => {
                         <span className="text-sm font-mono text-gray-800 break-all">
                           {activeTab === 'requests' 
                             ? selectedInvestment.walletTxId 
+                            : activeTab === 'investment-requests'
+                            ? selectedInvestment.walletTxId || 'N/A'
                             : selectedInvestment.txnReqId?.walletTxId}
                         </span>
                       </div>
@@ -748,7 +781,7 @@ const InvestmentHistory = () => {
                           <span className="text-sm font-mono text-gray-800 break-all">{selectedInvestment.walletAddress}</span>
                         </div>
                       )}
-                      {activeTab === 'requests' && (
+                      {(activeTab === 'requests' || activeTab === 'investment-requests') && (
                         <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
                           <span className="text-gray-600 font-medium">Transaction Image</span>
                           {selectedInvestment.transactionImage ? (
@@ -770,7 +803,7 @@ const InvestmentHistory = () => {
                   </div>
 
                   {/* Rejection Reason */}
-                  {activeTab === 'requests' && selectedInvestment.rejectionReason && (
+                  {(activeTab === 'requests' || activeTab === 'investment-requests') && selectedInvestment.rejectionReason && (
                     <div className="bg-red-50 border border-red-200 rounded-xl p-6">
                       <div className="flex items-center space-x-3 mb-3">
                         <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">

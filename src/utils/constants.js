@@ -17,6 +17,14 @@ export const INVESTMENT_STATUS = {
   CANCELLED: 'cancelled'
 };
 
+export const WITHDRAWAL_STATUS = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+  PROCESSING: 'processing',
+  COMPLETED: 'completed'
+};
+
 export const USER_VERIFICATION_STATUS = {
   UNVERIFIED: 'unverified',
   PENDING: 'pending',

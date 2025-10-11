@@ -13,7 +13,9 @@ import {
   FiBell,
   FiDollarSign,
   FiPieChart,
-  FiCreditCard
+  FiCreditCard,
+  FiTrendingDown,
+  FiArchive
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/common/Button';
@@ -32,12 +34,15 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
   const navItems = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: FiHome },
     { name: 'User Management', path: '/admin/users', icon: FiUsers },
-    { name: 'Investments', path: '/admin/investments', icon: FiTrendingUp },
     { name: 'Portfolio Management', path: '/admin/portfolio', icon: FiPieChart },
+    { name: 'Deposit Requests', path: '/admin/deposit-requests', icon: FiTrendingUp },
+    { name: 'Withdrawal Requests', path: '/admin/withdrawal-requests', icon: FiTrendingDown },
+    { name: 'Investment Withdrawal', path: '/admin/investment-withdrawal-requests', icon: FiArchive },
     { name: 'Documents', path: '/admin/documents', icon: FiFileText },
     { name: 'Manage Trader', path: '/admin/manage-trader', icon: FiUserCheck },
     { name: 'Manage Card', path: '/admin/card', icon: FiCreditCard },
-    { name: 'Transactions', path: '/admin/transactions', icon: FiDollarSign },
+    { name: 'Withdrawal History', path: '/admin/withdrawal-history', icon: FiTrendingDown },
+    { name: 'Deposit History', path: '/admin/deposit-history', icon: FiTrendingUp },
     { name: 'Notifications', path: '/admin/notifications', icon: FiBell },
     { name: 'Profile', path: '/admin/profile', icon: FiUser },
     // { name: 'Settings', path: '/admin/settings', icon: FiSettings },

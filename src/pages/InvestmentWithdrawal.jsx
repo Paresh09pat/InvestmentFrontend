@@ -4,12 +4,8 @@ import {
   FiAlertCircle,
   FiArrowLeft,
   FiCheckCircle,
-  FiClock,
   FiDollarSign,
-  FiHome,
   FiShield,
-  FiSmartphone,
-  FiCalendar,
   FiInfo
 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
@@ -29,10 +25,8 @@ const InvestmentWithdrawal = () => {
   
   const [formData, setFormData] = useState({
     amount: '',
-    walletId: '',
-    reason: '',
-    emergencyContact: '',
-    bankDetails: ''
+    walletAddress: '',
+    reason: ''
   });
 
   const [userInvestment, setUserInvestment] = useState({
@@ -47,28 +41,18 @@ const InvestmentWithdrawal = () => {
 
   const [selectedPlan, setSelectedPlan] = useState(null);
 
-  const [withdrawalMethods] = useState([
-    {
-      id: 'bank',
-      name: 'Bank Transfer',
-      icon: FiHome,
-      description: 'Direct bank account transfer',
-      fee: '$5.00',
-      processingTime: '3-5 business days'
-    },
-    {
-      id: 'crypto',
-      name: 'Crypto Wallet',
-      icon: FiSmartphone,
-      description: 'Cryptocurrency wallet transfer',
-      fee: '2%',
-      processingTime: '1-2 business days'
-    }
-  ]);
 
   useEffect(() => {
     if (user?.verificationStatus !== USER_VERIFICATION_STATUS.VERIFIED) {
       navigate('/profile');
+    }
+    
+    // Pre-populate wallet address if available
+    if (user?.trustWalletAddress) {
+      setFormData(prev => ({
+        ...prev,
+        walletAddress: user.trustWalletAddress
+      }));
     }
   }, [user, navigate]);
 
@@ -95,6 +79,22 @@ const InvestmentWithdrawal = () => {
       }
       
       setErrors(newErrors);
+    } else if (name === 'walletAddress' && value) {
+      const newErrors = { ...errors };
+      if (value.length < 10) {
+        newErrors.walletAddress = 'Please enter a valid wallet address';
+      } else {
+        delete newErrors.walletAddress;
+      }
+      setErrors(newErrors);
+    } else if (name === 'reason' && value) {
+      const newErrors = { ...errors };
+      if (value.length < 10) {
+        newErrors.reason = 'Please provide a detailed reason (minimum 10 characters)';
+      } else {
+        delete newErrors.reason;
+      }
+      setErrors(newErrors);
     } else if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -120,24 +120,16 @@ const InvestmentWithdrawal = () => {
       newErrors.amount = `Amount exceeds selected plan current value: $${selectedPlan.currentValue.toLocaleString()}`;
     }
 
-    if (!formData.walletId) {
-      newErrors.walletId = 'Wallet ID is required';
-    } else if (formData.walletId.length < 10) {
-      newErrors.walletId = 'Please enter a valid wallet ID';
+    if (!formData.walletAddress) {
+      newErrors.walletAddress = 'Wallet address is required';
+    } else if (formData.walletAddress.length < 10) {
+      newErrors.walletAddress = 'Please enter a valid wallet address';
     }
 
     if (!formData.reason) {
       newErrors.reason = 'Reason for withdrawal is required';
     } else if (formData.reason.length < 10) {
       newErrors.reason = 'Please provide a detailed reason (minimum 10 characters)';
-    }
-
-    if (!formData.emergencyContact) {
-      newErrors.emergencyContact = 'Emergency contact is required';
-    }
-
-    if (!formData.bankDetails) {
-      newErrors.bankDetails = 'Bank details are required';
     }
 
     setErrors(newErrors);
@@ -154,31 +146,58 @@ const InvestmentWithdrawal = () => {
     setLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      console.log('Investment withdrawal request:', {
-        ...formData,
-        userId: user.id,
-        selectedPlan: selectedPlan,
-        investmentData: userInvestment
+      const requestData = {
+        amount: parseFloat(formData.amount),
+        plan: selectedPlan.name,
+        walletAddress: formData.walletAddress,
+        reason: formData.reason
+      };
+
+      const response = await axios.post(`${VITE_APP_API_URL}/api/investment/create`, requestData, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
-      
-      setFormData({
-        amount: '',
-        walletId: '',
-        reason: '',
-        emergencyContact: '',
-        bankDetails: ''
-      });
-      
-      alert('Investment withdrawal request submitted successfully! Our team will review your request and contact you within 24-48 hours.');
-      
-      navigate('/withdrawal');
+
+      if (response.data.success) {
+        // Store withdrawal data for success page
+        const withdrawalResult = {
+          amount: parseFloat(formData.amount),
+          plan: selectedPlan.name,
+          walletAddress: formData.walletAddress,
+          reason: formData.reason,
+          withdrawalDate: new Date().toISOString(),
+          timestamp: Date.now()
+        };
+        
+        localStorage.setItem('withdrawalResult', JSON.stringify(withdrawalResult));
+        
+        setFormData({
+          amount: '',
+          walletAddress: '',
+          reason: ''
+        });
+        
+        navigate('/withdrawal-success');
+      } else {
+        setErrors({ general: response.data.message || 'Failed to submit withdrawal request' });
+      }
       
     } catch (error) {
       console.error('Investment withdrawal error:', error);
-      setErrors({ general: 'Failed to submit withdrawal request. Please try again.' });
+      
+      if (error.response?.data?.message) {
+        setErrors({ general: error.response.data.message });
+      } else if (error.response?.status === 400) {
+        setErrors({ general: 'Invalid request data. Please check your inputs.' });
+      } else if (error.response?.status === 403) {
+        setErrors({ general: 'You must be verified to create withdrawal requests.' });
+      } else if (error.response?.status === 404) {
+        setErrors({ general: 'User not found. Please try logging in again.' });
+      } else {
+        setErrors({ general: 'Failed to submit withdrawal request. Please try again.' });
+      }
     } finally {
       setLoading(false);
     }
@@ -261,7 +280,7 @@ const InvestmentWithdrawal = () => {
       
       setErrors(newErrors);
     }
-  }, [selectedPlan]);
+  }, [selectedPlan, formData.amount, errors]);
 
   const daysRemaining = calculateDaysRemaining();
 
@@ -448,22 +467,30 @@ const InvestmentWithdrawal = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Trust Wallet ID*
+                      Trust Wallet Address*
                     </label>
                     <div className="relative">
                       <textarea
-                        name="walletId"
-                        value={formData.walletId}
+                        name="walletAddress"
+                        value={formData.walletAddress}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                        placeholder="Enter your wallet address or ID"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+                          errors.walletAddress ? 'border-red-300' : 'border-gray-300'
+                        }`}
+                        placeholder="Enter your registered wallet address"
                         rows={3}
                         required
                       />
                     </div>
-                    {errors.walletId && (
-                      <p className="text-red-600 text-sm mt-1">{errors.walletId}</p>
+                    {errors.walletAddress && (
+                      <p className="text-red-600 text-sm mt-1">{errors.walletAddress}</p>
                     )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      {user?.trustWalletAddress ? 
+                        'Pre-filled from your profile. This must match your registered wallet address.' :
+                        'This must match your registered wallet address in your profile'
+                      }
+                    </p>
                   </div>
 
                   <div>
@@ -475,7 +502,9 @@ const InvestmentWithdrawal = () => {
                         name="reason"
                         value={formData.reason}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
+                          errors.reason ? 'border-red-300' : 'border-gray-300'
+                        }`}
                         placeholder="Please provide a detailed reason for withdrawing your investment early (minimum 10 characters)"
                         rows={4}
                         required
