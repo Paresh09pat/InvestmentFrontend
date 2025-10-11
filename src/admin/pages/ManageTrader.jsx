@@ -151,7 +151,7 @@ const ManageTrader = () => {
 
   return (
     <motion.div
-      className="p-6 space-y-6"
+      className="p-1 space-y-6"
       variants={containerVariants}
       initial="hidden"
       animate="visible"

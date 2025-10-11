@@ -234,7 +234,7 @@ const InvestmentManagement = () => {
       render: (_, investment) => (
         <button
           onClick={() => viewInvestmentDetails(investment)}
-          className="w-full cursor-pointer flex items-center justify-around py-2 border-2 border-blue-500 rounded-lg hover:bg-blue-50 transition-colors"
+          className="w-full cursor-pointer flex items-center justify-around p-2 border-2 border-blue-500 rounded-lg hover:bg-blue-50 transition-colors"
           title="View Details"
         >
           <div className="flex items-center space-x-3">

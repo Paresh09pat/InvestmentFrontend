@@ -31,7 +31,7 @@ const Dashboard = () => {
   const [userInvestments, setUserInvestments] = useState([]);
   const [portfolio, setPortfolio] = useState(null);
   const [priceHistory, setPriceHistory] = useState([]);
-  const [activeTab, setActiveTab] = useState('total');
+  const [activeTab, setActiveTab] = useState('silver');
   const [stats, setStats] = useState({
     totalInvested: 0,
     currentValue: 0,
@@ -162,7 +162,7 @@ const Dashboard = () => {
     }));
 
     return (
-      <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
+      <div className="inline-flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -267,9 +267,9 @@ const Dashboard = () => {
     };
 
     return (
-      <div className="w-full bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 shadow-lg border border-gray-200/50 backdrop-blur-sm">
+      <div className="w-full bg-gradient-to-br from-white to-gray-50 ">
         {/* Header with enhanced styling */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex  justify-between flex-col md:flex-row gap-4 md:gap-0 items-start md:items-center mb-8">
           <div className="space-y-2">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-100 rounded-lg">
@@ -627,9 +627,7 @@ const Dashboard = () => {
                           {formatCurrency(totalData.invested)}
                         </p>
                       </div>
-                      <div className="bg-blue-100 p-3 rounded-full">
-                        <span className="text-blue-600 text-2xl font-bold">$</span>
-                      </div>
+                     <img src="/tethericon.png" alt="" className="w-16" />
                     </div>
                   </Card>
 
@@ -734,7 +732,7 @@ const Dashboard = () => {
                         </div>
                       </div>
 
-                      <div className="space-y-3 max-h-64 overflow-y-auto">
+                      <div className="space-y-3 max-h-64 overflow-y-scroll">
                         {currentTabData.priceHistory
                           .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
                           .map((update, index) => {
@@ -818,7 +816,7 @@ const Dashboard = () => {
                         </div>
                       </div>
 
-                      <div className="space-y-3 max-h-64 overflow-y-auto">
+                      <div className="space-y-3 max-h-64 overflow-y-scroll">
                         {totalData.priceHistory
                           .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
                           .map((update, index) => {
@@ -884,7 +882,7 @@ const Dashboard = () => {
               })()}
 
               <Card className="animate-slide-up">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex justify-between flex-col md:flex-row mb-6 gap-4 md:gap-0 items-start md:items-center">
                   <h2 className="text-xl font-semibold text-gray-900">
                     Your Investments
                   </h2>

@@ -249,7 +249,7 @@ const Notifications = () => {
           ref={notificationsRef}
         >
           <div className="mb-8">
-            <div className="flex items-center justify-between">
+            <div className="flex  justify-between flex-col md:flex-row gap-4 md:gap-0 items-start md:items-center">
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
                   Notifications
@@ -257,9 +257,11 @@ const Notifications = () => {
                 <p className="text-gray-600">
                   Stay updated with your investment activities
                   {unreadCount > 0 && (
-                    <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-                      {unreadCount} unread
-                    </span>
+                    <>
+                    <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full min-w-full">
+                     <span className="w-fit"> {unreadCount} </span>
+                    </span> <span className="w-fit">unread</span>
+                    </>
                   )}
                   {total > 0 && (
                     <span className="ml-2 text-sm text-gray-500">

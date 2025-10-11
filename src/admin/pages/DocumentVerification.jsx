@@ -261,7 +261,7 @@ const DocumentVerification = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-col md:flex-row gap-4 md:gap-0 items-start md:items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Document Verification
