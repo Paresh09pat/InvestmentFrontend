@@ -18,6 +18,7 @@ import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Table from "../../components/common/Table";
 import Input from "../../components/forms/Input";
+import Pagination from "../../components/common/Pagination";
 
 const InvestmentManagement = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const InvestmentManagement = () => {
     totalItems: 0,
     itemsPerPage: 10,
   });
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState(null);
 
   // API function to fetch transaction requests
@@ -39,10 +41,15 @@ const InvestmentManagement = () => {
     limit = 10,
     status = "",
     type = "",
-    plan = ""
+    plan = "",
+    append = false
   ) => {
     try {
-      setLoading(true);
+      if (page === 1) {
+        setLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
       setError(null);
 
       const params = new URLSearchParams({
@@ -59,7 +66,14 @@ const InvestmentManagement = () => {
       );
 
       if (response.data.success) {
-        setInvestments(response.data.data);
+        const newData = response.data.data;
+        
+        if (append) {
+          setInvestments(prev => [...prev, ...newData]);
+        } else {
+          setInvestments(newData);
+        }
+        
         setPagination(response.data.pagination);
       } else {
         setError(
@@ -73,6 +87,7 @@ const InvestmentManagement = () => {
       );
     } finally {
       setLoading(false);
+      setIsLoadingMore(false);
     }
   };
 
@@ -88,7 +103,7 @@ const InvestmentManagement = () => {
       () => {
         if (searchTerm) {
           fetchTransactionRequests(
-            pagination.currentPage,
+            1, // Reset to page 1 for search
             pagination.itemsPerPage,
             statusFilter,
             "",
@@ -96,7 +111,7 @@ const InvestmentManagement = () => {
           );
         } else {
           fetchTransactionRequests(
-            pagination.currentPage,
+            1, // Reset to page 1 for filter changes
             pagination.itemsPerPage,
             statusFilter
           );
@@ -108,10 +123,27 @@ const InvestmentManagement = () => {
     return () => clearTimeout(timeoutId);
   }, [
     searchTerm,
-    pagination.currentPage,
-    pagination.itemsPerPage,
     statusFilter,
   ]);
+
+  // Handle page changes
+  const handlePageChange = (page) => {
+    if (searchTerm) {
+      fetchTransactionRequests(
+        page,
+        pagination.itemsPerPage,
+        statusFilter,
+        "",
+        searchTerm
+      );
+    } else {
+      fetchTransactionRequests(
+        page,
+        pagination.itemsPerPage,
+        statusFilter
+      );
+    }
+  };
 
   // Use investments directly since filtering is done server-side
   const filteredInvestments = investments;
@@ -416,49 +448,20 @@ const InvestmentManagement = () => {
 
         {/* Pagination */}
         {pagination.totalPages > 1 && (
-          <div className="flex justify-between items-center mt-4 pt-4 border-t">
-            <div className="text-sm text-gray-600">
-              Showing{" "}
-              {(pagination.currentPage - 1) * pagination.itemsPerPage + 1} to{" "}
-              {Math.min(
-                pagination.currentPage * pagination.itemsPerPage,
-                pagination.totalItems
-              )}{" "}
-              of {pagination.totalItems} results
-            </div>
-            <div className="flex space-x-2">
-              <Button
-                variant="outline"
-                onClick={() =>
-                  fetchTransactionRequests(
-                    pagination.currentPage - 1,
-                    pagination.itemsPerPage,
-                    statusFilter
-                  )
-                }
-                disabled={pagination.currentPage === 1 || loading}
-              >
-                Previous
-              </Button>
-              <span className="px-3 py-2 text-sm text-gray-600">
-                Page {pagination.currentPage} of {pagination.totalPages}
-              </span>
-              <Button
-                variant="outline"
-                onClick={() =>
-                  fetchTransactionRequests(
-                    pagination.currentPage + 1,
-                    pagination.itemsPerPage,
-                    statusFilter
-                  )
-                }
-                disabled={
-                  pagination.currentPage === pagination.totalPages || loading
-                }
-              >
-                Next
-              </Button>
-            </div>
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={pagination.totalItems}
+            itemsPerPage={pagination.itemsPerPage}
+            onPageChange={handlePageChange}
+          />
+        )}
+        
+        {/* Loading More Indicator */}
+        {isLoadingMore && (
+          <div className="flex items-center justify-center py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            <span className="ml-2 text-sm text-gray-600">Loading more transactions...</span>
           </div>
         )}
       </Card>

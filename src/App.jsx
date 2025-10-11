@@ -23,6 +23,7 @@ const Withdrawal = lazy(() => import('./pages/Withdrawal'));
 const InvestmentWithdrawal = lazy(() => import('./pages/InvestmentWithdrawal'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Notifications = lazy(() => import('./pages/Notifications'));
+const ReferalManage = lazy(() => import('./pages/ReferalManage'));
 
 // Footer pages
 const About = lazy(() => import('./pages/About'));
@@ -49,6 +50,7 @@ const AdminNotifications = lazy(() => import('./admin/pages/AdminNotifications')
 const AdminTransactionHistory = lazy(() => import('./admin/pages/AdminTransactionHistory'));
 const TransactionRequestDetails = lazy(() => import('./admin/pages/TransactionRequestDetails'));
 const PortfolioManagement = lazy(() => import('./admin/pages/PortfolioManagement'));
+const ReferralManagement = lazy(() => import('./admin/pages/ReferralManagement'));
 // const AdminSettings = lazy(() => import('./admin/pages/AdminSettings'));
 
 function App() {
@@ -103,6 +105,7 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/notifications" element={<Notifications />} />
+                <Route path="/referrals" element={<ReferalManage />} />
 
                 <Route path="/invest" element={
                   <ProtectedRoute requireVerification={true}>
@@ -153,6 +156,7 @@ function App() {
             <Route path="transaction-request/:id" element={<TransactionRequestDetails />} />
             <Route path="profile" element={<AdminProfile />} />
             <Route path="card" element={<CardManagement />} />
+            <Route path="referrals" element={<ReferralManagement />} />
             <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
           </Route>
 

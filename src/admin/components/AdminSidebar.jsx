@@ -13,7 +13,8 @@ import {
   FiBell,
   FiDollarSign,
   FiPieChart,
-  FiCreditCard
+  FiCreditCard,
+  FiGift
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/common/Button';
@@ -38,6 +39,7 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
     { name: 'Manage Trader', path: '/admin/manage-trader', icon: FiUserCheck },
     { name: 'Manage Card', path: '/admin/card', icon: FiCreditCard },
     { name: 'Transactions', path: '/admin/transactions', icon: FiDollarSign },
+    { name: 'Referrals', path: '/admin/referrals', icon: FiGift },
     { name: 'Notifications', path: '/admin/notifications', icon: FiBell },
     { name: 'Profile', path: '/admin/profile', icon: FiUser },
     // { name: 'Settings', path: '/admin/settings', icon: FiSettings },

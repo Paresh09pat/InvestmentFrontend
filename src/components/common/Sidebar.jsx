@@ -8,7 +8,8 @@ import {
   FiBell,
   FiChevronLeft,
   FiChevronRight,
-  FiShield
+  FiShield,
+  FiGift
 } from 'react-icons/fi';
 
 const Sidebar = ({ isCollapsed, onToggle }) => {
@@ -18,6 +19,7 @@ const Sidebar = ({ isCollapsed, onToggle }) => {
     { name: 'Dashboard', path: '/dashboard', icon: FiHome },
     { name: 'Invest', path: '/invest', icon: () => <span className="text-lg font-bold">$</span> },
     { name: 'Portfolio', path: '/portfolio', icon: FiTrendingUp },
+    { name: 'Referrals', path: '/referrals', icon: FiGift },
     { name: 'Profile', path: '/profile', icon: FiUser },
     { name: 'Notifications', path: '/notifications', icon: FiBell },
   ];
