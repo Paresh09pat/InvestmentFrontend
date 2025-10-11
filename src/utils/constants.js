@@ -44,6 +44,30 @@ export const NOTIFICATION_TYPES = {
   INFO: 'info'
 };
 
+export const REFERRAL_TRANSACTION_STATUS = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected'
+};
+
+export const REFERRAL_PLANS = {
+  SILVER: 'silver',
+  GOLD: 'gold',
+  PLATINUM: 'platinum'
+};
+
+export const REFERRAL_PLAN_COLORS = {
+  silver: 'bg-gray-100 text-gray-800',
+  gold: 'bg-yellow-100 text-yellow-800',
+  platinum: 'bg-purple-100 text-purple-800'
+};
+
+export const REFERRAL_PLAN_NAMES = {
+  silver: 'Silver',
+  gold: 'Gold',
+  platinum: 'Platinum'
+};
+
 export const ROUTES = {
   HOME: '/',
   LOGIN: '/login',

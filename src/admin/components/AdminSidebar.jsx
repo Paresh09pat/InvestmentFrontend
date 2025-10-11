@@ -16,6 +16,7 @@ import {
   FiCreditCard,
   FiTrendingDown,
   FiArchive
+  FiGift
 } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../../components/common/Button';
@@ -43,6 +44,8 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
     { name: 'Manage Card', path: '/admin/card', icon: FiCreditCard },
     { name: 'Withdrawal History', path: '/admin/withdrawal-history', icon: FiTrendingDown },
     { name: 'Deposit History', path: '/admin/deposit-history', icon: FiTrendingUp },
+    { name: 'Transactions', path: '/admin/transactions', icon: FiDollarSign },
+    { name: 'Referrals', path: '/admin/referrals', icon: FiGift },
     { name: 'Notifications', path: '/admin/notifications', icon: FiBell },
     { name: 'Profile', path: '/admin/profile', icon: FiUser },
     // { name: 'Settings', path: '/admin/settings', icon: FiSettings },

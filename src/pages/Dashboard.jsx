@@ -13,7 +13,8 @@ import {
   FiDollarSign,
   FiBarChart,
   FiAward,
-  FiStar
+  FiStar,
+  FiGift
 } from 'react-icons/fi';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart, ComposedChart, ScatterChart, Scatter, PieChart, Pie, Cell } from 'recharts';
 import { useAuth } from '../context/AuthContext';
@@ -111,14 +112,19 @@ const Dashboard = () => {
 
   // Get total portfolio data
   const getTotalPortfolioData = () => {
+    const referralAmount = portfolio?.referralAmount || 0;
+    const totalReturns = (portfolio?.totalReturns || 0) + referralAmount;
+    const totalCurrentValue = (portfolio?.currentValue || 0) + referralAmount;
+    
     return {
       name: 'Total Portfolio',
       invested: portfolio?.totalInvested || 0,
-      currentValue: portfolio?.currentValue || 0,
-      returns: portfolio?.totalReturns || 0,
-      returnsPercentage: portfolio?.totalReturnsPercentage || 0,
+      currentValue: totalCurrentValue,
+      returns: totalReturns,
+      returnsPercentage: portfolio?.totalInvested > 0 ? (totalReturns / portfolio.totalInvested) * 100 : 0,
       priceHistory: portfolio?.priceHistory || [],
-      returnRate: portfolio?.returnRate || { min: 0, max: 0 }
+      returnRate: portfolio?.returnRate || { min: 0, max: 0 },
+      referralAmount: referralAmount
     };
   };
 
@@ -678,10 +684,74 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </Card>
+
+                  {/* Referral Rewards Card */}
+                  {portfolio?.referralAmount > 0 && (
+                    <Card hover className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Referral Rewards</p>
+                          <p className="text-2xl font-bold text-green-600">
+                            {formatCurrency(portfolio.referralAmount)}
+                          </p>
+                          <p className="text-sm text-gray-600">From Referrals</p>
+                        </div>
+                        <div className="bg-green-100 p-3 rounded-full">
+                          <FiGift className="text-green-600" size={24} />
+                        </div>
+                      </div>
+                    </Card>
+                  )}
                 </>
               );
             })()}
           </div>
+
+          {/* Returns Breakdown - Show when portfolio has referral rewards */}
+          {portfolio && portfolio.referralAmount > 0 && (
+            <Card className="mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Returns Breakdown</h3>
+                <FiBarChart className="text-blue-600" size={20} />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-blue-700">Investment Returns</p>
+                      <p className="text-xl font-bold text-blue-900">
+                        {formatCurrency(portfolio.totalReturns)}
+                      </p>
+                    </div>
+                    <div className="bg-blue-100 p-2 rounded-full">
+                      <FiTrendingUp className="text-blue-600" size={20} />
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-green-700">Referral Rewards</p>
+                      <p className="text-xl font-bold text-green-900">
+                        {formatCurrency(portfolio.referralAmount)}
+                      </p>
+                    </div>
+                    <div className="bg-green-100 p-2 rounded-full">
+                      <FiGift className="text-green-600" size={20} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-gray-700">Total Returns</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    {formatCurrency((portfolio.totalReturns || 0) + (portfolio.referralAmount || 0))}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          )}
 
           {/* Plan Tabs - Only for detailed sections */}
           {portfolio && <TabsComponent />}

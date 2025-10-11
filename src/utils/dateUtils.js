@@ -135,3 +135,31 @@ export const formatDateForAPI = (dateString) => {
   
   return date.toISOString();
 };
+
+/**
+ * Format currency amount for display
+ * @param {number|string} amount - Amount to format
+ * @param {string} currency - Currency code (default: USD)
+ * @param {Object} options - Formatting options
+ * @returns {string} Formatted currency string
+ */
+export const formatCurrency = (amount, currency = 'USD', options = {}) => {
+  if (amount === null || amount === undefined || amount === '') return '$0.00';
+  
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  if (isNaN(numAmount)) return '$0.00';
+  
+  const defaultOptions = {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  };
+  
+  try {
+    return new Intl.NumberFormat('en-US', { ...defaultOptions, ...options }).format(numAmount);
+  } catch (error) {
+    // Fallback formatting if Intl.NumberFormat fails
+    return `$${numAmount.toFixed(2)}`;
+  }
+};
