@@ -11,6 +11,12 @@ export const AuthProvider = ({ children }) => {
   const [notificationCount, setNotificationCount] = useState(0);
   const [qr,setQr] = useState(null)
   const [adminNotifications,setAdminNotifications] = useState(0)
+  const [adminCounts, setAdminCounts] = useState({
+    pendingDocuments: 0,
+    pendingInvestments: 0,
+    pendingWithdrawals: 0,
+    pendingReferrals: 0
+  })
 
   // Configure axios to send cookies with requests
   useEffect(() => {
@@ -104,10 +110,17 @@ export const AuthProvider = ({ children }) => {
         `${VITE_APP_API_URL}/api/admin/profile`
       );
       const adminData = adminResponse.data.user;
+      const counts = adminResponse.data.counts || {};
 
       setUser(adminData);
       setIsAdmin(true);
       setAdminNotifications(adminData.notifications); // Admin doesn't have user notifications
+      setAdminCounts({
+        pendingDocuments: counts.pendingDocuments || 0,
+        pendingInvestments: counts.pendingInvestments || 0,
+        pendingWithdrawals: counts.pendingWithdrawals || 0,
+        pendingReferrals: counts.pendingReferrals || 0
+      });
       
       // Store admin data in localStorage for persistence
       localStorage.setItem('admin_user', JSON.stringify(adminData));
@@ -125,6 +138,12 @@ export const AuthProvider = ({ children }) => {
           setUser(adminData);
           setIsAdmin(true);
           setAdminNotifications(0);
+          setAdminCounts({
+            pendingDocuments: 0,
+            pendingInvestments: 0,
+            pendingWithdrawals: 0,
+            pendingReferrals: 0
+          });
           console.log("Using stored admin data as fallback");
           return;
         } catch (parseError) {
@@ -141,6 +160,13 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setIsAdmin(false);
     setNotificationCount(0);
+    setAdminNotifications(0);
+    setAdminCounts({
+      pendingDocuments: 0,
+      pendingInvestments: 0,
+      pendingWithdrawals: 0,
+      pendingReferrals: 0
+    });
     
     // Clear stored admin data
     localStorage.removeItem('admin_user');
@@ -198,6 +224,12 @@ export const AuthProvider = ({ children }) => {
       setUser(adminUser);
       setIsAdmin(true);
       setAdminNotifications(0);
+      setAdminCounts({
+        pendingDocuments: 0,
+        pendingInvestments: 0,
+        pendingWithdrawals: 0,
+        pendingReferrals: 0
+      });
 
       // Store admin data in localStorage for persistence
       localStorage.setItem('admin_user', JSON.stringify(adminUser));
@@ -246,6 +278,12 @@ export const AuthProvider = ({ children }) => {
       setIsAdmin(false);
       setUser(null);
       setAdminNotifications(0);
+      setAdminCounts({
+        pendingDocuments: 0,
+        pendingInvestments: 0,
+        pendingWithdrawals: 0,
+        pendingReferrals: 0
+      });
       
       // Clear stored admin data
       localStorage.removeItem('admin_user');
@@ -286,6 +324,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     notificationCount,
     adminNotifications,
+    adminCounts,
     isAuthenticated: !!user,
     qr,
     login,

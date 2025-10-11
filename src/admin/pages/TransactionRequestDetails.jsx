@@ -22,7 +22,7 @@ import {
   FiLoader,
 } from "react-icons/fi";
 import { INVESTMENT_STATUS, VITE_APP_API_URL } from "../../utils/constants";
-import { formatDateTime, formatDateForTable } from "../../utils/dateUtils";
+import { formatDateForTable } from "../../utils/dateUtils";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Modal from "../../components/common/Modal";
@@ -43,6 +43,34 @@ import Input from "../../components/forms/Input";
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [showRejectionReasonInput, setShowRejectionReasonInput] = useState(false);
   const [statusRejectionReason, setStatusRejectionReason] = useState('');
+
+  // Function to get the appropriate back navigation based on transaction type
+  const getBackNavigation = () => {
+    if (!transactionRequest) return "/admin/dashboard";
+    
+    switch (transactionRequest.type) {
+      case "deposit":
+        return "/admin/deposit-requests";
+      case "withdrawal":
+        return "/admin/withdrawal-requests";
+      default:
+        return "/admin/dashboard";
+    }
+  };
+
+  // Function to get the appropriate back button text
+  const getBackButtonText = () => {
+    if (!transactionRequest) return "Back to Dashboard";
+    
+    switch (transactionRequest.type) {
+      case "deposit":
+        return "Back to Deposit Requests";
+      case "withdrawal":
+        return "Back to Withdrawal Requests";
+      default:
+        return "Back to Dashboard";
+    }
+  };
 
   // API function to fetch transaction request by ID
   const fetchTransactionRequestById = async (transactionId) => {
@@ -120,8 +148,8 @@ import Input from "../../components/forms/Input";
 
     if (success) {
       setRejectionReason("");
-      // Navigate back to investments page after successful rejection
-      setTimeout(() => navigate("/admin/investments"), 1500);
+      // Navigate back to appropriate page after successful rejection
+      setTimeout(() => navigate(getBackNavigation()), 1500);
     }
 
     setActionLoading(false);
@@ -272,10 +300,10 @@ import Input from "../../components/forms/Input";
         <div className="flex items-center justify-between">
           <Button
             variant="outline"
-            onClick={() => navigate("/admin/investments")}
+            onClick={() => navigate(getBackNavigation())}
             icon={<FiArrowLeft />}
           >
-            Back to Investments
+            {getBackButtonText()}
           </Button>
         </div>
 
@@ -302,10 +330,10 @@ import Input from "../../components/forms/Input";
         <div className="flex items-center justify-between">
           <Button
             variant="outline"
-            onClick={() => navigate("/admin/investments")}
+            onClick={() => navigate(getBackNavigation())}
             icon={<FiArrowLeft />}
           >
-            Back to Investments
+            {getBackButtonText()}
           </Button>
         </div>
 
@@ -328,11 +356,11 @@ import Input from "../../components/forms/Input";
           <div className="flex items-center space-x-4 mb-4">
             <Button
               variant="outline"
-              onClick={() => navigate("/admin/investments")}
+              onClick={() => navigate(getBackNavigation())}
               icon={<FiArrowLeft />}
               size="small"
             >
-              Back to Investments
+              {getBackButtonText()}
             </Button>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Transaction Request Details</h1>

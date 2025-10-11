@@ -1,14 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   FiDollarSign,
-  FiTrendingUp,
   FiTrendingDown,
   FiFilter,
   FiSearch,
-  FiEye,
   FiUser,
   FiCalendar,
-  FiCreditCard,
   FiShield,
   FiClock,
   FiCheckCircle,
@@ -16,25 +13,19 @@ import {
   FiAlertCircle,
   FiPause,
   FiRefreshCw,
+  FiEye,
+  FiFileText,
 } from "react-icons/fi";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import Input from "../../components/forms/Input";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
-import TransactionViewModal from "../components/TransactionViewModal";
-import { formatDateTime, formatDateForTable } from "../../utils/dateUtils";
+import { formatDateForTable } from "../../utils/dateUtils";
 import { toast } from "react-toastify";
-// Transaction constants
-const TRANSACTION_TYPES = {
-  DEPOSIT: "deposit",
-  WITHDRAWAL: "withdrawal",
-  INVESTMENT: "investment",
-  REFUND: "refund",
-  FEE: "fee",
-  BONUS: "bonus",
-  DIVIDEND: "dividend",
-};
+import axios from "axios";
+import { VITE_APP_API_URL } from "../../utils/constants";
 
+// Transaction constants
 const TRANSACTION_STATUS = {
   PENDING: "pending",
   APPROVED: "approved",
@@ -45,14 +36,6 @@ const TRANSACTION_STATUS = {
   PROCESSING: "processing",
 };
 
-const PAYMENT_METHODS = {
-  BANK_TRANSFER: "bank_transfer",
-  CREDIT_CARD: "credit_card",
-  PAYPAL: "paypal",
-  CRYPTO: "crypto",
-  WIRE_TRANSFER: "wire_transfer",
-};
-
 // Helper functions
 const formatTransactionAmount = (amount, currency = "USD") => {
   return new Intl.NumberFormat("en-US", {
@@ -61,59 +44,47 @@ const formatTransactionAmount = (amount, currency = "USD") => {
   }).format(amount);
 };
 
-const formatTransactionTime = (dateString) => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffTime = Math.abs(now - date);
-  const diffMinutes = Math.ceil(diffTime / (1000 * 60));
-
-  if (diffMinutes < 1) return "Just now";
-  if (diffMinutes < 60) return `${diffMinutes}m ago`;
-  if (diffMinutes < 1440) return `${Math.floor(diffMinutes / 60)}h ago`;
-  if (diffMinutes < 10080) return `${Math.floor(diffMinutes / 1440)}d ago`;
-  return date.toLocaleDateString();
-};
-
-import axios from "axios";
-import { VITE_APP_API_URL } from "../../utils/constants";
-
-const AdminTransactionHistory = () => {
+const InvestmentWithdrawalRequest = () => {
   const [transactions, setTransactions] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [selectedTransaction, setSelectedTransaction] = useState(null);
-  const [showTransactionModal, setShowTransactionModal] = useState(false);
-  // Load transaction requests
-  const loadTransactions = async () => {
+
+
+  // Load investment withdrawal transactions
+  const loadTransactions = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        `${VITE_APP_API_URL}/api/admin/transaction-request`,
+        `${VITE_APP_API_URL}/api/admin/invt-requests`,
         { withCredentials: true }
       );
 
-      if (response.data && response.data.success) {
+      if (response.data && response.data.message === "Investment requests fetched successfully") {
+        console.log("Investment withdrawal transactions data:", response.data.data);
+        console.log("Sample transaction:", response.data.data[0]);
+        
         setTransactions(response.data.data);
         setFilteredTransactions(response.data.data);
-        // console.log("transaction requests", response.data.data);
+        
+        // User details are already included in the response, no need to fetch separately
+        console.log("User details are already populated in the response");
       } else {
         console.error("Invalid response format:", response.data);
         setTransactions([]);
         setFilteredTransactions([]);
       }
     } catch (error) {
-      toast.error("Failed to load transaction requests");
-      console.error("Failed to load transaction requests:", error);
+      toast.error("Failed to load investment withdrawal requests");
+      console.error("Failed to load investment withdrawal requests:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Filter transactions
   useEffect(() => {
@@ -129,11 +100,19 @@ const AdminTransactionHistory = () => {
           (transaction.userId?.email || "")
             .toLowerCase()
             .includes(searchTerm.toLowerCase()) ||
+          (transaction.userId?._id || "")
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
           (transaction.plan || "")
             .toLowerCase()
             .includes(searchTerm.toLowerCase()) ||
-          (transaction.type || "")
+          (transaction.rejectionReason || "")
             .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          (transaction.walletAddress || "")
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          (transaction.amount || 0).toString()
             .includes(searchTerm.toLowerCase())
       );
     }
@@ -142,13 +121,6 @@ const AdminTransactionHistory = () => {
     if (statusFilter !== "all") {
       filtered = filtered.filter(
         (transaction) => transaction.status === statusFilter
-      );
-    }
-
-    // Type filter
-    if (typeFilter !== "all") {
-      filtered = filtered.filter(
-        (transaction) => transaction.type === typeFilter
       );
     }
 
@@ -179,13 +151,13 @@ const AdminTransactionHistory = () => {
 
     setFilteredTransactions(filtered);
     setCurrentPage(1);
-  }, [transactions, searchTerm, statusFilter, typeFilter, dateFilter]);
+  }, [transactions, searchTerm, statusFilter, dateFilter]);
 
   useEffect(() => {
     loadTransactions();
-  }, []);
+  }, [loadTransactions]);
 
-  // Get transaction request statistics
+  // Get investment withdrawal statistics
   const stats = {
     totalRequests: filteredTransactions.length,
     totalVolume: filteredTransactions.reduce(
@@ -196,9 +168,6 @@ const AdminTransactionHistory = () => {
       .length,
     approvedRequests: filteredTransactions.filter(
       (t) => t.status === "approved"
-    ).length,
-    rejectedRequests: filteredTransactions.filter(
-      (t) => t.status === "rejected"
     ).length,
     uniqueUsers: new Set(filteredTransactions.map((t) => t.userId?._id)).size,
   };
@@ -231,45 +200,17 @@ const AdminTransactionHistory = () => {
     }
   };
 
-  // Get type icon
-  const getTypeIcon = (type) => {
-    switch (type) {
-      case TRANSACTION_TYPES.DEPOSIT:
-        return <FiTrendingUp className="text-green-500" size={16} />;
-      case TRANSACTION_TYPES.WITHDRAWAL:
-        return <FiTrendingDown className="text-orange-500" size={16} />;
-      case TRANSACTION_TYPES.INVESTMENT:
-        return <FiDollarSign className="text-blue-500" size={16} />;
-      case TRANSACTION_TYPES.DIVIDEND:
-        return <FiShield className="text-purple-500" size={16} />;
-      case TRANSACTION_TYPES.BONUS:
-        return <FiShield className="text-indigo-500" size={16} />;
-      case TRANSACTION_TYPES.FEE:
-        return <FiCreditCard className="text-red-500" size={16} />;
-      default:
-        return <FiDollarSign className="text-gray-500" size={16} />;
-    }
-  };
-
   // Clear all filters
   const clearFilters = () => {
     setSearchTerm("");
     setStatusFilter("all");
-    setTypeFilter("all");
     setDateFilter("all");
   };
 
-
   // Handle transaction view
   const handleViewTransaction = (transaction) => {
-    // Navigate to transaction request details page
-    window.location.href = `/admin/transaction-request/${transaction._id}`;
-  };
-
-  // Close transaction modal
-  const handleCloseTransactionModal = () => {
-    setShowTransactionModal(false);
-    setSelectedTransaction(null);
+    // Navigate to investment withdrawal request details page
+    window.location.href = `/admin/invt-req/${transaction._id}`;
   };
 
   return (
@@ -278,14 +219,13 @@ const AdminTransactionHistory = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Transaction Requests
+            Investment Withdrawal Requests
           </h1>
           <p className="text-gray-600">
-            View and manage all transaction requests
+            Manage and review all investment withdrawal requests
           </p>
         </div>
         <div className="flex space-x-3">
-  
           <Button
             variant="outline"
             onClick={loadTransactions}
@@ -309,8 +249,8 @@ const AdminTransactionHistory = () => {
                 {stats.totalRequests}
               </p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-full">
-              <FiDollarSign className="text-blue-600" size={24} />
+            <div className="p-3 bg-red-100 rounded-full">
+              <FiTrendingDown className="text-red-600" size={24} />
             </div>
           </div>
         </Card>
@@ -323,8 +263,8 @@ const AdminTransactionHistory = () => {
                 {formatTransactionAmount(stats.totalVolume)}
               </p>
             </div>
-            <div className="p-3 bg-green-100 rounded-full">
-              <FiTrendingUp className="text-green-600" size={24} />
+            <div className="p-3 bg-orange-100 rounded-full">
+              <FiDollarSign className="text-orange-600" size={24} />
             </div>
           </div>
         </Card>
@@ -360,10 +300,10 @@ const AdminTransactionHistory = () => {
 
       {/* Filters */}
       <Card className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <Input
-              placeholder="Search transaction requests..."
+              placeholder="Search investment withdrawal requests..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               icon={<FiSearch />}
@@ -385,18 +325,6 @@ const AdminTransactionHistory = () => {
 
           <div>
             <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">All Types</option>
-              <option value={TRANSACTION_TYPES.DEPOSIT}>Deposits</option>
-              <option value={TRANSACTION_TYPES.WITHDRAWAL}>Withdrawals</option>
-            </select>
-          </div>
-
-          <div>
-            <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -413,7 +341,7 @@ const AdminTransactionHistory = () => {
         <div className="flex justify-between items-center mt-4">
           <div className="text-sm text-gray-600">
             Showing {filteredTransactions.length} of {transactions.length}{" "}
-            transaction requests
+            investment withdrawal requests
           </div>
           <Button variant="outline" size="small" onClick={clearFilters}>
             Clear Filters
@@ -421,7 +349,7 @@ const AdminTransactionHistory = () => {
         </div>
       </Card>
 
-      {/* Transactions Table */}
+      {/* Investment Withdrawal Requests Table */}
       <Card className="p-6">
         {loading ? (
           <div className="flex items-center justify-center py-12">
@@ -439,9 +367,6 @@ const AdminTransactionHistory = () => {
                     Plan
                   </th>
                   <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                    Type
-                  </th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
                     Amount
                   </th>
                   <th className="text-left py-3 px-4 font-semibold text-gray-700">
@@ -451,7 +376,10 @@ const AdminTransactionHistory = () => {
                     Date
                   </th>
                   <th className="text-left py-3 px-4 font-semibold text-gray-700">
-                  WalletTxId
+                    Wallet Address
+                  </th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">
+                    Reason
                   </th>
                   <th className="text-left py-3 px-4 font-semibold text-gray-700">
                     Actions
@@ -475,20 +403,12 @@ const AdminTransactionHistory = () => {
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                      <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium capitalize">
                         {transaction.plan || "N/A"}
                       </span>
                     </td>
                     <td className="py-4 px-4">
-                      <div className="flex items-center space-x-2">
-                        {getTypeIcon(transaction.type)}
-                        <span className="capitalize">
-                          {transaction.type || "N/A"}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="font-semibold text-green-600">
+                      <span className="font-semibold text-red-600">
                         {formatTransactionAmount(transaction.amount || 0)}
                       </span>
                     </td>
@@ -505,6 +425,9 @@ const AdminTransactionHistory = () => {
                               : transaction.status ===
                                 TRANSACTION_STATUS.REJECTED
                               ? "text-red-600"
+                              : transaction.status ===
+                                TRANSACTION_STATUS.COMPLETED
+                              ? "text-green-600"
                               : "text-gray-600"
                           }`}
                         >
@@ -523,9 +446,16 @@ const AdminTransactionHistory = () => {
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <span className="text-sm font-mono text-gray-600">
-                        {transaction.walletTxId || transaction._id}
+                      <span className="text-sm font-mono text-gray-600 max-w-xs truncate block">
+                        {transaction.walletAddress || "N/A"}
                       </span>
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="max-w-xs">
+                        <span className="text-sm text-gray-600 truncate block">
+                          {transaction.rejectionReason || "N/A"}
+                        </span>
+                      </div>
                     </td>
                     <td className="py-4 px-4">
                       <Button
@@ -544,17 +474,16 @@ const AdminTransactionHistory = () => {
           </div>
         ) : (
           <div className="text-center py-12">
-            <FiDollarSign className="mx-auto text-gray-400 mb-4" size={48} />
+            <FiFileText className="mx-auto text-gray-400 mb-4" size={48} />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No transaction requests found
+              No investment withdrawal requests found
             </h3>
             <p className="text-gray-600">
               {searchTerm ||
               statusFilter !== "all" ||
-              typeFilter !== "all" ||
               dateFilter !== "all"
                 ? "Try adjusting your search or filter criteria."
-                : "No transaction requests have been recorded yet."}
+                : "No investment withdrawal requests have been submitted yet."}
             </p>
           </div>
         )}
@@ -565,7 +494,7 @@ const AdminTransactionHistory = () => {
             <div className="text-sm text-gray-600">
               Showing {startIndex + 1} to{" "}
               {Math.min(endIndex, filteredTransactions.length)} of{" "}
-              {filteredTransactions.length} transaction requests
+              {filteredTransactions.length} investment withdrawal requests
             </div>
             <div className="flex space-x-2">
               <Button
@@ -593,15 +522,8 @@ const AdminTransactionHistory = () => {
           </div>
         )}
       </Card>
-
-      {/* Transaction View Modal */}
-      <TransactionViewModal
-        isOpen={showTransactionModal}
-        onClose={handleCloseTransactionModal}
-        transaction={selectedTransaction}
-      />
     </div>
   );
 };
 
-export default AdminTransactionHistory;
+export default InvestmentWithdrawalRequest;

@@ -12,7 +12,7 @@ const Signup = () => {
   const navigate = useNavigate();
   const { signup } = useAuth();
   const [searchParams] = useSearchParams();
-  const refId = searchParams.get('refId');
+  const refId = searchParams.get('referralCode');
   console.log("searchParams", searchParams.toString());
   console.log("refId", refId);
 

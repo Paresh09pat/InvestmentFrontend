@@ -29,6 +29,7 @@ export const AdminNotificationProvider = ({ children }) => {
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + limit;
       const newNotifications = allNotifications.slice(startIndex, endIndex);
+      const hasMore = endIndex < allNotifications.length;
       
       if (page === 1) {
         setNotifications(newNotifications);
@@ -42,6 +43,7 @@ export const AdminNotificationProvider = ({ children }) => {
       return { 
         notifications: newNotifications, 
         total: allNotifications.length, 
+        hasMore,
         unreadCount 
       };
     } catch (error) {
@@ -85,20 +87,21 @@ export const AdminNotificationProvider = ({ children }) => {
     }
   };
 
-  const deleteNotification = async (notificationId) => {
+  const deleteNotification = async (notificationIds) => {
     try {
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 200));
 
-      const deletedNotification = notifications.find(n => n._id === notificationId);
-      setNotifications(prev => prev.filter(notif => notif._id !== notificationId));
+      const idsToDelete = Array.isArray(notificationIds) ? notificationIds : [notificationIds];
+      const deletedNotifications = notifications.filter(n => idsToDelete.includes(n._id));
       
-      // Decrease count if the deleted notification was unread
-      if (deletedNotification && !deletedNotification.read) {
-        setNotificationCount(prev => Math.max(0, prev - 1));
-      }
+      setNotifications(prev => prev.filter(notif => !idsToDelete.includes(notif._id)));
+      
+      // Decrease count for unread deleted notifications
+      const unreadDeletedCount = deletedNotifications.filter(n => !n.read).length;
+      setNotificationCount(prev => Math.max(0, prev - unreadDeletedCount));
     } catch (error) {
-      console.error("Failed to delete notification:", error);
+      console.error("Failed to delete notification(s):", error);
       throw error;
     }
   };

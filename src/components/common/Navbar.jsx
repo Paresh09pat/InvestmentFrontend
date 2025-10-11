@@ -10,6 +10,7 @@ import {
   FiTrendingUp,
   FiShield,
   FiClock,
+  FiGift,
 } from "react-icons/fi";
 import { useAuth } from "../../context/AuthContext";
 import Button from "./Button";
@@ -70,6 +71,7 @@ const Navbar = () => {
       icon: () => <span className="text-lg font-bold">$</span>,
     },
     { name: "History", path: "/investment-history", icon: FiClock },
+    { name: "Referrals", path: "/referrals", icon: FiGift },
     { name: "Profile", path: "/profile", icon: FiUser },
     {
       name: "Notifications",
