@@ -260,7 +260,7 @@ const AdminDashboard = () => {
   };
 
   const formatPercentage = (num) => {
-    return `${num.toFixed(1)}%`;
+    return `${num?.toFixed(1)}%`;
   };
 
   // Enhanced chart data processing functions
@@ -647,10 +647,10 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Transactions</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatNumber(dashboardData.transactions.stats.totalTransactions)}</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatNumber(dashboardData?.transactions?.stats?.totalTransactions || 0)}</p>
                   <div className="flex items-center space-x-1 mt-1">
                     <FiCreditCard className="text-indigo-500" size={14} />
-                    <span className="text-sm text-indigo-600">{formatPercentage(dashboardData.transactions.successRate)} success rate</span>
+                    <span className="text-sm text-indigo-600">{formatPercentage(dashboardData?.transactions?.successRate || 0)} success rate</span>
                   </div>
                 </div>
                 <div className="bg-indigo-100 p-3 rounded-full">
@@ -663,7 +663,7 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Subscriptions</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatNumber(dashboardData.overview.totalSubscriptions)}</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatNumber(dashboardData?.overview?.totalSubscriptions || 0)}</p>
                   <div className="flex items-center space-x-1 mt-1">
                     <FiPackage className="text-purple-500" size={14} />
                     <span className="text-sm text-purple-600">Active plans</span>
@@ -682,10 +682,10 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Verified Users</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatNumber(dashboardData.overview.verifiedUsers)}</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatNumber(dashboardData?.overview?.verifiedUsers || 0)}</p>
                   <div className="flex items-center space-x-1 mt-1">
                     <FiActivity className="text-blue-500" size={14} />
-                    <span className="text-sm text-blue-600">{formatPercentage(dashboardData.overview.verificationRate)} verification rate</span>
+                    <span className="text-sm text-blue-600">{formatPercentage(dashboardData?.overview?.verificationRate || 0)} verification rate</span>
                   </div>
                 </div>
                 <div className="bg-blue-100 p-3 rounded-full">
@@ -698,10 +698,10 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Traders</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatNumber(dashboardData.overview.totalTraders)}</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatNumber(dashboardData?.overview?.totalTraders || 0)}</p>
                   <div className="flex items-center space-x-1 mt-1">
                     <FiBarChart2 className="text-orange-500" size={14} />
-                    <span className="text-sm text-orange-600">{formatNumber(dashboardData.traders.stats.avgExperience)} years avg experience</span>
+                    <span className="text-sm text-orange-600">{formatNumber(dashboardData?.traders?.stats?.avgExperience || 0)} years avg experience</span>
                   </div>
                 </div>
                 <div className="bg-orange-100 p-3 rounded-full">
@@ -714,10 +714,10 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Returns</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(dashboardData.financial.portfolioStats.totalReturns)}</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(dashboardData?.financial?.portfolioStats?.totalReturns || 0)}</p>
                   <div className="flex items-center space-x-1 mt-1">
                     <FiTrendingUp className="text-green-500" size={14} />
-                    <span className="text-sm text-green-600">{formatPercentage(dashboardData.financial.portfolioStats.avgReturnPercentage)} avg return</span>
+                    <span className="text-sm text-green-600">{formatPercentage(dashboardData?.financial?.portfolioStats?.avgReturnPercentage || 0)} avg return</span>
                   </div>
                 </div>
                 <div className="bg-green-100 p-3 rounded-full">
@@ -730,7 +730,7 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Platform Health</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatNumber(dashboardData.overview.platformHealthScore)}</p>
+                  <p className="text-2xl font-bold text-gray-900">{formatNumber(dashboardData?.overview?.platformHealthScore || 0)}</p>
                   <div className="flex items-center space-x-1 mt-1">
                     <FiActivity className="text-green-500" size={14} />
                     <span className="text-sm text-green-600">Good</span>
@@ -965,27 +965,27 @@ const AdminDashboard = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600 text-sm">Total Portfolios</span>
-                    <span className="font-medium">{formatNumber(dashboardData.financial.portfolioStats.totalPortfolios)}</span>
+                    <span className="font-medium">{formatNumber(dashboardData?.financial?.portfolioStats?.totalPortfolios || 0)}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600 text-sm">Total Invested</span>
-                    <span className="font-medium text-blue-600">{formatCurrency(dashboardData.financial.portfolioStats.totalInvested)}</span>
+                    <span className="font-medium text-blue-600">{formatCurrency(dashboardData?.financial?.portfolioStats?.totalInvested || 0)}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600 text-sm">Current Value</span>
-                    <span className="font-medium text-green-600">{formatCurrency(dashboardData.financial.portfolioStats.totalCurrentValue)}</span>
+                    <span className="font-medium text-green-600">{formatCurrency(dashboardData?.financial?.portfolioStats?.totalCurrentValue || 0)}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600 text-sm">Total Returns</span>
-                    <span className="font-medium text-green-600">{formatCurrency(dashboardData.financial.portfolioStats.totalReturns)}</span>
+                    <span className="font-medium text-green-600">{formatCurrency(dashboardData?.financial?.portfolioStats?.totalReturns || 0)}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600 text-sm">Avg Return</span>
-                    <span className="font-medium text-green-600">{formatPercentage(dashboardData.financial.portfolioStats.avgReturnPercentage)}</span>
+                    <span className="font-medium text-green-600">{formatPercentage(dashboardData?.financial?.portfolioStats?.avgReturnPercentage || 0)}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600 text-sm">Profitable</span>
-                    <span className="font-medium text-green-600">{formatNumber(dashboardData.financial.portfolioStats.profitablePortfolios)}</span>
+                    <span className="font-medium text-green-600">{formatNumber(dashboardData?.financial?.portfolioStats?.profitablePortfolios || 0)}</span>
                   </div>
                 </div>
               </Card>
@@ -999,27 +999,27 @@ const AdminDashboard = () => {
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Total Transactions</span>
-                  <span className="font-medium">{formatNumber(dashboardData.transactions.stats.totalTransactions)}</span>
+                  <span className="font-medium">{formatNumber(dashboardData?.transactions?.stats?.totalTransactions || 0)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Total Amount</span>
-                  <span className="font-medium text-blue-600">{formatCurrency(dashboardData.transactions.stats.totalAmount)}</span>
+                  <span className="font-medium text-blue-600">{formatCurrency(dashboardData?.transactions?.stats?.totalAmount || 0)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Average Amount</span>
-                  <span className="font-medium text-green-600">{formatCurrency(dashboardData.transactions.stats.avgAmount)}</span>
+                  <span className="font-medium text-green-600">{formatCurrency(dashboardData?.transactions?.stats?.avgAmount || 0)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Max Amount</span>
-                  <span className="font-medium text-purple-600">{formatCurrency(dashboardData.transactions.stats.maxAmount)}</span>
+                  <span className="font-medium text-purple-600">{formatCurrency(dashboardData?.transactions?.stats?.maxAmount || 0)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Min Amount</span>
-                  <span className="font-medium text-orange-600">{formatCurrency(dashboardData.transactions.stats.minAmount)}</span>
+                    <span className="font-medium text-orange-600">{formatCurrency(dashboardData?.transactions?.stats?.minAmount || 0)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Success Rate</span>
-                  <span className="font-medium text-green-600">{formatPercentage(dashboardData.transactions.successRate)}</span>
+                  <span className="font-medium text-green-600">{formatPercentage(dashboardData?.transactions?.successRate || 0)}</span>
                 </div>
               </div>
             </Card>
@@ -1033,27 +1033,27 @@ const AdminDashboard = () => {
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Total Users</span>
-                  <span className="font-medium">{formatNumber(dashboardData.users.stats.totalUsers)}</span>
+                  <span className="font-medium">{formatNumber(dashboardData?.users?.stats?.totalUsers || 0)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Verified Users</span>
-                  <span className="font-medium text-green-600">{formatNumber(dashboardData.users.stats.verifiedUsers)}</span>
+                  <span className="font-medium text-green-600">{formatNumber(dashboardData?.users?.stats?.verifiedUsers || 0)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Unverified Users</span>
-                  <span className="font-medium text-yellow-600">{formatNumber(dashboardData.users.stats.unverifiedUsers)}</span>
+                  <span className="font-medium text-yellow-600">{formatNumber(dashboardData?.users?.stats?.unverifiedUsers || 0)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Rejected Users</span>
-                  <span className="font-medium text-red-600">{formatNumber(dashboardData.users.stats.rejectedUsers)}</span>
+                  <span className="font-medium text-red-600">{formatNumber(dashboardData?.users?.stats?.rejectedUsers || 0)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Pending Users</span>
-                  <span className="font-medium text-blue-600">{formatNumber(dashboardData.users.stats.pendingUsers)}</span>
+                  <span className="font-medium text-blue-600">{formatNumber(dashboardData?.users?.stats?.pendingUsers || 0)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Verification Rate</span>
-                  <span className="font-medium text-green-600">{formatPercentage(dashboardData.overview.verificationRate)}</span>
+                    <span className="font-medium text-green-600">{formatPercentage(dashboardData?.overview?.verificationRate || 0)}</span>
                 </div>
               </div>
             </Card>
@@ -1067,27 +1067,27 @@ const AdminDashboard = () => {
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Total Traders</span>
-                  <span className="font-medium">{formatNumber(dashboardData.traders.stats.totalTraders)}</span>
+                  <span className="font-medium">{formatNumber(dashboardData?.traders?.stats?.totalTraders || 0)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Avg Experience</span>
-                  <span className="font-medium text-blue-600">{formatNumber(dashboardData.traders.stats.avgExperience)} years</span>
+                  <span className="font-medium text-blue-600">{formatNumber(dashboardData?.traders?.stats?.avgExperience || 0)} years</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Max Experience</span>
-                  <span className="font-medium text-green-600">{formatNumber(dashboardData.traders.stats.maxExperience)} years</span>
+                  <span className="font-medium text-green-600">{formatNumber(dashboardData?.traders?.stats?.maxExperience || 0)} years</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Min Experience</span>
-                  <span className="font-medium text-orange-600">{formatNumber(dashboardData.traders.stats.minExperience)} years</span>
+                  <span className="font-medium text-orange-600">{formatNumber(dashboardData?.traders?.stats?.minExperience || 0)} years</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Avg Min Rate</span>
-                  <span className="font-medium text-purple-600">{formatPercentage(dashboardData.traders.stats.avgMinRate)}</span>
+                  <span className="font-medium text-purple-600">{formatPercentage(dashboardData?.traders?.stats?.avgMinRate || 0)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 text-sm">Avg Max Rate</span>
-                  <span className="font-medium text-green-600">{formatPercentage(dashboardData.traders.stats.avgMaxRate)}</span>
+                  <span className="font-medium text-green-600">{formatPercentage(dashboardData?.traders?.stats?.avgMaxRate || 0)}</span>
                 </div>
               </div>
             </Card>

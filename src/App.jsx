@@ -77,6 +77,7 @@ function App() {
     );
   }
 
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {!location.pathname.startsWith('/admin') &&
@@ -110,7 +111,12 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/notifications" element={<Notifications />} />
-                <Route path="/referrals" element={<ReferalManage />} />
+                 
+                <Route path="/referrals" element={
+                   <ProtectedRoute requireVerification={true}>
+                    <ReferalManage />
+                  </ProtectedRoute>
+                } />
 
                 <Route path="/invest" element={
                   <ProtectedRoute requireVerification={true}>

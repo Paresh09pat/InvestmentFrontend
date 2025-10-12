@@ -466,8 +466,8 @@ const UserManagement = () => {
                     Join Date
                   </label>
                   <div>
-                    <div>{formatDateForTable(selectedUser.joinDate).date}</div>
-                    <div className="text-sm text-gray-500">{formatDateForTable(selectedUser.joinDate).time}</div>
+                    <div>{formatDateForTable(selectedUser.createdAt).date}</div>
+                    <div className="text-sm text-gray-500">{formatDateForTable(selectedUser.createdAt).time}</div>
                   </div>
                 </div>
 
