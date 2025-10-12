@@ -174,7 +174,7 @@ const ReferalManage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8">
@@ -293,7 +293,7 @@ const ReferalManage = () => {
                                                 onClick={copyReferralCode}
                                                 variant="outline"
                                                 size="sm"
-                                                className="flex items-center space-x-2"
+                                                className="flex items-center px-2 py-1 space-x-2"
                                             >
                                                 {copiedCode ? <FiCheck className="h-4 w-4" /> : <FiCopy className="h-4 w-4" />}
                                                 <span>{copiedCode ? 'Copied!' : 'Copy'}</span>
@@ -317,10 +317,10 @@ const ReferalManage = () => {
                                             onClick={copyReferralLink}
                                             variant="outline"
                                             size="sm"
-                                            className="flex items-center space-x-2"
+                                            className="flex items-center px-2 py-1 space-x-2"
                                         >
-                                            <FiShare2 className="h-4 w-4" />
-                                            <span>Share</span>
+                                            <FiCopy className="h-4 w-4" />
+                                            <span>Copy</span>
                                         </Button>
                                     </div>
                                 </div>

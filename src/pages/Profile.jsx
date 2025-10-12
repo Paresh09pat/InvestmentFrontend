@@ -397,6 +397,11 @@ const Profile = () => {
                     required={isDocumentsVerifiedButWalletMissing()}
                     placeholder={isDocumentsVerifiedButWalletMissing() ? "Required for verified users" : "Enter your Trust Wallet address"}
                   />
+                 {!user?.trustWalletAddress && (
+                  <p className="text-sm text-red-500 mt-1">
+                    You must add your Trust Wallet address to complete your profile and enable investment features.
+                  </p>
+                 )}
 
                 </div>
               </Card>

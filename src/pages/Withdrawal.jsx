@@ -89,7 +89,7 @@ const Withdrawal = () => {
 
     if (!formData.address) {
       newErrors.address = 'Withdrawal address is required';
-    } else if (formData.address.length < 10) {
+    } else if (formData.address.length < 1) {
       newErrors.address = 'Please enter a valid wallet address';
     }
 
