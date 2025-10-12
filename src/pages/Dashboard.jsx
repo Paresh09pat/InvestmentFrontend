@@ -112,19 +112,20 @@ const Dashboard = () => {
 
   // Get total portfolio data
   const getTotalPortfolioData = () => {
-    const referralAmount = portfolio?.referralAmount || 0;
-    const totalReturns = (portfolio?.totalReturns || 0) + referralAmount;
-    const totalCurrentValue = (portfolio?.currentValue || 0) + referralAmount;
+    const referralAmount = portfolio?.referralRewards || 0;
+    // portfolio.totalReturns already includes referral rewards, so don't add them again
+    const totalReturns = portfolio?.totalReturns || 0;
+    const totalCurrentValue = portfolio?.currentValue || 0;
     
     return {
       name: 'Total Portfolio',
       invested: portfolio?.totalInvested || 0,
       currentValue: totalCurrentValue,
       returns: totalReturns,
-      returnsPercentage: portfolio?.totalInvested > 0 ? (totalReturns / portfolio.totalInvested) * 100 : 0,
+      returnsPercentage: portfolio?.totalReturnsPercentage || 0,
       priceHistory: portfolio?.priceHistory || [],
       returnRate: portfolio?.returnRate || { min: 0, max: 0 },
-      referralAmount: referralAmount
+      referralAmount: referralAmount || 0
     };
   };
 
@@ -684,13 +685,13 @@ const Dashboard = () => {
                   </Card>
 
                   {/* Referral Rewards Card */}
-                  {portfolio?.referralAmount > 0 && (
+                  {portfolio?.referralRewards > 0 && (
                     <Card hover className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-600">Referral Rewards</p>
                           <p className="text-2xl font-bold text-green-600">
-                            {formatCurrency(portfolio.referralAmount)}
+                            {formatCurrency(portfolio.referralRewards)}
                           </p>
                           <p className="text-sm text-gray-600">From Referrals</p>
                         </div>
@@ -706,7 +707,7 @@ const Dashboard = () => {
           </div>
 
           {/* Returns Breakdown - Show when portfolio has referral rewards */}
-          {portfolio && portfolio.referralAmount > 0 && (
+          {portfolio && portfolio.referralRewards > 0 && (
             <Card className="mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Returns Breakdown</h3>
@@ -718,7 +719,9 @@ const Dashboard = () => {
                     <div>
                       <p className="text-sm font-medium text-blue-700">Investment Returns</p>
                       <p className="text-xl font-bold text-blue-900">
-                        {formatCurrency(portfolio.totalReturns)}
+                        {formatCurrency(
+                          portfolio?.plans?.reduce((total, plan) => total + (plan.returns || 0), 0) || 0
+                        )}
                       </p>
                     </div>
                     <div className="bg-blue-100 p-2 rounded-full">
@@ -731,7 +734,7 @@ const Dashboard = () => {
                     <div>
                       <p className="text-sm font-medium text-green-700">Referral Rewards</p>
                       <p className="text-xl font-bold text-green-900">
-                        {formatCurrency(portfolio.referralAmount)}
+                        {formatCurrency(portfolio.referralRewards)}
                       </p>
                     </div>
                     <div className="bg-green-100 p-2 rounded-full">
@@ -744,7 +747,7 @@ const Dashboard = () => {
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium text-gray-700">Total Returns</p>
                   <p className="text-lg font-bold text-gray-900">
-                    {formatCurrency((portfolio.totalReturns || 0) + (portfolio.referralAmount || 0))}
+                    {formatCurrency(portfolio.totalReturns || 0)}
                   </p>
                 </div>
               </div>

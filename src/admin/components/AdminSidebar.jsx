@@ -100,7 +100,7 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 space-y-2 mb-8">
+        <nav className="flex-1 space-y-2 mb-8 overflow-auto">
           {navItems.map((item) => (
             <Link
               key={item.name}
