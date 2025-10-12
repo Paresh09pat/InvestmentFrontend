@@ -104,7 +104,7 @@ const AdminLayout = () => {
           {/* Main Content Area */}
           <main className=" sm:p-6 lg:p-8">
             <div 
-              className="max-w-7xl mx-auto"
+              className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
               onClick={closeMobileSidebar}
             >
               {/* Use Outlet for proper nested routing */}

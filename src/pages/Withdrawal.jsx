@@ -275,7 +275,7 @@ const Withdrawal = () => {
           {/* Investment Withdrawal Button */}
           <div className="mb-8">
             <Card className="bg-gradient-to-r from-red-50 to-orange-50 border-red-200">
-              <div className="flex items-center justify-between">
+              <div className="flex  justify-between flex-col md:flex-row gap-4 md:gap-0 items-start md:items-center">
                 <div className="flex items-center space-x-4">
                   <div className="bg-gradient-to-r from-red-500 to-orange-500 p-3 rounded-lg">
                     <FiDollarSign className="h-6 w-6 text-white" />

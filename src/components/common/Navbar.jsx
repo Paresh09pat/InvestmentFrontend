@@ -93,11 +93,11 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-           <img src="/trdexalogo.jpg" alt="logo" className="w-30 h-10" />
+           <img src="/trdexalogo.jpg" alt="logo" className="lg:w-30 lg:h-10 w-24 h-8" />
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center lg:space-x-8 space-x-2">
             {user ? (
               <>
                 {navLinks.map((link) => (
@@ -111,7 +111,7 @@ const Navbar = () => {
                     }`}
                   >
                     <link.icon size={18} />
-                    <span>{link.name}</span>
+                    <span className="lg:text-base text-sm">{link.name}</span>
                     {link.count > 0 && (
                       <span className="text-xs text-white bg-blue-500 rounded-full px-2 py-1">
                         {link.count}
@@ -194,7 +194,7 @@ const Navbar = () => {
 
       {/* Mobile Navigation */}
       {isOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200 animate-slide-up shadow-lg">
+        <div className="md:hidden bg-white border-t border-gray-200 animate-slide-up shadow-lg fixed w-full z-50 h-screen">
           <div className="px-4 py-4 space-y-3">
             {user ? (
               <>

@@ -543,7 +543,7 @@ const AdminDashboard = () => {
 
 
   return (
-    <div className="p-4 lg:p-6 space-y-4 lg:space-y-6 animate-fade-in">
+    <div className=" space-y-4 lg:space-y-6 animate-fade-in">
       {/* Enhanced Header */}
       <div className="mb-6 lg:mb-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">

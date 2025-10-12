@@ -427,7 +427,7 @@ const Profile = () => {
                       </div>
                     </div>
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full text-center ${getDocumentStatus('aadhaar') === 'verified'
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full w-fit text-center ${getDocumentStatus('aadhaar') === 'verified'
                         ? 'text-green-600 bg-green-100'
                         : getDocumentStatus('aadhaar') === 'pending'
                           ? 'text-yellow-600 bg-yellow-100'
@@ -486,7 +486,7 @@ const Profile = () => {
                       </div>
                     </div>
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full text-center ${getDocumentStatus('pan') === 'verified'
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full w-fit text-center ${getDocumentStatus('pan') === 'verified'
                         ? 'text-green-600 bg-green-100'
                         : getDocumentStatus('pan') === 'pending'
                           ? 'text-yellow-600 bg-yellow-100'

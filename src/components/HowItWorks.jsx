@@ -11,58 +11,168 @@ import { USER_VERIFICATION_STATUS } from '../utils/constants';
 const HowItWorks = () => {
   const [mounted, setMounted] = useState(false);
   const [activeTimeframe, setActiveTimeframe] = useState('1 Year');
+  const [dataKey, setDataKey] = useState(0); // Key to force re-render of chart data
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const [isMobile, setIsMobile] = useState(false);  
 
-  
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+  }, []);
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Portfolio data for different timeframes with upward trend
-  const getPortfolioData = (timeframe) => {
-    const baseData = {
-      '1 Year': [
-        { month: 'Jan', value: 35000, stocks: 24500, crypto: 10500 },
-        { month: 'Feb', value: 36500, stocks: 25550, crypto: 10950 },
-        { month: 'Mar', value: 38000, stocks: 26600, crypto: 11400 },
-        { month: 'Apr', value: 39500, stocks: 27650, crypto: 11850 },
-        { month: 'May', value: 41000, stocks: 28700, crypto: 12300 },
-        { month: 'Jun', value: 42500, stocks: 29750, crypto: 12750 },
-        { month: 'Jul', value: 44000, stocks: 30800, crypto: 13200 },
-        { month: 'Aug', value: 45500, stocks: 31850, crypto: 13650 },
-        { month: 'Sep', value: 47000, stocks: 32900, crypto: 14100 },
-        { month: 'Oct', value: 48500, stocks: 33950, crypto: 14550 },
-        { month: 'Nov', value: 50000, stocks: 35000, crypto: 15000 },
-        { month: 'Dec', value: 51500, stocks: 36050, crypto: 15450 }
-      ],
-      '6 Month': [
-        { month: 'Jul', value: 42000, stocks: 29400, crypto: 12600 },
-        { month: 'Aug', value: 43500, stocks: 30450, crypto: 13050 },
-        { month: 'Sep', value: 45000, stocks: 31500, crypto: 13500 },
-        { month: 'Oct', value: 46500, stocks: 32550, crypto: 13950 },
-        { month: 'Nov', value: 48000, stocks: 33600, crypto: 14400 },
-        { month: 'Dec', value: 49500, stocks: 34650, crypto: 14850 }
-      ],
-      '3 Month': [
-        { month: 'Oct', value: 45000, stocks: 31500, crypto: 13500 },
-        { month: 'Nov', value: 47000, stocks: 32900, crypto: 14100 },
-        { month: 'Dec', value: 49000, stocks: 34300, crypto: 14700 }
-      ],
-      'Weekly': [
-        { day: 'Mon', value: 48000, stocks: 33600, crypto: 14400 },
-        { day: 'Tue', value: 48500, stocks: 33950, crypto: 14550 },
-        { day: 'Wed', value: 49000, stocks: 34300, crypto: 14700 },
-        { day: 'Thu', value: 49500, stocks: 34650, crypto: 14850 },
-        { day: 'Fri', value: 50000, stocks: 35000, crypto: 15000 },
-        { day: 'Sat', value: 50500, stocks: 35350, crypto: 15150 },
-        { day: 'Sun', value: 51000, stocks: 35700, crypto: 15300 }
-      ]
+  // Regenerate chart data every 3 seconds for real-time trading feel
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDataKey(prev => prev + 1);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Regenerate data when timeframe changes
+  useEffect(() => {
+    setDataKey(prev => prev + 1);
+  }, [activeTimeframe]);
+
+  // Generate highly volatile portfolio data like real trading graphs
+  const generateVolatileData = (timeframe) => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    
+    let data = [];
+    let currentValue = 35000;
+    let currentStocks = 24500;
+    let currentCrypto = 10500;
+    
+    // Much higher volatility for trading-like movements
+    const getRandomVolatility = () => {
+      const base = (Math.random() - 0.5) * 0.4; // ±20% base volatility
+      const spike = Math.random() < 0.1 ? (Math.random() - 0.5) * 0.3 : 0; // 10% chance of big spike
+      return base + spike;
     };
-    return baseData[timeframe] || baseData['1 Year'];
+    
+    const getTrendMultiplier = () => {
+      const trend = Math.random() < 0.6 ? 1.02 : 0.98; // 60% chance up, 40% chance down
+      return trend + (Math.random() - 0.5) * 0.04; // Add some randomness
+    };
+    
+    const getMarketShock = () => Math.random() < 0.05 ? (Math.random() - 0.5) * 0.5 : 0; // 5% chance of market shock
+    
+    // Trading-like momentum and mean reversion
+    let momentum = 0;
+    const getMomentumEffect = () => {
+      momentum = momentum * 0.7 + (Math.random() - 0.5) * 0.3; // Momentum decays but adds new random component
+      return momentum * 0.2;
+    };
+    
+    const getMeanReversion = (currentVal, baseVal) => {
+      const deviation = (currentVal - baseVal) / baseVal;
+      return -deviation * 0.1; // Pull back towards base value
+    };
+    
+    if (timeframe === '1 Year') {
+      const baseValue = currentValue;
+      for (let i = 0; i < 12; i++) {
+        const volatility = getRandomVolatility();
+        const trend = getTrendMultiplier();
+        const marketShock = getMarketShock();
+        const momentum = getMomentumEffect();
+        const meanReversion = getMeanReversion(currentValue, baseValue * (1 + i * 0.02));
+        
+        // Apply all trading effects
+        const totalChange = volatility * 0.6 + (trend - 1) * 0.8 + marketShock * 0.4 + momentum + meanReversion;
+        currentValue *= (1 + totalChange);
+        currentStocks *= (1 + totalChange * 0.7); // Stocks less volatile than crypto
+        currentCrypto *= (1 + totalChange * 1.3); // Crypto much more volatile
+        
+        data.push({
+          month: months[i],
+          value: Math.round(currentValue),
+          stocks: Math.round(currentStocks),
+          crypto: Math.round(currentCrypto)
+        });
+      }
+    } else if (timeframe === '6 Month') {
+      for (let i = 6; i < 12; i++) {
+        const volatility = getRandomVolatility();
+        const trend = getTrendMultiplier();
+        const marketShock = getMarketShock();
+        
+        const totalChange = volatility * 0.6 + (trend - 1) * 0.8 + marketShock * 0.4;
+        currentValue *= (1 + totalChange);
+        currentStocks *= (1 + totalChange * 0.7);
+        currentCrypto *= (1 + totalChange * 1.3);
+        
+        data.push({
+          month: months[i],
+          value: Math.round(currentValue),
+          stocks: Math.round(currentStocks),
+          crypto: Math.round(currentCrypto)
+        });
+      }
+    } else if (timeframe === '3 Month') {
+      for (let i = 9; i < 12; i++) {
+        const volatility = getRandomVolatility();
+        const trend = getTrendMultiplier();
+        const marketShock = getMarketShock();
+        
+        const totalChange = volatility * 0.6 + (trend - 1) * 0.8 + marketShock * 0.4;
+        currentValue *= (1 + totalChange);
+        currentStocks *= (1 + totalChange * 0.7);
+        currentCrypto *= (1 + totalChange * 1.3);
+        
+        data.push({
+          month: months[i],
+          value: Math.round(currentValue),
+          stocks: Math.round(currentStocks),
+          crypto: Math.round(currentCrypto)
+        });
+      }
+    } else if (timeframe === 'Weekly') {
+      const baseValue = currentValue;
+      for (let i = 0; i < 7; i++) {
+        const volatility = getRandomVolatility() * 0.8; // Still high volatility for daily trading
+        const trend = getTrendMultiplier();
+        const marketShock = getMarketShock() * 0.5; // Smaller shocks for daily
+        const momentum = getMomentumEffect();
+        const meanReversion = getMeanReversion(currentValue, baseValue * (1 + i * 0.01));
+        
+        // Add intraday patterns (higher volatility on weekdays)
+        const isWeekend = i >= 5; // Saturday, Sunday
+        const intradayVolatility = isWeekend ? 0.5 : 1.2;
+        
+        const totalChange = (volatility * 0.4 + (trend - 1) * 0.6 + marketShock * 0.3 + momentum + meanReversion) * intradayVolatility;
+        currentValue *= (1 + totalChange);
+        currentStocks *= (1 + totalChange * 0.6);
+        currentCrypto *= (1 + totalChange * 1.1);
+        
+        data.push({
+          day: days[i],
+          value: Math.round(currentValue),
+          stocks: Math.round(currentStocks),
+          crypto: Math.round(currentCrypto)
+        });
+      }
+    }
+    
+    return data;
+  };
+
+  const getPortfolioData = (timeframe) => {
+    return generateVolatileData(timeframe);
   };
 
   const portfolioData = getPortfolioData(activeTimeframe);
+  
+  // Add dataKey to force re-render when data changes
+  const chartData = portfolioData.map((item, index) => ({
+    ...item,
+    key: `${dataKey}-${index}`
+  }));
 
   const pieData = [
     { name: 'Stocks', value: 35, color: '#3B82F6', amount: 15594 }, // Blue from Hero
@@ -236,7 +346,7 @@ const HowItWorks = () => {
                           cx="50%"
                           cy="50%"
                           innerRadius={70}
-                          outerRadius={100}
+                          outerRadius={isMobile ? 90 : 100}
                           dataKey="value"
                           startAngle={90}
                           endAngle={450}
@@ -310,7 +420,7 @@ const HowItWorks = () => {
                 {/* Enhanced Area Chart - Matching Image Style */}
                 <div className="h-48 sm:h-56 md:h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={portfolioData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="colorStocks" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.4}/>
@@ -350,6 +460,8 @@ const HowItWorks = () => {
                         strokeWidth={2.5}
                         dot={false}
                         activeDot={{ r: 4, fill: '#3B82F6', stroke: '#fff', strokeWidth: 2 }}
+                        animationDuration={1500}
+                        animationEasing="ease-in-out"
                       />
                       <Area
                         type="monotone"
@@ -360,6 +472,8 @@ const HowItWorks = () => {
                         strokeWidth={2.5}
                         dot={false}
                         activeDot={{ r: 4, fill: '#10B981', stroke: '#fff', strokeWidth: 2 }}
+                        animationDuration={1500}
+                        animationEasing="ease-in-out"
                       />
                     </AreaChart>
                   </ResponsiveContainer>
