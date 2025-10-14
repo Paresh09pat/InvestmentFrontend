@@ -1,30 +1,32 @@
+version: "3.9"
+
 services:
   investment-frontend:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3001:80"
+      - "80:80"                # Serve directly on VPS port 80
+    env_file:
+      - .env                   # Use env_file instead of volume to avoid read-only mount error
     environment:
       - NODE_ENV=production
-    volumes:
-      # Mount .env file if it exists
-      - ./.env:/app/.env:ro
     restart: unless-stopped
     networks:
       - investment-network
 
-  # Optional: Add a development service
+  # Optional: Development service
   investment-frontend-dev:
     build:
       context: .
       dockerfile: Dockerfile.dev
     ports:
-      - "5173:5173"
+      - "5173:5173"             # Dev server port
     volumes:
       - .:/app
       - /app/node_modules
-      - ./.env:/app/.env:ro
+    env_file:
+      - .env
     environment:
       - NODE_ENV=development
     command: npm run dev
