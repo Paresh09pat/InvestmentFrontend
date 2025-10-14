@@ -4,10 +4,6 @@ FROM node:20-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Accept build arguments
-ARG VITE_APP_API_URL
-ENV VITE_APP_API_URL=$VITE_APP_API_URL
-
 # Copy package files
 COPY package*.json ./
 

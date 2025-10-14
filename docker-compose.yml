@@ -3,12 +3,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - VITE_APP_API_URL=https://api.trdexa.com
     ports:
       - "3001:80"
     environment:
       - NODE_ENV=production
+    volumes:
+      # Mount .env file if it exists
+      - ./.env:/app/.env:ro
     restart: unless-stopped
     networks:
       - investment-network
@@ -18,16 +19,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-      args:
-        - VITE_APP_API_URL=https://api.trdexa.com
     ports:
       - "5173:5173"
     volumes:
       - .:/app
       - /app/node_modules
+      - ./.env:/app/.env:ro
     environment:
       - NODE_ENV=development
-      - VITE_APP_API_URL=https://api.trdexa.com
     command: npm run dev
     profiles:
       - dev
