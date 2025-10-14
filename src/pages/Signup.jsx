@@ -150,7 +150,7 @@ const Signup = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center space-x-2">
-           <img src="/trdexalogo.jpg" alt="logo" className="w-30 h-10" />
+            <img src="/trdexalogo.jpg" alt="logo" className="w-30 h-10" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mt-6 mb-2">
             Create Account
@@ -241,6 +241,18 @@ const Signup = () => {
                 {showConfirmPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
               </button>
             </div>
+
+            <Input
+              label="Referral Code"
+              type="text"
+              name="referralCode"
+              value={formData.referralCode}
+              onChange={handleChange}
+              placeholder="Enter your referral code"
+              icon={<FiUser />}
+              error={errors.referralCode}
+              className="mt-4"
+            />
 
             <div className="space-y-2">
               <label className="flex items-start space-x-3">
