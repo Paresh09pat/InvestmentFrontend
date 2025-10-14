@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "80:80"                # Serve directly on VPS port 80
+      - "3001:80"                # Serve directly on VPS port 80
     env_file:
       - .env                   # Use env_file instead of volume to avoid read-only mount error
     environment:
