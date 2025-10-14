@@ -7,14 +7,12 @@ services:
       - "3001:80"
     environment:
       - NODE_ENV=production
-    volumes:
-      # Mount .env file if it exists
-      - ./.env:/app/.env:ro
+    env_file:
+      - .env   # <-- use this instead of volumes for env vars
     restart: unless-stopped
     networks:
       - investment-network
 
-  # Optional: Add a development service
   investment-frontend-dev:
     build:
       context: .
@@ -24,7 +22,8 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-      - ./.env:/app/.env:ro
+    env_file:
+      - .env   # <-- use here too
     environment:
       - NODE_ENV=development
     command: npm run dev
