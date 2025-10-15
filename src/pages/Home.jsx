@@ -19,6 +19,7 @@ import WhyChooseUs from '../components/WhyChooseUs';
 import MembershipTiers from '../components/MembershipTiers';
 import Testimonials from '../components/Testimonials';
 import CallToAction from '../components/CallToAction';
+import axios from 'axios';
 
 const Home = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -140,6 +141,9 @@ const Home = () => {
       delay: 0.6
     }
   ];
+
+
+
 
 
   return (

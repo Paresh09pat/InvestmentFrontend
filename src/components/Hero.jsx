@@ -1,12 +1,19 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import { FaUser, FaSignInAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import axios from "axios";
+import { VITE_APP_API_URL } from "../utils/constants";
 
 const Hero = () => {
   const { scrollYProgress } = useScroll();
   const { isAuthenticated } = useAuth();
+  const [analytics, setAnalytics] = useState({
+    totalInvested: 0,
+    totalUsers: 0,
+    totalReturns: 0
+  })
 
   // Transform scroll progress into various animation values
   const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
@@ -33,6 +40,27 @@ const Hero = () => {
   const middleRingSpeed = useTransform(scrollYProgress, [0, 1], [25, 6]);
   const innerRingSpeed = useTransform(scrollYProgress, [0, 1], [20, 5]);
   const innermostRingSpeed = useTransform(scrollYProgress, [0, 1], [15, 4]);
+
+
+  const getHomeAnalytics = async () => {
+    try {
+      const res = await axios.get(`${VITE_APP_API_URL}/api/public/home-analytics`);
+    
+      setAnalytics({
+        totalInvested: res.data?.data.totalAmountInvested,
+        totalUsers: res.data?.data?.totalUsers,
+        totalReturns: res.data?.data?.totalReturns
+      })
+    }
+    catch (err) {
+      console.log(err)
+    }
+  }
+
+
+  useEffect(() => {
+    getHomeAnalytics()
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
@@ -250,7 +278,7 @@ const Hero = () => {
                 Total Funds Traded
               </div>
               <div className="text-white text-sm sm:text-lg md:text-xl font-bold">
-                $3,820,633,321
+                ${analytics.totalInvested}
               </div>
             </motion.div>
 
@@ -272,7 +300,7 @@ const Hero = () => {
                 Active Client
               </div>
               <div className="text-white text-sm sm:text-lg md:text-xl font-bold">
-                4,236,308
+                {analytics.totalUsers}
               </div>
             </motion.div>
 
@@ -294,7 +322,7 @@ const Hero = () => {
                 Partners Earned
               </div>
               <div className="text-white text-sm sm:text-lg md:text-xl font-bold">
-                $2,125,616,729
+                ${analytics.totalReturns}
               </div>
             </motion.div>
 
