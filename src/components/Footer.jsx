@@ -28,13 +28,6 @@ const Footer = () => {
     }
   };
 
-  const socialLinks = [
-    { icon: FiFacebook, href: "#", label: "Facebook" },
-    { icon: FiTwitter, href: "#", label: "Twitter" },
-    { icon: FiLinkedin, href: "#", label: "LinkedIn" },
-    { icon: FiInstagram, href: "#", label: "Instagram" },
-    { icon: FiGithub, href: "#", label: "GitHub" }
-  ];
 
   const quickLinks = [
     { to: "/about", text: "About Us" },
@@ -197,39 +190,6 @@ const Footer = () => {
                 >
                   <contact.icon className="text-blue-400 group-hover:text-blue-300 transition-colors duration-300" size={16} />
                   <span className="text-sm sm:text-base">{contact.text}</span>
-                </motion.a>
-              ))}
-            </motion.div>
-
-            {/* Social Links */}
-            <motion.div
-              className="flex space-x-3 sm:space-x-4"
-              initial={{ y: 20, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-            >
-              {socialLinks.map((social, index) => (
-                <motion.a
-                  key={social.label}
-                  href={social.href}
-                  className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center cursor-pointer backdrop-blur-sm border border-white/10 hover:border-white/30 transition-all duration-300"
-                  whileHover={{
-                    scale: 1.2,
-                    rotate: 360,
-                    transition: { type: "spring", stiffness: 300 }
-                  }}
-                  whileTap={{ scale: 0.9 }}
-                  initial={{ scale: 0, rotate: -180 }}
-                  whileInView={{ scale: 1, rotate: 0 }}
-                  viewport={{ once: true }}
-                  transition={{
-                    delay: 0.8 + index * 0.1,
-                    type: "spring",
-                    stiffness: 200
-                  }}
-                >
-                  <social.icon className="text-white text-sm sm:text-base" />
                 </motion.a>
               ))}
             </motion.div>

@@ -5,7 +5,8 @@ import { FaBitcoin, FaChartLine, FaUniversity } from 'react-icons/fa';
 import { BsCalendarEvent } from 'react-icons/bs';
 import { MdWorkOutline } from 'react-icons/md';
 import { HiOutlineTicket } from 'react-icons/hi';
-
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 const WhyChooseUs = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState({
@@ -14,7 +15,7 @@ const WhyChooseUs = () => {
     minutes: 54,
     seconds: 32
   });
-
+  const { isAuthenticated } = useAuth();
   // Investment portfolio slides data
   const slides = [
     {
@@ -222,16 +223,36 @@ const WhyChooseUs = () => {
                   whileTap={{ scale: 0.95 }}
                   className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-purple-500/25 transition-shadow"
                 >
+                    {isAuthenticated ? (
+                  <Link to="/invest" className="flex items-center justify-center gap-2">
                   <FiShoppingCart />
                   Start Investing
+                  </Link>
+                  ) : (
+                 
+                    <Link to="/signup" className="flex items-center justify-center gap-2">
+                      <FiShoppingCart />
+                      Start Investing
+                    </Link>
+                  )}
+                 
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="flex-1 bg-white/10 backdrop-blur py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-white/20 transition-colors"
                 >
-                  <FiTrendingUp />
-                  View Portfolio
+                  {isAuthenticated ? (
+                    <Link to="/dashboard" className="flex items-center justify-center gap-2">
+                      <FiTrendingUp />
+                      View Portfolio
+                    </Link>
+                  ) : (
+                    <Link to="/signup" className="flex items-center justify-center gap-2">
+                      <FiTrendingUp />
+                      View Portfolio
+                    </Link>
+                  )}
                 </motion.button>
               </div>
             </div>
