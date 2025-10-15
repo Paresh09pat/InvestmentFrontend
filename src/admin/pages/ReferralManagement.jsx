@@ -40,6 +40,7 @@ const ReferralManagement = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editStatus, setEditStatus] = useState('');
   const [editRewardAmount, setEditRewardAmount] = useState('');
+  const [editRewardPercentage, setEditRewardPercentage] = useState('');
   const [editRejectionReason, setEditRejectionReason] = useState('');
   const [processing, setProcessing] = useState(false);
 
@@ -79,6 +80,15 @@ const ReferralManagement = () => {
     setSelectedTransaction(transaction);
     setEditStatus(transaction.status || '');
     setEditRewardAmount(transaction.rewardAmount || '');
+    
+    // Calculate percentage from existing reward amount and deposit amount
+    if (transaction.rewardAmount && transaction.referredDepositAmount) {
+      const percentage = ((transaction.rewardAmount / transaction.referredDepositAmount) * 100).toFixed(2);
+      setEditRewardPercentage(percentage);
+    } else {
+      setEditRewardPercentage('');
+    }
+    
     setEditRejectionReason(transaction.rejectionReason || '');
     setShowEditModal(true);
   };
@@ -89,8 +99,8 @@ const ReferralManagement = () => {
     setProcessing(true);
     try {
       // Validate required fields based on status
-      if (editStatus === 'approved' && (!editRewardAmount || parseFloat(editRewardAmount) <= 0)) {
-        toast.error('Please enter a valid reward amount for approved status');
+      if (editStatus === 'approved' && (!editRewardPercentage || parseFloat(editRewardPercentage) <= 0)) {
+        toast.error('Please enter a valid reward percentage for approved status');
         return;
       }
       
@@ -99,10 +109,16 @@ const ReferralManagement = () => {
         return;
       }
 
+      // Calculate reward amount from percentage
+      const calculatedRewardAmount = editStatus === 'approved' 
+        ? (parseFloat(editRewardPercentage) / 100) * selectedTransaction.referredDepositAmount
+        : 0;
+
       // Prepare update data
       const updateData = {
         status: editStatus,
-        rewardAmount: editStatus === 'approved' ? parseFloat(editRewardAmount) : 0,
+        rewardAmount: calculatedRewardAmount,
+        rewardPercentage: editStatus === 'approved' ? parseFloat(editRewardPercentage) : 0,
         rejectionReason: editStatus === 'rejected' ? editRejectionReason : ''
       };
 
@@ -113,6 +129,7 @@ const ReferralManagement = () => {
       setSelectedTransaction(null);
       setEditStatus('');
       setEditRewardAmount('');
+      setEditRewardPercentage('');
       setEditRejectionReason('');
       fetchReferralTransactions();
     } catch (error) {
@@ -503,20 +520,38 @@ const ReferralManagement = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Reward Amount {editStatus === 'approved' && '*'}
+                  Reward Percentage {editStatus === 'approved' && '*'}
                 </label>
-                <Input
-                  type="number"
-                  value={editRewardAmount}
-                  onChange={(e) => setEditRewardAmount(e.target.value)}
-                  placeholder="Enter reward amount"
-                  min="0"
-                  step="0.01"
-                  disabled={editStatus !== 'approved'}
-                />
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="number"
+                    value={editRewardPercentage}
+                    onChange={(e) => setEditRewardPercentage(e.target.value)}
+                    placeholder="Enter percentage"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    disabled={editStatus !== 'approved'}
+                    className="flex-1"
+                  />
+                  <span className="text-gray-500 font-medium">%</span>
+                </div>
+                
+                {editStatus === 'approved' && editRewardPercentage && selectedTransaction && (
+                  <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                    <p className="text-sm text-blue-800">
+                      <span className="font-medium">Calculated Reward Amount:</span>{' '}
+                      {formatCurrency((parseFloat(editRewardPercentage) / 100) * selectedTransaction.referredDepositAmount)}
+                    </p>
+                    <p className="text-xs text-blue-600 mt-1">
+                      Based on deposit amount: {formatCurrency(selectedTransaction.referredDepositAmount)}
+                    </p>
+                  </div>
+                )}
+                
                 {editStatus !== 'approved' && (
                   <p className="text-sm text-gray-500 mt-1">
-                    Reward amount is only required for approved status
+                    Reward percentage is only required for approved status
                   </p>
                 )}
               </div>
