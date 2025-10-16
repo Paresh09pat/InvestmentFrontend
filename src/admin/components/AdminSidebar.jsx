@@ -43,7 +43,6 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
     { name: 'Deposit History', path: '/admin/deposit-history', icon: FiTrendingUp },
     { name: 'Transactions', path: '/admin/transactions', icon: FiDollarSign },
     { name: 'Referrals', path: '/admin/referrals', icon: FiGift, count: adminCounts.pendingReferrals },
-    { name: 'Notifications', path: '/admin/notifications', icon: FiBell, count: adminNotifications },
     { name: 'Profile', path: '/admin/profile', icon: FiUser },
     // { name: 'Settings', path: '/admin/settings', icon: FiSettings },
   ];
@@ -79,11 +78,26 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
     `}>
       <div className="p-4 h-full flex flex-col">
         {/* Logo Section */}
-        <div className="flex items-center justify-center mb-2">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center">
               <img src="/trdexalogo.jpg" alt="logo" className="w-30 h-10" />
           </div>
           <div className="flex items-center space-x-2">
+            {/* Fixed Notification Bell - Always visible */}
+            <Link
+              to="/admin/notifications"
+              onClick={handleNavClick}
+              className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 cursor-pointer group"
+              title="Notifications"
+            >
+              <FiBell size={20} className="text-gray-600 group-hover:text-blue-600" />
+              {adminNotifications > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                  {adminNotifications > 99 ? '99+' : adminNotifications}
+                </span>
+              )}
+            </Link>
+            
             {/* Mobile Close Button - Only show on mobile */}
             {isMobile && (
               <button

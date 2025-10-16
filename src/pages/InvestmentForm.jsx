@@ -744,13 +744,6 @@ const InvestmentForm = () => {
                     <span className="font-medium text-green-600">{formatCurrency(returns.returns)}</span>
                   </div>
 
-                  <hr />
-
-                  <div className="flex justify-between">
-                    <span className="font-semibold">Total Maturity Value</span>
-                    <span className="font-bold text-blue-600">{formatCurrency(returns.total)}</span>
-                  </div>
-
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <p className="text-sm text-blue-800">
                       🎯 <strong>ROI:</strong> {selectedTrader?.returnRate || '10%'} per annum
