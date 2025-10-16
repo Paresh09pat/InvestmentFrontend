@@ -65,42 +65,42 @@ const HelpCenter = () => {
   const faqs = [
     {
       question: "How do I create an account?",
-      answer: "Creating an account is simple! Click the 'Sign Up' button, enter your email address, create a secure password, and verify your email. You'll then be guided through the identity verification process to complete your account setup.",
+      answer: "Creating an account is simple! Click the 'Sign Up' button, enter your name, email address, phone number, and create a secure password. After registration, you'll need to complete your profile verification by uploading required documents to start investing.",
       category: "Getting Started"
     },
     {
       question: "What documents do I need for verification?",
-      answer: "You'll need a government-issued photo ID (driver's license, passport, or national ID) and proof of address (utility bill, bank statement, or official mail). All documents must be clear, readable, and not expired.",
+      answer: "You need to upload two documents: Aadhaar Card and PAN Card. Both documents must be clear, readable, and not expired. Upload them through your Profile page, and our admin team will verify them within 24-48 hours.",
       category: "Account Security"
     },
     {
       question: "How do I make my first investment?",
-      answer: "After completing verification, navigate to the 'Invest' section. Choose from our recommended portfolios or create a custom one. Enter your investment amount and confirm your selection. Your investment will be processed within 1-2 business days.",
+      answer: "After completing verification, go to the 'Invest' section. Choose a membership tier (Silver, Gold, or Platinum), select a trader, enter your investment amount, and make payment using the provided QR code. Upload your payment screenshot and transaction ID to complete the process.",
       category: "Getting Started"
     },
     {
       question: "What are the fees?",
-      answer: "We charge a transparent 0.5% annual management fee on your portfolio value. There are no hidden fees, no trading commissions, and no account maintenance fees. You only pay when you make money.",
+      answer: "We have transparent pricing with no hidden fees. Each membership tier has different minimum investment amounts and return rates. There are no management fees, trading commissions, or account maintenance charges. You only pay the investment amount you choose.",
       category: "Trading Support"
     },
     {
       question: "How do I withdraw my money?",
-      answer: "To withdraw funds, go to your dashboard, click 'Withdraw', enter the amount, and select your withdrawal method. Most withdrawals are processed within 1-3 business days. There are no withdrawal fees.",
+      answer: "To withdraw funds, go to your dashboard and click 'Withdraw'. Select the investment plan you want to withdraw returns from, enter the amount, provide your wallet address, and submit the request. Withdrawals are processed within 1-3 business days after admin approval.",
       category: "Trading Support"
     },
     {
       question: "Is my money safe?",
-      answer: "Yes! We use bank-level security with 256-bit SSL encryption, multi-factor authentication, and are regulated by top financial authorities. Your funds are held in segregated accounts and are insured up to $250,000.",
+      answer: "Yes! We use bank-level security with 256-bit SSL encryption and secure authentication. Your personal information and documents are protected with advanced security measures. All transactions are monitored and verified by our admin team.",
       category: "Account Security"
     },
     {
       question: "Can I change my investment strategy?",
-      answer: "Absolutely! You can modify your portfolio allocation at any time through your dashboard. Changes take effect within 1-2 business days. You can also switch between different risk levels or investment themes.",
+      answer: "You can make new investments anytime by selecting different membership tiers and traders. Each investment is independent, so you can diversify across multiple plans and traders to optimize your returns based on your risk preference.",
       category: "Trading Support"
     },
     {
       question: "What if I need help?",
-      answer: "We offer 24/7 customer support via live chat, email, and phone. You can also browse our comprehensive help center, watch video tutorials, or schedule a call with our investment specialists.",
+      answer: "We provide comprehensive support through our help center, contact forms, and admin assistance. You can also check your investment status, transaction history, and account details anytime through your dashboard.",
       category: "Getting Started"
     }
   ];
@@ -150,129 +150,12 @@ const HelpCenter = () => {
         transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
       />
 
-      {/* Header */}
-      <motion.div 
-        className="relative z-10 pt-20 pb-16"
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 1, ease: "easeOut" }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      
+  
 
-          {/* Logo and Title */}
-          <motion.div 
-            className="flex items-center justify-center space-x-4 mb-8"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.8, type: "spring", stiffness: 200 }}
-          >
-            <motion.div 
-              className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-2xl shadow-2xl"
-              whileHover={{ 
-                scale: 1.1,
-                rotate: 5,
-                transition: { type: "spring", stiffness: 300 }
-              }}
-            >
-              <FiShield className="h-12 w-12 text-white" />
-            </motion.div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Help Center
-            </h1>
-          </motion.div>
-
-          <motion.p 
-            className="text-xl sm:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed mb-8"
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
-          >
-            Find answers, tutorials, and support to help you 
-            <span className="text-white font-semibold"> succeed with Trdexa</span>.
-          </motion.p>
-
-          {/* Search Bar */}
-          <motion.div 
-            className="max-w-2xl mx-auto"
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.7, duration: 0.8 }}
-          >
-            <div className="relative">
-              <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <input
-                type="text"
-                placeholder="Search for help articles, FAQs, or topics..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:bg-white/20 transition-all duration-300"
-              />
-            </div>
-          </motion.div>
-        </div>
-      </motion.div>
-
-      {/* Help Categories */}
-      <motion.section 
-        className="relative z-10 py-16"
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.3 }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            className="text-center mb-12"
-            variants={itemVariants}
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-              Browse by Category
-            </h2>
-            <p className="text-lg text-gray-300 max-w-3xl mx-auto">
-              Find the help you need organized by topic
-            </p>
-          </motion.div>
-
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
-            variants={containerVariants}
-          >
-            {helpCategories.map((category, index) => (
-              <motion.div 
-                key={category.title}
-                className="text-center"
-                variants={itemVariants}
-                whileHover={{ scale: 1.05, y: -10 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <motion.div 
-                  className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-2xl h-full"
-                  whileHover={{ 
-                    boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.25)",
-                    borderColor: "rgba(59, 130, 246, 0.5)"
-                  }}
-                >
-                  <motion.div 
-                    className={`w-16 h-16 bg-gradient-to-r ${category.color} rounded-xl flex items-center justify-center mx-auto mb-4`}
-                    whileHover={{ rotate: 360, scale: 1.1 }}
-                    transition={{ duration: 0.6 }}
-                  >
-                    <category.icon className="h-8 w-8 text-white" />
-                  </motion.div>
-                  <h3 className="text-xl font-bold text-white mb-2">{category.title}</h3>
-                  <p className="text-gray-300 text-sm mb-3">{category.description}</p>
-                  <p className="text-blue-400 font-semibold">{category.articles} articles</p>
-                </motion.div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </motion.section>
 
       {/* FAQ Section */}
       <motion.section 
-        className="relative z-10 py-16"
+        className="relative z-10 py-22"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.3 }}
@@ -346,72 +229,6 @@ const HelpCenter = () => {
         </div>
       </motion.section>
 
-      {/* Contact Support Section */}
-      <motion.section 
-        className="relative z-10 py-16"
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 0.8 }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div 
-            className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-md rounded-3xl p-8 sm:p-12 border border-white/20 shadow-2xl"
-            whileHover={{ scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <motion.div 
-              className="flex items-center justify-center space-x-3 mb-6"
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.5, type: "spring" }}
-            >
-              <FiHelpCircle className="h-8 w-8 text-blue-400" />
-              <h2 className="text-3xl sm:text-4xl font-bold text-white">
-                Still Need Help?
-              </h2>
-            </motion.div>
-            <motion.p 
-              className="text-lg sm:text-xl text-gray-300 mb-8 max-w-3xl mx-auto"
-              initial={{ y: 20, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4, duration: 0.8 }}
-            >
-              Can't find what you're looking for? Our support team is here to help you 24/7.
-            </motion.p>
-            <motion.div 
-              className="flex flex-col sm:flex-row gap-4 justify-center"
-              initial={{ y: 20, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-            >
-              <motion.button 
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-2xl"
-                whileHover={{ 
-                  scale: 1.05,
-                  boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.4)"
-                }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Contact Support
-              </motion.button>
-              <motion.button 
-                className="border-2 border-white/30 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/10 transition-colors duration-300"
-                whileHover={{ 
-                  scale: 1.05,
-                  borderColor: "rgba(59, 130, 246, 0.5)"
-                }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Schedule a Call
-              </motion.button>
-            </motion.div>
-          </motion.div>
-        </div>
-      </motion.section>
 
 
     </motion.div>

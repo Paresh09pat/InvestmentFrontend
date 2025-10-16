@@ -248,72 +248,7 @@ const Terms = () => {
         </div>
       </motion.section>
 
-      {/* Contact Information */}
-      <motion.section 
-        className="relative z-10 py-16"
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 0.8 }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div 
-            className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-md rounded-3xl p-8 sm:p-12 border border-white/20 shadow-2xl"
-            whileHover={{ scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <motion.div 
-              className="flex items-center justify-center space-x-3 mb-6"
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.5, type: "spring" }}
-            >
-              <FiShield className="h-8 w-8 text-blue-400" />
-              <h2 className="text-3xl sm:text-4xl font-bold text-white">
-                Questions About These Terms?
-              </h2>
-            </motion.div>
-            <motion.p 
-              className="text-lg sm:text-xl text-gray-300 mb-8 max-w-3xl mx-auto"
-              initial={{ y: 20, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4, duration: 0.8 }}
-            >
-              If you have any questions about these Terms of Service, please contact our legal team.
-            </motion.p>
-            <motion.div 
-              className="flex flex-col sm:flex-row gap-4 justify-center"
-              initial={{ y: 20, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-            >
-              <motion.button 
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-2xl"
-                whileHover={{ 
-                  scale: 1.05,
-                  boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.4)"
-                }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Contact Legal Team
-              </motion.button>
-              <motion.button 
-                className="border-2 border-white/30 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/10 transition-colors duration-300"
-                whileHover={{ 
-                  scale: 1.05,
-                  borderColor: "rgba(59, 130, 246, 0.5)"
-                }}
-                whileTap={{ scale: 0.95 }}
-              >
-                View Terms
-              </motion.button>
-            </motion.div>
-          </motion.div>
-        </div>  
-      </motion.section>
+
 
     
     </motion.div>

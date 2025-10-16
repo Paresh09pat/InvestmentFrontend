@@ -115,17 +115,8 @@ const AdminLogin = () => {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center space-x-2 mb-6">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-xl">
-              <FiShield className="h-8 w-8 text-white" />
-            </div>
-            <div className="text-left">
-              <span className="text-2xl font-bold text-white">
-                Trdexa
-              </span>
-              <div className="text-sm text-gray-300">Admin Panel</div>
-            </div>
-          </div>
+            <img src="/trdexalogo.jpg" alt="Trdexa Logo" className="w-30 h-10 mx-auto mb-4" />
+          
           <h1 className="text-3xl font-bold text-white mb-2">
             Admin Login
           </h1>

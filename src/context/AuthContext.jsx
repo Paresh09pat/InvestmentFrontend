@@ -27,6 +27,21 @@ export const AuthProvider = ({ children }) => {
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
+          // Check if this is an admin route and if we have stored admin data
+          const currentPath = window.location.pathname;
+          const isAdminRoute = currentPath.startsWith("/admin");
+          
+          if (isAdminRoute) {
+            const storedAdmin = localStorage.getItem('admin_user');
+            const isStoredAdmin = localStorage.getItem('is_admin');
+            
+            // If we have stored admin data, don't auto-logout
+            if (storedAdmin && isStoredAdmin === 'true') {
+              console.log("401 error on admin route with stored data, not logging out");
+              return Promise.reject(error);
+            }
+          }
+          
           console.log("401 error detected, logging out user");
           clearAuthState();
         }

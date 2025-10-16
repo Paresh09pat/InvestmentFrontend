@@ -5,7 +5,6 @@ import {
   FiSearch,
   FiFilter,
   FiEdit,
-  FiTrash2,
   FiCheck,
   FiX,
   FiEye,
@@ -119,48 +118,6 @@ const UserManagement = () => {
     setRejectionReason('');
   };
 
-  const handleDeleteUser = async (userId) => {
-    if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-      setLoading(true);
-      try {
-        const response = await axios.delete(
-          `${VITE_APP_API_URL}/api/auth/admin/delete-user/${userId}`,
-          { withCredentials: true }
-        );
-
-        // Remove user from the list
-        setUsers(prev => prev.filter(user => user._id !== userId));
-
-        // Close user modal if the deleted user was selected
-        if (selectedUser && selectedUser._id === userId) {
-          setShowUserModal(false);
-          setSelectedUser(null);
-        }
-
-        toast.success('User deleted successfully!', {
-          position: "top-right",
-          autoClose: 3000,
-        });
-
-      } catch (error) {
-        console.error('Failed to delete user:', error);
-
-        let errorMessage = 'Failed to delete user';
-        if (error.response?.data?.message) {
-          errorMessage = error.response.data.message;
-        }
-
-        toast.error(errorMessage, {
-          position: "top-right",
-          autoClose: 5000,
-        });
-
-        setError(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
 
   const viewUserDetails = (user) => {
     setSelectedUser(user);
@@ -272,10 +229,11 @@ const UserManagement = () => {
         <div className="flex space-x-2">
           <button
             onClick={() => viewUserDetails(user)}
-            className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors cursor-pointer"
+            className="px-3 py-1.5 text-blue-600 hover:bg-blue-100 border border-blue-200 hover:border-blue-300 rounded-lg transition-colors cursor-pointer text-sm font-medium flex items-center space-x-1"
             title="View Details"
           >
-            <FiEye size={16} />
+            <FiEye size={14} />
+            <span>View</span>
           </button>
 
           {/* Document verification actions */}
@@ -283,19 +241,21 @@ const UserManagement = () => {
             <>
               <button
                 onClick={() => openDocumentModal(user, 'aadhaar', 'verify')}
-                className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors cursor-pointer"
+                className="px-3 py-1.5 text-green-600 hover:bg-green-100 border border-green-200 hover:border-green-300 rounded-lg transition-colors cursor-pointer text-sm font-medium flex items-center space-x-1"
                 title="Approve Aadhaar"
                 disabled={loading}
               >
-                <FiCheck size={16} />
+                <FiCheck size={14} />
+                <span>Approve</span>
               </button>
               <button
                 onClick={() => openDocumentModal(user, 'aadhaar', 'reject')}
-                className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors cursor-pointer"
+                className="px-3 py-1.5 text-red-600 hover:bg-red-100 border border-red-200 hover:border-red-300 rounded-lg transition-colors cursor-pointer text-sm font-medium flex items-center space-x-1"
                 title="Reject Aadhaar"
                 disabled={loading}
               >
-                <FiX size={16} />
+                <FiX size={14} />
+                <span>Reject</span>
               </button>
             </>
           )}
@@ -304,32 +264,25 @@ const UserManagement = () => {
             <>
               <button
                 onClick={() => openDocumentModal(user, 'pan', 'verify')}
-                className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors cursor-pointer"
+                className="px-3 py-1.5 text-green-600 hover:bg-green-100 border border-green-200 hover:border-green-300 rounded-lg transition-colors cursor-pointer text-sm font-medium flex items-center space-x-1"
                 title="Approve PAN"
                 disabled={loading}
               >
-                <FiCheck size={16} />
+                <FiCheck size={14} />
+                <span>Approve</span>
               </button>
               <button
                 onClick={() => openDocumentModal(user, 'pan', 'reject')}
-                className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors cursor-pointer"
+                className="px-3 py-1.5 text-red-600 hover:bg-red-100 border border-red-200 hover:border-red-300 rounded-lg transition-colors cursor-pointer text-sm font-medium flex items-center space-x-1"
                 title="Reject PAN"
                 disabled={loading}
               >
-                <FiX size={16} />
+                <FiX size={14} />
+                <span>Reject</span>
               </button>
             </>
           )}
 
-          {/* Delete user button */}
-          <button
-            onClick={() => handleDeleteUser(user._id)}
-            className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors cursor-pointer"
-            title="Delete User"
-            disabled={loading}
-          >
-            <FiTrash2 size={16} />
-          </button>
         </div>
       )
     }
@@ -620,30 +573,6 @@ const UserManagement = () => {
               </div>
             </div>
 
-            {/* Delete User Section */}
-            <div className="pt-4 border-t border-red-200">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <div className="flex items-center space-x-2 mb-3">
-                  <FiTrash2 className="text-red-600" size={20} />
-                  <span className="font-medium text-red-900">Danger Zone</span>
-                </div>
-                <p className="text-sm text-red-800 mb-4">
-                  Deleting a user will permanently remove their account and all associated data. This action cannot be undone.
-                </p>
-                <Button
-                  variant="danger"
-                  size="small"
-                  onClick={() => {
-                    setShowUserModal(false);
-                    handleDeleteUser(selectedUser._id);
-                  }}
-                  icon={<FiTrash2 />}
-                  disabled={loading}
-                >
-                  Delete User Account
-                </Button>
-              </div>
-            </div>
           </div>
         )}
       </Modal>
