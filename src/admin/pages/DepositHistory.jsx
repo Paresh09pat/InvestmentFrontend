@@ -311,24 +311,12 @@ const DepositHistory = () => {
               <option value={TRANSACTION_STATUS.PENDING}>Pending</option>
               <option value={TRANSACTION_STATUS.APPROVED}>Approved</option>
               <option value={TRANSACTION_STATUS.REJECTED}>Rejected</option>
-              <option value={TRANSACTION_STATUS.COMPLETED}>Completed</option>
-              <option value={TRANSACTION_STATUS.PROCESSING}>Processing</option>
             </select>
           </div>
+          <Button variant="outline" size="small" onClick={clearFilters}>
+            Clear Filters
+          </Button>
 
-          <div>
-            <select
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">All Time</option>
-              <option value="today">Today</option>
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
-              <option value="year">This Year</option>
-            </select>
-          </div>
         </div>
 
         <div className="flex justify-between items-center mt-4">
@@ -336,9 +324,7 @@ const DepositHistory = () => {
             Showing {filteredTransactions.length} of {transactions.length}{" "}
             deposit transactions
           </div>
-          <Button variant="outline" size="small" onClick={clearFilters}>
-            Clear Filters
-          </Button>
+       
         </div>
       </Card>
 

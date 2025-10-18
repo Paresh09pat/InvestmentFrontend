@@ -261,7 +261,7 @@ const DocumentVerification = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between flex-col md:flex-row gap-4 md:gap-0 items-start md:items-center">
+      <div className="flex items-center justify-between flex-col md:flex-row gap-4 md:gap-0 md:items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Document Verification
@@ -289,29 +289,6 @@ const DocumentVerification = () => {
         </div>
       )}
 
-      {/* Filters */}
-      <Card>
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <Input
-              placeholder="Search users by name or email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              icon={<FiSearch />}
-            />
-          </div>
-          
-          <div className="flex space-x-2">
-            <Button 
-              variant="outline" 
-              onClick={fetchPendingDocuments}
-              icon={<FiShield />}
-            >
-              Refresh
-            </Button>
-          </div>
-        </div>
-      </Card>
 
       {/* Pending Documents Table */}
       <Card>
