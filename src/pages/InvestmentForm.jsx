@@ -740,8 +740,8 @@ const InvestmentForm = () => {
                   </div>
 
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Expected Returns ({selectedTrader?.returnRate || '10%'} p.a.)</span>
-                    <span className="font-medium text-green-600">{formatCurrency(returns.returns)}</span>
+                    <span className="text-gray-600">Expected Returns</span>
+                    <span className="font-medium text-green-600">{selectedTrader?.returnRate || '10%'} p.a.</span>
                   </div>
 
                   <div className="bg-blue-50 p-4 rounded-lg">
