@@ -17,67 +17,14 @@ import {
   FiCalendar,
   FiCheck,
   FiX
-} from 'react-icons/fi';
+} from 'react-icons/fi';  
 import axios from 'axios';
 import { VITE_APP_API_URL } from '../../utils/constants';
 
 const CardManagement = () => {
   const navigate = useNavigate();
   const [selectedTier, setSelectedTier] = useState('silver');
-  const [cardData, setCardData] = useState({
-    silver: {
-      name: 'Silver',
-      minAmount: 10000,
-      maxAmount: 50000,
-      minInterestRate: 8,
-      maxInterestRate: 12,
-      duration: 12,
-      features: [
-        'Basic trading strategies',
-        'Email support',
-        'Monthly reports',
-        'Standard risk management'
-      ],
-      description: 'Perfect for beginners looking to start their investment journey',
-      isActive: true
-    },
-    gold: {
-      name: 'Gold',
-      minAmount: 50000,
-      maxAmount: 200000,
-      minInterestRate: 12,
-      maxInterestRate: 18,
-      duration: 12,
-      features: [
-        'Advanced trading strategies',
-        'Priority support',
-        'Weekly reports',
-        'Enhanced risk management',
-        'Personal account manager'
-      ],
-      description: 'Ideal for experienced investors seeking better returns',
-      isActive: true
-    },
-    platinum: {
-      name: 'Platinum',
-      minAmount: 200000,
-      maxAmount: 1000000,
-      minInterestRate: 18,
-      maxInterestRate: 25,
-      duration: 12,
-      features: [
-        'Premium trading strategies',
-        '24/7 dedicated support',
-        'Daily reports',
-        'Advanced risk management',
-        'Personal account manager',
-        'Exclusive market insights',
-        'Custom portfolio management'
-      ],
-      description: 'Premium tier for high-net-worth investors',
-      isActive: true
-    }
-  });
+  const [cardData, setCardData] = useState({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [newFeature, setNewFeature] = useState('');
@@ -135,12 +82,33 @@ const CardManagement = () => {
     try {
       setLoading(true);
       const response = await axios.get(`${VITE_APP_API_URL}/api/admin/plans`);
-      if (response.data && response.data.cards) {
-        setCardData(response.data.cards);
+      if (response.data && response.data.plans) {
+        // Transform the plans array into the expected object structure
+        const transformedData = {};
+        response.data.plans.forEach(plan => {
+          transformedData[plan.name] = {
+            name: plan.name.charAt(0).toUpperCase() + plan.name.slice(1), // Capitalize first letter
+            minAmount: plan.minInvestment,
+            maxAmount: plan.maxInvestment,
+            minInterestRate: plan.minReturnRate,
+            maxInterestRate: plan.maxReturnRate,
+            duration: plan.duration || 12,
+            features: plan.features || [],
+            description: plan.description || '',
+            isActive: plan.isActive !== undefined ? plan.isActive : true,
+            _id: plan._id
+          };
+        });
+        setCardData(transformedData);
+        toast.success('Card data loaded successfully');
+      } else {
+        toast.error('No card data received from server');
       }
     } catch (error) {
       console.error('Error fetching card data:', error);
-      toast.error('Failed to load card data. Using default values.');
+      toast.error('Failed to load card data. Please check your connection and try again.');
+      // Set empty state on error
+      setCardData({});
     } finally {
       setLoading(false);
     }
@@ -185,11 +153,27 @@ const CardManagement = () => {
   const handleSave = async () => {
     try {
       setSaving(true);
-      await axios.put(`${VITE_APP_API_URL}/api/admin/cards/${selectedTier}`, {
-        ...cardData[selectedTier]
-      });
+      const currentPlan = cardData[selectedTier];
+      const planId = currentPlan._id;
+      
+      // Transform data back to API format
+      const updateData = {
+        name: selectedTier,
+        minInvestment: currentPlan.minAmount,
+        maxInvestment: currentPlan.maxAmount,
+        minReturnRate: currentPlan.minInterestRate,
+        maxReturnRate: currentPlan.maxInterestRate,
+        duration: currentPlan.duration,
+        features: currentPlan.features,
+        description: currentPlan.description,
+        isActive: currentPlan.isActive
+      };
+      
+      await axios.put(`${VITE_APP_API_URL}/api/admin/plan/${planId}`, updateData);
       toast.success(`${tierConfig[selectedTier].name} card updated successfully!`);
       setHasChanges(false);
+      // Refetch data after successful update
+      await fetchCardData();
     } catch (error) {
       console.error('Error saving card data:', error);
       toast.error('Failed to save card data. Please try again.');
@@ -209,7 +193,7 @@ const CardManagement = () => {
   };
 
   const currentConfig = tierConfig[selectedTier];
-  const currentData = cardData[selectedTier];
+  const currentData = cardData[selectedTier] || {};
   const IconComponent = currentConfig.icon;
 
   return (
@@ -243,8 +227,16 @@ const CardManagement = () => {
             <span className="text-sm text-orange-600 font-medium text-center sm:text-left">Unsaved changes</span>
           )}
           <button
+            onClick={fetchCardData}
+            disabled={loading}
+            className="bg-gray-500 text-white px-4 lg:px-6 py-2 rounded-lg hover:bg-gray-600 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm lg:text-base"
+          >
+            <FiRefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </button>
+          <button
             onClick={handleSave}
-            disabled={saving || !hasChanges}
+            disabled={saving || !hasChanges || !cardData[selectedTier]}
             className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 lg:px-6 py-2 rounded-lg hover:from-blue-600 hover:to-purple-600 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm lg:text-base"
           >
             {saving ? (
@@ -261,6 +253,21 @@ const CardManagement = () => {
         <motion.div variants={itemVariants} className="flex items-center justify-center py-12">
           <FiRefreshCw className="h-8 w-8 text-gray-400 animate-spin" />
           <span className="ml-2 text-gray-600">Loading card data...</span>
+        </motion.div>
+      ) : Object.keys(cardData).length === 0 ? (
+        <motion.div variants={itemVariants} className="flex flex-col items-center justify-center py-12">
+          <FiCreditCard className="h-16 w-16 text-gray-400 mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No Card Data Available</h3>
+          <p className="text-gray-600 text-center mb-6">
+            Unable to load card data from the server. Please check your connection and try refreshing.
+          </p>
+          <button
+            onClick={fetchCardData}
+            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors flex items-center space-x-2"
+          >
+            <FiRefreshCw className="h-4 w-4" />
+            <span>Retry Loading</span>
+          </button>
         </motion.div>
       ) : (
         <div className="space-y-6">
@@ -285,7 +292,10 @@ const CardManagement = () => {
                     </div>
                     <h3 className="text-base lg:text-lg font-semibold text-gray-900">{config.name}</h3>
                     <p className="text-xs lg:text-sm text-gray-600 mt-1">
-                      {cardData[tierKey].minAmount.toLocaleString()} - {cardData[tierKey].maxAmount.toLocaleString()}
+                      {cardData[tierKey] ? 
+                        `${cardData[tierKey].minAmount?.toLocaleString() || 'N/A'} - ${cardData[tierKey].maxAmount?.toLocaleString() || 'N/A'}` : 
+                        'No data available'
+                      }
                     </p>
                   </button>
                 );
@@ -306,7 +316,7 @@ const CardManagement = () => {
                   </label>
                   <input
                     type="text"
-                    value={currentData.name}
+                    value={currentData.name || ''}
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
                   />
@@ -317,7 +327,7 @@ const CardManagement = () => {
                     Description
                   </label>
                   <textarea
-                    value={currentData.description}
+                    value={currentData.description || ''}
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
@@ -332,7 +342,7 @@ const CardManagement = () => {
                     </label>
                     <input
                       type="number"
-                      value={currentData.minAmount}
+                      value={currentData.minAmount || ''}
                       onChange={(e) => handleInputChange('minAmount', parseInt(e.target.value))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
                     />
@@ -344,7 +354,7 @@ const CardManagement = () => {
                     </label>
                     <input
                       type="number"
-                      value={currentData.maxAmount}
+                      value={currentData.maxAmount || ''}
                       onChange={(e) => handleInputChange('maxAmount', parseInt(e.target.value))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
                     />
@@ -360,7 +370,7 @@ const CardManagement = () => {
                     <input
                       type="number"
                       step="0.1"
-                      value={currentData.minInterestRate}
+                      value={currentData.minInterestRate || ''}
                       onChange={(e) => handleInputChange('minInterestRate', parseFloat(e.target.value))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
                     />
@@ -373,7 +383,7 @@ const CardManagement = () => {
                     <input
                       type="number"
                       step="0.1"
-                      value={currentData.maxInterestRate}
+                      value={currentData.maxInterestRate || ''}
                       onChange={(e) => handleInputChange('maxInterestRate', parseFloat(e.target.value))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
                     />
@@ -387,7 +397,7 @@ const CardManagement = () => {
                   </label>
                   <input
                     type="number"
-                    value={currentData.duration}
+                    value={currentData.duration || ''}
                     onChange={(e) => handleInputChange('duration', parseInt(e.target.value))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
                   />
@@ -397,7 +407,7 @@ const CardManagement = () => {
                   <input
                     type="checkbox"
                     id="isActive"
-                    checked={currentData.isActive}
+                    checked={currentData.isActive || false}
                     onChange={(e) => handleInputChange('isActive', e.target.checked)}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
@@ -414,7 +424,7 @@ const CardManagement = () => {
               
               <div className="space-y-4">
                 <div className="space-y-2 lg:space-y-3 max-h-48 lg:max-h-64 overflow-y-auto">
-                  {currentData.features.map((feature, index) => (
+                  {(currentData.features || []).map((feature, index) => (
                     <div key={index} className="flex items-center space-x-2 lg:space-x-3 p-2 lg:p-3 bg-gray-50 rounded-lg">
                       <FiCheck className="h-3 w-3 lg:h-4 lg:w-4 text-green-500 flex-shrink-0" />
                       <span className="flex-1 text-xs lg:text-sm text-gray-700">{feature}</span>
