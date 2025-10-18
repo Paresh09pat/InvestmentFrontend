@@ -343,9 +343,6 @@ const UserManagement = () => {
               <option value={USER_VERIFICATION_STATUS.REJECTED}>Rejected</option>
             </select>
 
-            <Button variant="outline" icon={<FiFilter />}>
-              More Filters
-            </Button>
           </div>
         </div>
       </Card>

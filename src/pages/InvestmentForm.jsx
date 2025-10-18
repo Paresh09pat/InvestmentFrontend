@@ -742,11 +742,13 @@ const InvestmentForm = () => {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Expected Returns</span>
                     <span className="font-medium text-green-600">{selectedTrader?.returnRate || '10%'} p.a.</span>
+                    <span className="text-gray-600">Expected Returns ({selectedTrader?.returnRate || '10%'} p.m.)</span>
+                    {/* <span className="font-medium text-green-600">{formatCurrency(returns.returns)}</span> */}
                   </div>
 
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <p className="text-sm text-blue-800">
-                      🎯 <strong>ROI:</strong> {selectedTrader?.returnRate || '10%'} per annum
+                      🎯 <strong>ROI:</strong> {selectedTrader?.returnRate || '10%'} per month
                     </p>
                     <p className="text-sm text-blue-800 mt-1">
                       ⏰ <strong>Duration:</strong> 12 months

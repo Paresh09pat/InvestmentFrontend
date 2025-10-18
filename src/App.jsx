@@ -28,7 +28,7 @@ const ReferalManage = lazy(() => import('./pages/ReferalManage'));
 
 // Footer pages
 const About = lazy(() => import('./pages/About'));
-const Contact = lazy(() => import('./pages/Contact'));
+// const Contact = lazy(() => import('./pages/Contact'));
 const HelpCenter = lazy(() => import('./pages/HelpCenter'));
 const Terms = lazy(() => import('./pages/Terms'));
 const Privacy = lazy(() => import('./pages/Privacy'));
@@ -96,7 +96,7 @@ function App() {
 
           {/* Footer pages */}
           <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
+          {/* <Route path="/contact" element={<Contact />} /> */}
           <Route path="/help" element={<HelpCenter />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />

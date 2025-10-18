@@ -261,7 +261,7 @@ const ReferralManagement = () => {
 
   if (loading && !referralTransactions.length) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+      <div className="min-h-screen ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <LoadingSpinner size="large" color="primary" text="Loading referral transactions..." />
         </div>
@@ -270,7 +270,7 @@ const ReferralManagement = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+    <div className="min-h-screen ">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
@@ -308,17 +308,7 @@ const ReferralManagement = () => {
                   <option value={REFERRAL_TRANSACTION_STATUS.REJECTED}>Rejected</option>
                 </select>
               </div>
-              <Button
-                onClick={() => {
-                  fetchReferralTransactions();
-                }}
-                variant="outline"
-                size="sm"
-                className="flex items-center space-x-2"
-              >
-                <FiRefreshCw className="h-4 w-4" />
-                <span>Refresh</span>
-              </Button>
+
             </div>
           </div>
         </Card>
