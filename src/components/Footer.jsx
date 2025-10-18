@@ -32,7 +32,7 @@ const Footer = () => {
   const quickLinks = [
     { to: "/about", text: "About Us" },
     { to: "/features", text: "Features" },
-    { to: "/contact", text: "Contact" },
+    // { to: "/contact", text: "Contact" },
     { to: "/blog", text: "Blog" },
     { to: "/pricing", text: "Pricing" }
   ];
@@ -307,7 +307,7 @@ const Footer = () => {
               viewport={{ once: true }}
               transition={{ delay: 0.8, duration: 0.8 }}
             >
-              © 2025 Trdexa. All rights reserved.
+              © 2020 - {new Date().getFullYear()} Trdexa. All rights reserved.
             </motion.p>
             <motion.div
               className="flex items-center space-x-4"
