@@ -40,6 +40,7 @@ const PortfolioManagement = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingCurrentValue, setEditingCurrentValue] = useState(false);
   const [currentValueInput, setCurrentValueInput] = useState('');
+  const [selectedPercentage, setSelectedPercentage] = useState('');
   const [formData, setFormData] = useState({
     userId: '',
     totalValue: '',
@@ -121,6 +122,27 @@ const PortfolioManagement = () => {
     return amount >= 0 ? 'text-green-600' : 'text-red-600';
   };
 
+  // Generate percentage options based on plan return rates
+  const generatePercentageOptions = (plan) => {
+    if (!plan || !plan.returnRate || !plan.returnRate.min || !plan.returnRate.max) {
+      return [];
+    }
+    
+    const min = plan.returnRate.min;
+    const max = plan.returnRate.max;
+    const options = [];
+    
+    // Generate options from min to max with 0.5% increments
+    for (let i = min; i <= max; i += 0.5) {
+      options.push({
+        value: i,
+        label: `${i}%`
+      });
+    }
+    
+    return options;
+  };
+
   // Handle search with debouncing
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -177,11 +199,9 @@ const PortfolioManagement = () => {
     const newErrors = {};
     
     if (showEditModal) {
-      // For edit modal, only validate current value
-      if (!formData.totalValue) {
-        newErrors.totalValue = 'Current value is required';
-      } else if (parseFloat(formData.totalValue) < 0) {
-        newErrors.totalValue = 'Current value must be positive';
+      // For edit modal, validate percentage selection
+      if (!selectedPercentage) {
+        newErrors.percentage = 'Please select a percentage';
       }
     }
     
@@ -190,46 +210,21 @@ const PortfolioManagement = () => {
   };
 
   const handleUpdateCurrentValue = async () => {
-    if (!selectedPortfolio || !selectedPlan || !currentValueInput) return;
+    if (!selectedPortfolio || !selectedPlan || !selectedPercentage) return;
     
     setLoading(true);
     try {
       const response = await axios.put(
         `${VITE_APP_API_URL}/api/admin/portfolio/${selectedPortfolio._id}`,
         { 
-          currentValue: parseFloat(currentValueInput),
+          returnRate: parseFloat(selectedPercentage),
           planName: selectedPlan.name
         },
         { withCredentials: true }
       );
       
-      // Update the portfolio in the list
-      setPortfolios(prev => prev.map(p => 
-        p._id === selectedPortfolio._id 
-          ? {
-              ...p,
-              plans: p.plans.map(plan => 
-                plan.name === selectedPlan.name
-                  ? { ...plan, currentValue: parseFloat(currentValueInput) }
-                  : plan
-              ),
-              currentValue: p.plans.reduce((sum, plan) => sum + (plan.name === selectedPlan.name ? parseFloat(currentValueInput) : plan.currentValue), 0)
-            }
-          : p
-      ));
-      
-      // Update the selected portfolio
-      setSelectedPortfolio(prev => ({
-        ...prev,
-        plans: prev.plans.map(plan => 
-          plan.name === selectedPlan.name
-            ? { ...plan, currentValue: parseFloat(currentValueInput) }
-            : plan
-        ),
-        currentValue: prev.plans.reduce((sum, plan) => sum + (plan.name === selectedPlan.name ? parseFloat(currentValueInput) : plan.currentValue), 0)
-      }));
-      
       setEditingCurrentValue(false);
+      setSelectedPercentage('');
       
       // Show success toast
       toast.success(response.data.message || 'Portfolio updated successfully!');
@@ -251,31 +246,16 @@ const PortfolioManagement = () => {
     
     setLoading(true);
     try {
-      if (showEditModal && selectedPlan) {
-        // Update existing portfolio current value for specific plan
+      if (showEditModal && selectedPlan && selectedPercentage) {
+        // Update existing portfolio with percentage for specific plan
         const response = await axios.put(
           `${VITE_APP_API_URL}/api/admin/portfolio/${selectedPortfolio._id}`,
           { 
-            currentValue: parseFloat(formData.totalValue),
+            returnRate: parseFloat(selectedPercentage),
             planName: selectedPlan.name
           },
           { withCredentials: true }
         );
-        
-        // Update the portfolio in the list
-        setPortfolios(prev => prev.map(p => 
-          p._id === selectedPortfolio._id 
-            ? {
-                ...p,
-                plans: p.plans.map(plan => 
-                  plan.name === selectedPlan.name
-                    ? { ...plan, currentValue: parseFloat(formData.totalValue) }
-                    : plan
-                ),
-                currentValue: p.plans.reduce((sum, plan) => sum + (plan.name === selectedPlan.name ? parseFloat(formData.totalValue) : plan.currentValue), 0)
-              }
-            : p
-        ));
         
         console.log('Portfolio updated successfully:', response.data);
         
@@ -289,6 +269,7 @@ const PortfolioManagement = () => {
       setShowEditModal(false);
       setSelectedPortfolio(null);
       setSelectedPlan(null);
+      setSelectedPercentage('');
     } catch (error) {
       console.error('Error saving portfolio:', error);
       toast.error(error.response?.data?.message || 'Failed to save portfolio');
@@ -798,7 +779,6 @@ const PortfolioManagement = () => {
                             <button
                               onClick={() => {
                                 setSelectedPlan(plan);
-                                setCurrentValueInput(plan.currentValue.toString());
                                 setEditingCurrentValue(true);
                               }}
                               className="w-full px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
@@ -807,17 +787,22 @@ const PortfolioManagement = () => {
                             </button>
                           ) : (
                             <div className="space-y-2">
-                              <input
-                                type="number"
-                                value={currentValueInput}
-                                onChange={(e) => setCurrentValueInput(e.target.value)}
+                              <select
+                                value={selectedPercentage}
+                                onChange={(e) => setSelectedPercentage(e.target.value)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="Enter new value"
-                              />
+                              >
+                                <option value="">Select percentage...</option>
+                                {generatePercentageOptions(plan).map((option) => (
+                                  <option key={option.value} value={option.value}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
                               <div className="flex space-x-2">
                                 <button
                                   onClick={handleUpdateCurrentValue}
-                                  disabled={loading}
+                                  disabled={loading || !selectedPercentage}
                                   className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
                                 >
                                   {loading ? 'Saving...' : 'Save'}
@@ -826,7 +811,7 @@ const PortfolioManagement = () => {
                                   onClick={() => {
                                     setEditingCurrentValue(false);
                                     setSelectedPlan(null);
-                                    setCurrentValueInput('');
+                                    setSelectedPercentage('');
                                   }}
                                   className="flex-1 px-3 py-2 bg-gray-300 text-gray-700 text-sm rounded-md hover:bg-gray-400 transition-colors"
                                 >
@@ -977,10 +962,7 @@ const PortfolioManagement = () => {
                       }`}
                       onClick={() => {
                         setSelectedPlan(plan);
-                        setFormData(prev => ({
-                          ...prev,
-                          totalValue: plan.currentValue.toString()
-                        }));
+                        setSelectedPercentage('');
                       }}
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -1015,38 +997,50 @@ const PortfolioManagement = () => {
                 )}
               </div>
 
-              {/* Current Value Section */}
+              {/* Percentage Selection Section */}
               {selectedPlan && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
                   <div className="flex items-center space-x-2 mb-4">
                     <FiDollarSign className="text-yellow-600" size={24} />
                     <h4 className="text-lg font-semibold text-yellow-800">
-                      Update {selectedPlan.name.charAt(0).toUpperCase() + selectedPlan.name.slice(1)} Plan Value
+                      Update {selectedPlan.name.charAt(0).toUpperCase() + selectedPlan.name.slice(1)} Plan Return Rate
                     </h4>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        New Current Value *
+                        Weekly Return Percentage *
                       </label>
-                      <input
-                        type="number"
-                        name="totalValue"
-                        value={formData.totalValue}
-                        onChange={handleFormChange}
+                      <select
+                        value={selectedPercentage}
+                        onChange={(e) => setSelectedPercentage(e.target.value)}
                         className="w-full px-4 py-3 border border-yellow-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-lg font-semibold"
-                        placeholder="Enter new value"
                         required
-                      />
-                      {errors.totalValue && (
-                        <p className="mt-1 text-sm text-red-600">{errors.totalValue}</p>
+                      >
+                        <option value="">Select percentage...</option>
+                        {generatePercentageOptions(selectedPlan).map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.percentage && (
+                        <p className="mt-1 text-sm text-red-600">{errors.percentage}</p>
+                      )}
+                      {selectedPlan.returnRate.min && selectedPlan.returnRate.max && (
+                        <p className="mt-2 text-sm text-gray-600">
+                          Available range: {selectedPlan.returnRate.min}% - {selectedPlan.returnRate.max}%
+                        </p>
                       )}
                     </div>
                     <div className="flex items-end">
                       <div className="w-full p-4 bg-white rounded-lg border border-yellow-200">
-                        <div className="text-sm text-gray-500 mb-1">Previous Value</div>
+                        <div className="text-sm text-gray-500 mb-1">Current Value</div>
                         <div className="text-xl font-bold text-gray-900">
                           {formatCurrency(selectedPlan.currentValue)}
+                        </div>
+                        <div className="text-sm text-gray-500 mt-1">
+                          Invested: {formatCurrency(selectedPlan.invested)}
                         </div>
                       </div>
                     </div>
@@ -1120,6 +1114,7 @@ const PortfolioManagement = () => {
                   onClick={() => {
                     setShowEditModal(false);
                     setSelectedPlan(null);
+                    setSelectedPercentage('');
                   }}
                   className="flex-1 cursor-pointer py-3"
                 >
@@ -1129,7 +1124,7 @@ const PortfolioManagement = () => {
                   variant="primary"
                   onClick={handleSavePortfolio}
                   loading={loading}
-                  disabled={!selectedPlan}
+                  disabled={!selectedPlan || !selectedPercentage}
                   className="flex-1 cursor-pointer py-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Updating...' : `Update ${selectedPlan?.name ? selectedPlan.name.charAt(0).toUpperCase() + selectedPlan.name.slice(1) : ''} Plan`}
