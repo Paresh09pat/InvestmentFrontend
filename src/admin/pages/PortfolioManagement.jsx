@@ -100,6 +100,21 @@ const PortfolioManagement = () => {
     }).format(amount);
   };
 
+  // Format currency with decimals for small amounts
+  const formatCurrencyWithDecimals = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  };
+
+  // Helper function to check if returns should be displayed
+  const shouldShowReturns = (returns) => {
+    return returns !== null && returns !== undefined && Math.abs(returns) > 0;
+  };
+
   const getRiskLevelColor = (riskLevel) => {
     switch (riskLevel) {
       case 'low': return 'bg-green-100 text-green-800';
@@ -122,18 +137,23 @@ const PortfolioManagement = () => {
     return amount >= 0 ? 'text-green-600' : 'text-red-600';
   };
 
-  // Generate percentage options based on plan return rates
+  // Generate percentage options based on plan adminSetReturnRate
   const generatePercentageOptions = (plan) => {
-    if (!plan || !plan.returnRate || !plan.returnRate.min || !plan.returnRate.max) {
+    if (!plan) {
       return [];
     }
     
-    const min = plan.returnRate.min;
-    const max = plan.returnRate.max;
+    // Use adminSetReturnRate if available, otherwise fall back to returnRate.max
+    const maxRate = plan.adminSetReturnRate || plan.returnRate?.max;
+    
+    if (!maxRate) {
+      return [];
+    }
+    
     const options = [];
     
-    // Generate options from min to max with 0.5% increments
-    for (let i = min; i <= max; i += 0.5) {
+    // Generate options from 0.5% to maxRate with 0.5% increments
+    for (let i = 0.5; i <= maxRate; i += 0.5) {
       options.push({
         value: i,
         label: `${i}%`
@@ -471,9 +491,9 @@ const PortfolioManagement = () => {
                           <div className="text-xs sm:text-sm text-gray-500">
                             Invested: {formatCurrency(silverPlan.invested)}
                           </div>
-                          {silverPlan.returns !== 0 && (
+                          {shouldShowReturns(silverPlan.returns) && (
                             <div className={`text-xs ${getProfitLossColor(silverPlan.returns)}`}>
-                              {silverPlan.returns >= 0 ? '+' : ''}{formatCurrency(silverPlan.returns)}
+                              {silverPlan.returns >= 0 ? '+' : ''}{formatCurrencyWithDecimals(silverPlan.returns)}
                             </div>
                           )}
                         </td>
@@ -486,9 +506,9 @@ const PortfolioManagement = () => {
                           <div className="text-xs sm:text-sm text-gray-500">
                             Invested: {formatCurrency(goldPlan.invested)}
                           </div>
-                          {goldPlan.returns !== 0 && (
+                          {shouldShowReturns(goldPlan.returns) && (
                             <div className={`text-xs ${getProfitLossColor(goldPlan.returns)}`}>
-                              {goldPlan.returns >= 0 ? '+' : ''}{formatCurrency(goldPlan.returns)}
+                              {goldPlan.returns >= 0 ? '+' : ''}{formatCurrencyWithDecimals(goldPlan.returns)}
                             </div>
                           )}
                         </td>
@@ -501,9 +521,9 @@ const PortfolioManagement = () => {
                           <div className="text-xs sm:text-sm text-gray-500">
                             Invested: {formatCurrency(platinumPlan.invested)}
                           </div>
-                          {platinumPlan.returns !== 0 && (
+                          {shouldShowReturns(platinumPlan.returns) && (
                             <div className={`text-xs ${getProfitLossColor(platinumPlan.returns)}`}>
-                              {platinumPlan.returns >= 0 ? '+' : ''}{formatCurrency(platinumPlan.returns)}
+                              {platinumPlan.returns >= 0 ? '+' : ''}{formatCurrencyWithDecimals(platinumPlan.returns)}
                             </div>
                           )}
                         </td>
@@ -760,14 +780,30 @@ const PortfolioManagement = () => {
                           <span className={`text-sm font-medium ${
                             plan.returns >= 0 ? 'text-green-600' : 'text-red-600'
                           }`}>
-                            {plan.returns >= 0 ? '+' : ''}{formatCurrency(plan.returns)}
+                            {plan.returns >= 0 ? '+' : ''}{formatCurrencyWithDecimals(plan.returns)}
                           </span>
                         </div>
                         {plan.returnRate.min && plan.returnRate.max && (
                           <div className="flex justify-between">
-                            <span className="text-sm text-gray-600">Return Rate:</span>
+                            <span className="text-sm text-gray-600">Return Rate Range:</span>
                             <span className="text-sm font-medium text-gray-900">
                               {plan.returnRate.min}% - {plan.returnRate.max}%
+                            </span>
+                          </div>
+                        )}
+                        {plan.adminSetReturnRate && (
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Admin Set Rate:</span>
+                            <span className="text-sm font-medium text-blue-600">
+                              {plan.adminSetReturnRate}%
+                            </span>
+                          </div>
+                        )}
+                        {plan.lastDailyUpdate && (
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Last Update:</span>
+                            <span className="text-sm font-medium text-gray-900">
+                              {formatDateForTable(plan.lastDailyUpdate).date} at {formatDateForTable(plan.lastDailyUpdate).time}
                             </span>
                           </div>
                         )}
@@ -985,9 +1021,17 @@ const PortfolioManagement = () => {
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-600">Returns:</span>
                           <span className={`font-medium ${plan.returns >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {plan.returns >= 0 ? '+' : ''}{formatCurrency(plan.returns)}
+                            {plan.returns >= 0 ? '+' : ''}{formatCurrencyWithDecimals(plan.returns)}
                           </span>
                         </div>
+                        {plan.adminSetReturnRate && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Admin Rate:</span>
+                            <span className="font-medium text-blue-600">
+                              {plan.adminSetReturnRate}%
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -1027,9 +1071,14 @@ const PortfolioManagement = () => {
                       {errors.percentage && (
                         <p className="mt-1 text-sm text-red-600">{errors.percentage}</p>
                       )}
+                      {selectedPlan.adminSetReturnRate && (
+                        <p className="mt-2 text-sm text-blue-600">
+                          Admin Set Rate: {selectedPlan.adminSetReturnRate}%
+                        </p>
+                      )}
                       {selectedPlan.returnRate.min && selectedPlan.returnRate.max && (
-                        <p className="mt-2 text-sm text-gray-600">
-                          Available range: {selectedPlan.returnRate.min}% - {selectedPlan.returnRate.max}%
+                        <p className="mt-1 text-sm text-gray-600">
+                          Rate Range: {selectedPlan.returnRate.min}% - {selectedPlan.returnRate.max}%
                         </p>
                       )}
                     </div>
