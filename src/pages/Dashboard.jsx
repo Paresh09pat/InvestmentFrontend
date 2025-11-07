@@ -1175,7 +1175,7 @@ const Dashboard = () => {
                               <div className="bg-gray-50 p-3 rounded-lg">
                                 <p className="text-xs text-gray-600 mb-1">Return Rate</p>
                                 <p className="font-semibold text-gray-900">
-                                  {currentTabData.returnsPercentage.toFixed(2)}%
+                                  {currentTabData.returnsPercentage.toFixed(2)}% Per Day
                                 </p>
                               </div>
                             </div>
