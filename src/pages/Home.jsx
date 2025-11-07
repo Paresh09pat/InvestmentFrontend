@@ -108,7 +108,7 @@ const Home = () => {
     {
       icon: FiTrendingUp,
       title: 'Premium Returns',
-      description: 'Earn up to 18% annual returns with our AI-powered investment strategies and expert analysis.',
+      description: 'Earn up to 18% weekly returns with our AI-powered investment strategies and expert analysis.',
       color: 'from-green-500 to-emerald-500',
       delay: 0.2
     },

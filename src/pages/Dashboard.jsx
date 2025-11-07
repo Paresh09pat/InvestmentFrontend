@@ -1151,7 +1151,7 @@ const Dashboard = () => {
                                     {currentTabData.name} Plan
                                   </p>
                                   <p className="text-sm text-gray-600">
-                                    {currentTabData.returnRate.min}% - {currentTabData.returnRate.max}% annual return
+                                    {currentTabData.returnRate.min}% - {currentTabData.returnRate.max}% weekly return
                                   </p>
                                 </div>
                               </div>

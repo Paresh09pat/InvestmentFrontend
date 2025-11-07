@@ -340,7 +340,7 @@ const WhyChooseUs = () => {
                 >
                   16.5%
                 </motion.h3>
-                <p className="text-sm text-gray-400">Average annual return rate</p>
+                <p className="text-sm text-gray-400">Average weekly return rate</p>
               </motion.div>
               
               <motion.div 
