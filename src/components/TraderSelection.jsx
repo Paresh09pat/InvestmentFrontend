@@ -116,15 +116,9 @@ const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader, trade
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 p-3 rounded-lg text-center">
-              <div className="text-lg font-semibold text-gray-900">{trader.totalClients}</div>
-              <div className="text-sm text-gray-600">Total Clients</div>
-            </div>
-            <div className="bg-gray-50 p-3 rounded-lg text-center">
-              <div className="text-lg font-semibold text-gray-900">{trader.riskLevel}</div>
-              <div className="text-sm text-gray-600">Risk Level</div>
-            </div>
+          <div className="grid justify-center gap-4">
+            <div className="text-lg font-semibold text-gray-900">{trader.riskLevel}</div>
+            <div className="text-sm text-gray-600">Risk Level</div>
           </div>
         </div>
       </motion.div>
@@ -230,7 +224,7 @@ const TraderSelection = ({ membershipTier, onTraderSelect, selectedTrader, trade
                 <p className="text-sm text-gray-600 mb-3 line-clamp-2">{trader.description}</p>
 
                 {/* Specialties */}
-                <div className="flex flex-wrap gap-1 mb-3">
+                <div className="flex justify-center flex-wrap gap-1 mb-3">
                   {trader.specialties.slice(0, 2).map((specialty, index) => (
                     <span key={index} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
                       {specialty}

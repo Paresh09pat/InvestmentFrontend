@@ -70,7 +70,7 @@ const InvestmentWithdrawal = () => {
       
       if (amount <= 0) {
         newErrors.amount = 'Amount must be greater than 0';
-      } else if (amount < 1000) {
+      } else if (amount < 10) {
         newErrors.amount = 'Minimum withdrawal amount is $1,000';
       } else if (selectedPlan && amount > selectedPlan.currentValue) {
         newErrors.amount = `Amount exceeds selected plan current value: $${selectedPlan.currentValue.toLocaleString()}`;
@@ -114,8 +114,8 @@ const InvestmentWithdrawal = () => {
       newErrors.amount = 'Amount is required';
     } else if (parseFloat(formData.amount) <= 0) {
       newErrors.amount = 'Amount must be greater than 0';
-    } else if (parseFloat(formData.amount) < 1000) {
-      newErrors.amount = 'Minimum withdrawal amount is $1,000';
+    } else if (parseFloat(formData.amount) < 10) {
+      newErrors.amount = 'Minimum withdrawal amount is $10';
     } else if (selectedPlan && parseFloat(formData.amount) > selectedPlan.currentValue) {
       newErrors.amount = `Amount exceeds selected plan current value: $${selectedPlan.currentValue.toLocaleString()}`;
     }
