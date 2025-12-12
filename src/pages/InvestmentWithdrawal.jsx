@@ -71,7 +71,7 @@ const InvestmentWithdrawal = () => {
       if (amount <= 0) {
         newErrors.amount = 'Amount must be greater than 0';
       } else if (amount < 10) {
-        newErrors.amount = 'Minimum withdrawal amount is $1,000';
+        newErrors.amount = 'Minimum withdrawal amount is $10';
       } else if (selectedPlan && amount > selectedPlan.currentValue) {
         newErrors.amount = `Amount exceeds selected plan current value: $${selectedPlan.currentValue.toLocaleString()}`;
       } else {
