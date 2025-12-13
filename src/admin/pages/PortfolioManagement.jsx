@@ -202,14 +202,14 @@ const PortfolioManagement = () => {
     return amount >= 0 ? 'text-green-600' : 'text-red-600';
   };
 
-  // Generate percentage options based on plan adminSetReturnRate
+  // Generate percentage options based on plan returnRate.max
   const generatePercentageOptions = (plan) => {
     if (!plan) {
       return [];
     }
     
-    // Use adminSetReturnRate if available, otherwise fall back to returnRate.max
-    const maxRate = plan.adminSetReturnRate || plan.returnRate?.max;
+    // Use returnRate.max if available, otherwise fall back to adminSetReturnRate
+    const maxRate = plan.returnRate?.max || plan.adminSetReturnRate;
     
     if (!maxRate) {
       return [];
